@@ -1,0 +1,64 @@
+{
+  "name": "CookMore Pro Profile",
+  "description": "Professional membership profile for CookMore platform - v1.0",
+  "image": "ipfs://{CID}/v1.0/pro-badge.png",
+  "external_url": "https://cookmore.xyz/profile/{id}",
+  "attributes": [
+    {
+      "trait_type": "Tier",
+      "value": "Pro"
+    },
+    {
+      "trait_type": "Version",
+      "value": "1.0"
+    },
+    {
+      "trait_type": "Schema Version",
+      "value": "1.0.0"
+    }
+  ],
+  "properties": {
+    "version": "1.0",
+    "name": "",
+    "bio": "",
+    "avatar": "",
+    "title": "",
+    "company": "",
+    "location": "",
+    "social": {
+      "urls": [],
+      "labels": []
+    },
+    "preferences": {
+      "theme": "system",
+      "notifications": false,
+      "displayEmail": false,
+      "displayLocation": false
+    },
+    "culinaryInfo": {
+      "expertise": "professional",
+      "specialties": [],
+      "dietaryPreferences": [],
+      "cuisineTypes": [],
+      "techniques": [],
+      "equipment": [],
+      "certifications": []
+    },
+    "experience": {
+      "current": {
+        "title": "",
+        "company": "",
+        "startDate": "",
+        "description": ""
+      },
+      "history": []
+    },
+    "education": [],
+    "availability": {
+      "forHire": false,
+      "consulting": false,
+      "collaborations": false,
+      "teaching": false
+    }
+  }
+}

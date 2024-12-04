@@ -1,0 +1,45 @@
+{
+  "name": "CookMore Free Profile",
+  "description": "Basic membership profile for CookMore platform - v1.0",
+  "image": "ipfs://{CID}/v1.0/free-badge.png",
+  "external_url": "https://cookmore.xyz/profile/{id}",
+  "attributes": [
+    {
+      "trait_type": "Tier",
+      "value": "Free"
+    },
+    {
+      "trait_type": "Version",
+      "value": "1.0"
+    },
+    {
+      "trait_type": "Schema Version",
+      "value": "1.0.0"
+    }
+  ],
+  "properties": {
+    "version": "1.0",
+    "name": "",
+    "bio": "",
+    "avatar": "",
+    "location": "",
+    "social": {
+      "urls": [],
+      "labels": []
+    },
+    "preferences": {
+      "theme": "system",
+      "notifications": false,
+      "displayEmail": false,
+      "displayLocation": false
+    },
+    "culinaryInfo": {
+      "expertise": "beginner",
+      "specialties": [],
+      "dietaryPreferences": [],
+      "cuisineTypes": [],
+      "techniques": [],
+      "equipment": []
+    }
+  }
+}

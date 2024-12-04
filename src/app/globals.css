@@ -1,0 +1,492 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+
+  /* Core colors - GitHub Dark theme */
+  --canvas-default: #0d1117;
+  --canvas-subtle: #161b22;
+  --canvas-inset: #010409;
+  --canvas-overlay: #30363d;
+  --border-default: #30363d;
+  --border-muted: #21262d;
+  --border-subtle: #6e7681;
+  --fg-default: #c9d1d9;
+  --fg-muted: #8b949e;
+  --fg-subtle: #6e7681;
+  --fg-onEmphasis: #ffffff;
+  --btn-bg: #21262d;
+  --btn-hover: #30363d;
+  --btn-active: #282e33;
+  --btn-border: #f0f6fc1a;
+  --accent-fg: #58a6ff;
+  --accent-emphasis: #1f6feb;
+  --accent-muted: #388bfd1a;
+  --accent-subtle: #388bfd26;
+  --success-fg: #3fb950;
+  --success-emphasis: #238636;
+  --success-muted: #238636;
+  --success-subtle: #2ea04326;
+  --attention-fg: #d29922;
+  --attention-emphasis: #9e6a03;
+  --attention-muted: #bb800966;
+  --attention-subtle: #bb800926;
+  --danger-fg: #f85149;
+  --danger-emphasis: #da3633;
+  --danger-muted: #f8514926;
+  --banner-height: 0px;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Core colors - GitHub Light theme */
+  --canvas-default: #ffffff;
+  --canvas-subtle: #f6f8fa;
+  --canvas-inset: #f6f8fa;
+  --canvas-overlay: #ffffff;
+  --border-default: #d0d7de;
+  --border-muted: #d8dee4;
+  --border-subtle: #6e7681;
+  --fg-default: #24292f;
+  --fg-muted: #57606a;
+  --fg-subtle: #6e7681;
+  --fg-onEmphasis: #ffffff;
+  --btn-bg: #f6f8fa;
+  --btn-hover: #f3f4f6;
+  --btn-active: #ebecf0;
+  --btn-border: rgba(27, 31, 36, 0.15);
+  --accent-fg: #0969da;
+  --accent-emphasis: #0969da;
+  --accent-muted: rgba(9, 105, 218, 0.1);
+  --accent-subtle: rgba(9, 105, 218, 0.15);
+  --success-fg: #1a7f37;
+  --success-emphasis: #2da44e;
+  --success-muted: rgba(31, 136, 61, 0.1);
+  --success-subtle: rgba(31, 136, 61, 0.15);
+  --attention-fg: #9a6700;
+  --attention-emphasis: #bf8700;
+  --attention-muted: rgba(174, 124, 20, 0.1);
+  --attention-subtle: rgba(174, 124, 20, 0.15);
+  --danger-fg: #cf222e;
+  --danger-emphasis: #a40e26;
+  --danger-muted: rgba(207, 34, 46, 0.1);
+  --danger-subtle: rgba(207, 34, 46, 0.15);
+  --banner-height: 0px;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-github-canvas-default text-github-fg-default font-sans font-[450];
+  }
+
+  /* Optional: Style headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans font-[550];
+  }
+
+  /* Optional: Style monospace elements */
+  code,
+  pre {
+    @apply font-mono font-[450];
+  }
+}
+
+@layer components {
+  /* Interface components */
+  .interface-container {
+    @apply border border-[var(--color-border-default)] 
+           bg-[var(--color-canvas-subtle)] 
+           rounded-[var(--border-radius-medium)];
+  }
+
+  .interface-header {
+    @apply h-[var(--header-height)] 
+           border-b border-[var(--color-border-default)] 
+           px-4 flex items-center;
+  }
+
+  /* Control elements */
+  .control-button {
+    @apply px-2 py-1 
+           text-sm 
+           border border-[var(--color-border-default)] 
+           rounded-[var(--border-radius-small)]
+           hover:bg-[var(--color-border-default)];
+  }
+
+  .control-input {
+    @apply bg-[var(--color-canvas-default)] 
+           border border-[var(--color-border-default)] 
+           rounded-[var(--border-radius-small)]
+           px-2 py-1;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes border-scan {
+  0% {
+    background-position: -300% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
+}
+
+@layer utilities {
+  /* When reduce motion is enabled */
+  .reduce-motion {
+    /* Disable all animations */
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    /* Disable smooth scrolling */
+    html {
+      scroll-behavior: auto !important;
+    }
+
+    /* Replace slide animations with fades */
+    .animate-slide-left {
+      animation: none !important;
+      opacity: 0;
+      animation: fadeIn 0.1s ease forwards !important;
+    }
+
+    /* Make transitions instant */
+    .transition-all,
+    .transition,
+    .transition-transform {
+      transition: none !important;
+    }
+  }
+
+  .backface-visibility-hidden {
+    backface-visibility: hidden;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+}
+
+[data-banner-visible='true'] {
+  --banner-height: 40px;
+}
+
+[data-banner-minimized='true'] {
+  --banner-height: 8px;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-github-btn-bg text-github-fg-onEmphasis hover:bg-github-btn-hover;
+  }
+
+  .btn-secondary {
+    @apply border border-github-border-default text-github-fg-default hover:bg-github-canvas-subtle;
+  }
+}
+
+/* Add our new themes */
+[data-theme='neo'] {
+  color-scheme: light;
+
+  /* Font settings */
+  --font-family-neo: 'Space Grotesk', 'Archivo Black', system-ui;
+
+  /* Bolder colors */
+  --canvas-default: #ffffff;
+  --canvas-subtle: #ffde59;
+  --canvas-inset: #ff8c42;
+  --canvas-overlay: #ff5757;
+
+  /* Heavier borders and deeper shadows */
+  --border-default: #000000;
+  --border-muted: #000000;
+  --border-subtle: #000000;
+  --neo-border-width: 6px;
+  --neo-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
+  --neo-hover-shadow: 16px 16px 0px rgba(0, 0, 0, 1);
+  --neo-active-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+
+  /* Transition settings */
+  --neo-transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* High contrast text */
+  --fg-default: #000000;
+  --fg-muted: #1a1a1a;
+  --fg-subtle: #333333;
+
+  /* Vibrant accents */
+  --accent-fg: #ff3333;
+  --accent-emphasis: #ff6b42;
+  --accent-muted: rgba(255, 51, 51, 0.4);
+  --accent-subtle: rgba(255, 51, 51, 0.1);
+
+  /* Success colors - more vivid */
+  --success-fg: #00ff66;
+  --success-emphasis: #00cc44;
+  --success-muted: rgba(0, 255, 102, 0.4);
+  --success-subtle: rgba(0, 255, 102, 0.1);
+}
+
+/* Enhanced Neo utilities */
+.neo-border {
+  border: var(--neo-border-width) solid var(--border-default);
+  transform: rotate(-1deg);
+  position: relative;
+  z-index: 1;
+}
+
+.neo-shadow {
+  box-shadow: var(--neo-shadow);
+  transition: var(--neo-transition);
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+
+.neo-shadow:hover {
+  box-shadow: var(--neo-hover-shadow);
+  transform: translate(-4px, -4px) rotate(1deg);
+}
+
+.neo-shadow:active {
+  box-shadow: var(--neo-active-shadow);
+  transform: translate(2px, 2px) rotate(0deg);
+}
+
+/* Neo button specific */
+.neo-button {
+  @apply neo-border neo-shadow bg-github-canvas-default;
+  padding: 12px 24px;
+  position: relative;
+  transition: var(--neo-transition);
+}
+
+.neo-button:hover {
+  @apply bg-github-canvas-subtle;
+}
+
+.neo-button:active {
+  @apply bg-github-canvas-inset;
+}
+
+/* Neo container */
+.neo-container {
+  @apply neo-border neo-shadow;
+  background: var(--canvas-default);
+  position: relative;
+  margin: 8px;
+}
+
+/* Neo input */
+.neo-input {
+  @apply neo-border;
+  background: var(--canvas-default);
+  padding: 12px;
+  margin: 4px;
+  transform: rotate(-0.5deg);
+}
+
+.neo-input:focus {
+  transform: rotate(0.5deg);
+  outline: none;
+}
+
+@import '../styles/svg-patterns.css';
+
+[data-theme='wooden'] {
+  color-scheme: dark;
+
+  /* Core colors */
+  --canvas-default: #8b4513;
+  --canvas-subtle: #a0522d;
+  --canvas-inset: #6b4423;
+  --canvas-overlay: #deb887;
+
+  /* Borders */
+  --border-default: #654321;
+  --border-muted: #8b4513;
+  --border-subtle: #a0522d;
+
+  /* Text colors */
+  --fg-default: #ffffff;
+  --fg-muted: #deb887;
+  --fg-subtle: #d2b48c;
+
+  /* Wood specific */
+  --wood-grain: var(--pattern-wood);
+  --wood-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='steel'] {
+  color-scheme: light;
+
+  /* Core colors */
+  --canvas-default: #e8e8e8;
+  --canvas-subtle: #d4d4d4;
+  --canvas-inset: #b0b0b0;
+  --canvas-overlay: #f5f5f5;
+
+  /* Borders */
+  --border-default: #9a9a9a;
+  --border-muted: #b0b0b0;
+  --border-subtle: #c0c0c0;
+
+  /* Text colors */
+  --fg-default: #2c3e50;
+  --fg-muted: #34495e;
+  --fg-subtle: #7f8c8d;
+
+  /* Steel specific */
+  --steel-gradient: linear-gradient(145deg, #e8e8e8 0%, #d4d4d4 100%);
+  --steel-highlight: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+}
+
+[data-theme='silicone'] {
+  /* Soft, matte silicone baking mat look */
+  --canvas-default: #e6e6e6;
+  --canvas-subtle: #f0f0f0;
+  --canvas-inset: #d9d9d9;
+  --canvas-overlay: #ffffff;
+
+  /* Subtle grid pattern for silicone texture */
+  --silicone-texture: var(--pattern-silicone);
+  --silicone-surface: linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.02) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.02) 75%
+  );
+}
+
+[data-theme='copper'] {
+  /* Keep copper base colors */
+  --canvas-default: #7b3f1b; /* More brown-copper base */
+  --canvas-subtle: #436b5d; /* Darker patina */
+  --canvas-inset: #5e2f15; /* Deep brown-copper */
+  --canvas-overlay: #4d2b17; /* Rich aged copper */
+
+  /* Darker patina in borders and shadows */
+  --border-default: #2e4a40; /* Even darker patina border */
+  --border-muted: #243b33; /* Deeper dark patina */
+  --border-subtle: #5e2f15; /* Dark copper accent */
+  --copper-shadow: 0 4px 16px rgba(46, 74, 64, 0.6),
+    /* Intensified patina glow */ 0 2px 6px rgba(94, 47, 21, 0.5); /* Deeper copper shadow */
+
+  /* Enhanced copper shine effect */
+  --copper-shine: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.02) 15%,
+    rgba(255, 255, 255, 0.6) 47%,
+    /* More intense shine */ rgba(255, 255, 255, 0.9) 50%,
+    /* Brighter peak */ rgba(255, 255, 255, 0.6) 53%,
+    rgba(255, 255, 255, 0.02) 85%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  /* Darker, more intense patina effect */
+  --copper-patina: radial-gradient(
+    circle at 50% 50%,
+    rgba(46, 74, 64, 0.5),
+    /* Darker patina core */ rgba(46, 74, 64, 0.4) 25%,
+    /* Adjusted stops for more intensity */ rgba(46, 74, 64, 0.3) 40%,
+    rgba(46, 74, 64, 0.2) 60%,
+    rgba(46, 74, 64, 0.1) 75%,
+    transparent 85%
+  );
+}
+
+/* Make the shine animation more dramatic */
+.copper-shine::after {
+  --shine-gradient: var(--copper-shine);
+  opacity: 0.7;
+  mix-blend-mode: soft-light;
+  transform-origin: center;
+  transform: rotate(-45deg);
+}
+
+[data-theme='ceramic'] {
+  --canvas-default: #ffffff;
+  --ceramic-glaze: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+}
+
+[data-theme='marble'] {
+  --canvas-default: #f5f5f5;
+  --marble-veins: var(--pattern-marble);
+  --marble-highlight: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  z-index: 1;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: var(--shine-gradient);
+  background-size: 200% 200%;
+  animation: shine 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Theme-specific shine variations */
+.copper-shine::after {
+  --shine-gradient: var(--copper-shine);
+  opacity: 0.7;
+  mix-blend-mode: soft-light;
+  transform-origin: center;
+  transform: rotate(-45deg);
+}
+
+.steel-shine::after {
+  --shine-gradient: var(--steel-shine);
+  opacity: 0.5;
+}

@@ -1,0 +1,18 @@
+{
+  "current": "1.0",
+  "versions": [
+    {
+      "version": "1.0",
+      "released": "2024-03-10",
+      "supported": true,
+      "breaking": false,
+      "changes": ["Initial release"],
+      "ipfsCIDs": {
+        "free": "",
+        "pro": "",
+        "group": ""
+      }
+    }
+  ],
+  "upgradeInstructions": {}
+}

@@ -1,0 +1,28 @@
+.exploreContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-left: -1rem;
+}
+
+.exploreContent {
+  width: 100%;
+  max-width: 1200px;
+  padding-left: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .exploreContainer {
+    margin-left: 0;
+  }
+
+  .exploreContent {
+    width: calc(100% - 10rem);
+  }
+}
+
+@media (min-width: 1536px) {
+  .exploreContent {
+    width: calc(100% - 16rem);
+  }
+}
