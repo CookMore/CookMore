@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePrivy, User } from '@privy-io/react-auth'
+import { useAuth } from '@/hooks/useAuth'
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -27,9 +27,11 @@ import * as Tooltip from '@radix-ui/react-tooltip'
 import { DefaultAvatar } from '@/components/ui/DefaultAvatar'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { cn } from '@/lib/utils'
+import { User } from '@privy-io/react-auth'
+import type { ProfileMetadata } from '@/types/profile'
 
 // Define the extended user type
-interface PrivyUser extends Omit<User, 'email'> {
+interface PrivyUser extends User {
   email?: {
     address: string
     verified: boolean
@@ -57,6 +59,7 @@ const NavLink = ({
   disabled?: boolean
   className?: string
 }) => {
+  const router = useRouter()
   const { theme } = useTheme()
 
   const content = <>{children}</>
@@ -135,7 +138,7 @@ const ADMIN_WALLET = '0x1920F5b512634DE346100b025382c04eEA8Bbc67'
 
 export function Header() {
   const router = useRouter()
-  const { authenticated, user, login, logout } = usePrivy()
+  const { authenticated, user, login, logout, hasProfile } = useAuth()
   const privyUser = user as PrivyUser | null
   const pathname = usePathname()
   const { profile, isLoading } = useProfile()

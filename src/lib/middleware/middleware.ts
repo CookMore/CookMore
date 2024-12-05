@@ -1,44 +1,53 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { routeConfig } from '../routes'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
   // Get auth token from cookies
-  const hasAuthToken = request.cookies.has('privy-token')
+  const isAuthenticated = request.cookies.has('privy-token')
+
+  // Get profile status from cookies or headers
+  const hasProfile = request.cookies.has('profile-token')
+
+  // Check admin status - using the same wallet check as header
+  const ADMIN_WALLET = '0x1920F5b512634DE346100b025382c04eEA8Bbc67'
+  const walletAddress = request.cookies.get('wallet-address')?.value
+  const isAdmin = walletAddress?.toLowerCase() === ADMIN_WALLET.toLowerCase()
 
   // Clear response to prevent caching issues
   const response = NextResponse.next()
   response.headers.set('Cache-Control', 'no-store, must-revalidate')
-  response.headers.set('Pragma', 'no-cache')
-  response.headers.set('Expires', '0')
 
-  // Get the current path
-  const { pathname } = request.nextUrl
+  // Public routes are always accessible
+  if (routeConfig.public.includes(pathname)) {
+    return response
+  }
 
-  console.log('Middleware Check:', {
-    pathname,
-    hasAuthToken,
-    cookies: request.cookies.getAll(),
-  })
+  // Handle profile creation separately
+  if (pathname === routeConfig.special.profileCreate) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    return response
+  }
 
-  // Protected routes that require authentication
-  const protectedRoutes = ['/kitchen', '/app', '/profile']
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-
-  // Marketing routes
-  const marketingRoutes = ['/', '/features', '/pricing', '/explore', '/club']
-  const isMarketingRoute = marketingRoutes.includes(pathname)
-
-  // Special case for profile creation
-  const isProfileCreate = pathname.startsWith('/profile/create')
-
-  if (isProtectedRoute && !hasAuthToken && !isProfileCreate) {
-    // Redirect to home if trying to access protected routes while not authenticated
-    console.log('Redirecting to home: No auth token')
+  // Check authentication for protected routes
+  if (routeConfig.protected.includes(pathname) && !isAuthenticated) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Don't redirect from marketing routes even if authenticated
-  // Let the client handle profile NFT check and appropriate routing
+  // Check profile requirement
+  if (routeConfig.requiresProfile.includes(pathname) && !hasProfile) {
+    return NextResponse.redirect(new URL(routeConfig.special.profileCreate, request.url))
+  }
+
+  // Check admin access
+  if (routeConfig.adminOnly.includes(pathname) && !isAdmin) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   return response
 }
 

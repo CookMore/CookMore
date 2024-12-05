@@ -1,58 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
+import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 
 export function useWalletState() {
-  const { user, ready } = usePrivy()
-  const [address, setAddress] = useState<string | null>(null)
-  const [isCorrectNetwork, setIsCorrectNetwork] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { user, logout } = usePrivy()
+  const router = useRouter()
+  const address = user?.wallet?.address
 
-  // Get the connected wallet address
   useEffect(() => {
-    if (ready && user?.wallet?.address) {
-      setAddress(user.wallet.address)
-    } else {
-      setAddress(null)
-    }
-  }, [ready, user?.wallet?.address])
-
-  // Check if we're on the correct network
-  useEffect(() => {
-    const checkNetwork = async () => {
-      if (!user?.wallet) {
-        setIsCorrectNetwork(false)
-        setLoading(false)
-        return
+    // Check if window.ethereum exists (MetaMask is installed)
+    if (typeof window !== 'undefined' && window.ethereum) {
+      const handleAccountsChanged = async (accounts: string[]) => {
+        // If no accounts, user has disconnected their wallet
+        if (!accounts.length) {
+          console.log('Wallet disconnected, logging out...')
+          await logout()
+          router.push(ROUTES.MARKETING.HOME)
+        }
       }
 
-      try {
-        // Get the chain ID directly from the wallet
-        const chainId = await user.wallet.chainId
+      const handleChainChanged = () => {
+        // Reload the page when chain changes
+        window.location.reload()
+      }
 
-        // Check if we're on Base Sepolia (chain ID 84532)
-        const isBase = chainId === '84532'
+      // Subscribe to accounts change
+      window.ethereum.on('accountsChanged', handleAccountsChanged)
+      // Subscribe to chain change
+      window.ethereum.on('chainChanged', handleChainChanged)
 
-        setIsCorrectNetwork(isBase)
-        setLoading(false)
-      } catch (error) {
-        console.error('Network check failed:', error)
-        setIsCorrectNetwork(false)
-        setLoading(false)
+      // Cleanup listeners
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
+        window.ethereum.removeListener('chainChanged', handleChainChanged)
       }
     }
+  }, [logout, router])
 
-    if (ready) {
-      checkNetwork()
-    }
-  }, [ready, user?.wallet])
-
-  return {
-    address,
-    isCorrectNetwork,
-    loading,
-    wallet: user?.wallet || null,
-    ready,
-  }
+  return { address }
 }

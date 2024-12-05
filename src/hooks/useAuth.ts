@@ -2,73 +2,46 @@
 
 import { usePrivy } from '@privy-io/react-auth'
 import { useRouter } from 'next/navigation'
-import { useCallback } from 'react'
-
-export interface AuthUser {
-  id: string
-  email?: {
-    address: string
-    verified: boolean
-  }
-  wallet?: {
-    address: string
-    chainId: number
-  }
-  google?: {
-    email: string
-    name: string
-  }
-  github?: {
-    username: string
-    email: string
-  }
-  createdAt: Date
-  linkedAccounts: Array<{
-    type: string
-    id: string
-  }>
-}
+import { ROUTES } from '@/lib/routes'
+import { useProfile } from './useProfile'
+import { useEffect } from 'react'
+import { useWalletState } from './useWalletState'
 
 export function useAuth() {
-  const {
-    ready,
-    authenticated,
-    user,
-    login,
-    logout: privyLogout,
-    createWallet,
-    linkWallet,
-    unlinkWallet,
-    connectWallet,
-    exportWallet,
-  } = usePrivy()
+  const { login, logout, authenticated, user } = usePrivy()
   const router = useRouter()
+  const { profile } = useProfile()
+  const { address: walletAddress } = useWalletState()
 
-  const logout = useCallback(async () => {
-    await privyLogout()
-    router.push('/')
-  }, [privyLogout, router])
-
-  const getUser = useCallback((): AuthUser | null => {
-    if (!user) return null
-
-    return {
-      id: user.id,
-      email: user.email,
-      wallet: user.wallet,
-      google: user.google,
-      github: user.github,
-      createdAt: user.createdAt,
-      linkedAccounts: user.linkedAccounts,
+  // Watch for authentication and wallet connection changes
+  useEffect(() => {
+    // If not authenticated or wallet disconnected, redirect to home
+    if (!authenticated || !walletAddress) {
+      router.push(ROUTES.MARKETING.HOME)
+      return
     }
-  }, [user])
+
+    // If authenticated but no profile, redirect to profile creation
+    if (!profile) {
+      router.push(ROUTES.AUTH.PROFILE.CREATE)
+      return
+    }
+
+    // If authenticated with profile, allow access to kitchen
+    router.push(ROUTES.AUTH.KITCHEN.HOME)
+  }, [authenticated, walletAddress, profile, router])
+
+  // Enhanced logout to handle both Privy and wallet
+  const handleLogout = async () => {
+    await logout()
+    router.push(ROUTES.MARKETING.HOME)
+  }
 
   return {
-    user: getUser(),
-    authenticated,
-    ready,
-    isLoading: !ready,
     login,
-    logout,
+    logout: handleLogout,
+    authenticated: authenticated && !!walletAddress,
+    user,
+    hasProfile: !!profile,
   }
 }
