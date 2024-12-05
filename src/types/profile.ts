@@ -347,3 +347,11 @@ export interface Preferences {
   displayLocation: boolean
   email?: string
 }
+
+export interface Profile {
+  tokenId: string
+  owner: string
+  metadata: ProfileMetadata
+  createdAt: Date
+  updatedAt: Date
+}

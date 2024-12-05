@@ -13,6 +13,7 @@ import type {
 import { useNFTTiers } from './useNFTTiers'
 import { usePrivy } from '@privy-io/react-auth'
 import { useWalletState } from '@/hooks/useWalletState'
+import type { Profile } from '@/types/profile'
 
 const ADMIN_WALLET = '0x1920F5b512634DE346100b025382c04eEA8Bbc67'
 
@@ -203,7 +204,7 @@ export function useProfile() {
     hasGroupAccess: hasGroup,
 
     // Profile data
-    profile,
+    profile: null as Profile | null,
     error,
     loading,
     refetch: fetchProfile,

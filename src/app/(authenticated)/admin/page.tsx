@@ -7,7 +7,10 @@ import { LoadingSkeleton } from '@/components/ui/skeletons/LoadingSkeleton'
 
 // Lazy load components
 const RoleManager = dynamic(
-  () => import('@/app/admin/components/RoleManager').then((mod) => ({ default: mod.RoleManager })),
+  () =>
+    import('@/app/(authenticated)/admin/components/RoleManager').then((mod) => ({
+      default: mod.RoleManager,
+    })),
   {
     loading: () => <LoadingSkeleton className='h-48' />,
     ssr: false,
@@ -16,7 +19,7 @@ const RoleManager = dynamic(
 
 const ProfileManager = dynamic(
   () =>
-    import('@/app/admin/components/ProfileManager').then((mod) => ({
+    import('@/app/(authenticated)/admin/components/ProfileManager').then((mod) => ({
       default: mod.ProfileManager,
     })),
   {
@@ -26,7 +29,10 @@ const ProfileManager = dynamic(
 )
 
 const NFTManager = dynamic(
-  () => import('@/app/admin/components/NFTManager').then((mod) => ({ default: mod.NFTManager })),
+  () =>
+    import('@/app/(authenticated)/admin/components/NFTManager').then((mod) => ({
+      default: mod.NFTManager,
+    })),
   {
     loading: () => <LoadingSkeleton className='h-48' />,
     ssr: false,
@@ -35,7 +41,9 @@ const NFTManager = dynamic(
 
 const SystemStatus = dynamic(
   () =>
-    import('@/app/admin/components/SystemStatus').then((mod) => ({ default: mod.SystemStatus })),
+    import('@/app/(authenticated)/admin/components/SystemStatus').then((mod) => ({
+      default: mod.SystemStatus,
+    })),
   {
     loading: () => <LoadingSkeleton className='h-48' />,
     ssr: false,

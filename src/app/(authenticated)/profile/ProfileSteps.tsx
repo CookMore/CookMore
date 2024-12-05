@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useTheme } from '@/app/providers/ThemeProvider'
-import { getStepsForTier, type ProfileStep } from '@/app/profile/steps'
+import { getStepsForTier, type ProfileStep } from '@/app/(authenticated)/profile/steps'
 import { ProfileTier } from '@/types/profile'
 
 export function ProfileSteps() {
