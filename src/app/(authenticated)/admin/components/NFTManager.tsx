@@ -3,27 +3,19 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FormInput } from '@/components/ui/form/FormInput'
-import { useToast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { PRO_NFT_ADDRESS, GROUP_NFT_ADDRESS } from '@/lib/web3/addresses'
 
 export function NFTManager() {
   const [baseURI, setBaseURI] = useState('')
   const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
 
   const handleUpdateBaseURI = async () => {
     try {
       setLoading(true)
-      toast({
-        title: 'Not Implemented',
-        description: 'NFT base URI update functionality coming soon',
-      })
+      toast.info('NFT base URI update functionality coming soon')
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update base URI',
-        variant: 'destructive',
-      })
+      toast.error('Failed to update base URI')
     } finally {
       setLoading(false)
     }

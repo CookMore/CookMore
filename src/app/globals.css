@@ -103,7 +103,6 @@
     @apply font-mono font-[450];
   }
 }
-
 @layer components {
   /* Interface components */
   .interface-container {

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Header } from '@/components/Header'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { PanelContainer } from '@/components/panels/PanelContainer'
-import { PageContainer } from '@/components/PageContainer'
+import { PageContainer } from '@/components/layouts/PageContainer'
 
 export default function CalendarPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -18,7 +18,7 @@ export default function CalendarPage() {
 
   return (
     <div className='flex flex-col min-h-screen'>
-      <Header title='Culinary Calendar' />
+      <PageHeader title='Culinary Calendar' />
       <main className='flex-1 p-6'>
         <PanelContainer>
           <PageContainer>

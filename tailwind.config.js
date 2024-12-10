@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import scrollbar from 'tailwind-scrollbar'
+
+export default {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -13,55 +15,47 @@ module.exports = {
       },
       colors: {
         github: {
-          // Canvas colors (backgrounds)
           canvas: {
             default: 'var(--canvas-default)',
             subtle: 'var(--canvas-subtle)',
             inset: 'var(--canvas-inset)',
             overlay: 'var(--canvas-overlay)',
           },
-          // Border colors
           border: {
             default: 'var(--border-default)',
             muted: 'var(--border-muted)',
             subtle: 'var(--border-subtle)',
           },
-          // Text colors
           fg: {
             default: 'var(--fg-default)',
             muted: 'var(--fg-muted)',
             subtle: 'var(--fg-subtle)',
             onEmphasis: 'var(--fg-onEmphasis)',
           },
-          // Button colors
           btn: {
             bg: 'var(--btn-bg)',
             hover: 'var(--btn-hover)',
             active: 'var(--btn-active)',
             border: 'var(--btn-border)',
           },
-          // Accent colors
           accent: {
             fg: 'var(--accent-fg)',
             emphasis: 'var(--accent-emphasis)',
             muted: 'var(--accent-muted)',
             subtle: 'var(--accent-subtle)',
           },
-          // Success colors (green)
           success: {
             fg: 'var(--success-fg)',
             emphasis: 'var(--success-emphasis)',
             muted: 'var(--success-muted)',
             subtle: 'var(--success-subtle)',
           },
-          // Warning colors
           attention: {
             fg: 'var(--attention-fg)',
             emphasis: 'var(--attention-emphasis)',
             muted: 'var(--attention-muted)',
             subtle: 'var(--attention-subtle)',
           },
-          // Danger colors
           danger: {
             fg: 'var(--danger-fg)',
             emphasis: 'var(--danger-emphasis)',
@@ -69,7 +63,6 @@ module.exports = {
             subtle: 'var(--danger-subtle)',
           },
         },
-        // Theme-specific utilities
         neo: {
           shadow: 'var(--neo-shadow)',
           border: 'var(--neo-border-width)',
@@ -128,8 +121,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('tailwind-scrollbar')({ nocompatible: true }),
-    // Add plugin for theme-specific styles
+    scrollbar({ nocompatible: true }),
     function ({ addComponents }) {
       addComponents({
         '.theme-neo-brutalism': {

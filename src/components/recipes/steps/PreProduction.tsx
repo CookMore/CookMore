@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { usePreProduction } from '@/hooks/usePreProduction'
+import { usePreProduction } from '@/app/(authenticated)/kitchen/hooks/usePreProduction'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { BaseStep } from './BaseStep'
 import { RecipeData, PreProductionTask } from '@/types/recipe'

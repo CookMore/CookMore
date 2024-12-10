@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSpecialtyIngredients } from '@/hooks/useSpecialtyIngredients'
+import { useSpecialtyIngredients } from '@/app/(authenticated)/kitchen/hooks/useSpecialtyIngredients'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { BaseStep } from './BaseStep'
 import { RecipeData, SpecialtyIngredient } from '@/types/recipe'

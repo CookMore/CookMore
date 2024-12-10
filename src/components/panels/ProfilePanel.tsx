@@ -7,6 +7,8 @@ import { IconUser, IconEdit } from '@/components/ui/icons'
 import { BasePanel } from './BasePanel'
 import Image from 'next/image'
 import { ProfileTier } from '@/types/profile'
+import { TierBadge } from '@/components/ui/TierBadge'
+import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
 
 const PRO_IMAGE_URL = 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
 const GROUP_IMAGE_URL = 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
@@ -20,7 +22,8 @@ const NFT_ABI = ['function balanceOf(address owner) view returns (uint256)']
 
 export function ProfilePanel() {
   const { user, authenticated, ready } = usePrivy()
-  const [tier, setTier] = useState<ProfileTier>(ProfileTier.FREE)
+  const { hasGroup, hasPro } = useNFTTiers()
+  const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
 
   useEffect(() => {
     checkUserTier()
@@ -78,22 +81,7 @@ export function ProfilePanel() {
         <div className='space-y-2'>
           <h3 className='text-sm font-medium text-github-fg-default'>Membership Tier</h3>
           <div className='flex items-center space-x-3'>
-            {tier !== ProfileTier.FREE && (
-              <div className='w-12 h-12 relative'>
-                <Image
-                  src={tier === ProfileTier.PRO ? PRO_IMAGE_URL : GROUP_IMAGE_URL}
-                  alt={`${tier} NFT`}
-                  width={48}
-                  height={48}
-                  className='rounded-md'
-                  priority
-                  unoptimized
-                />
-              </div>
-            )}
-            <span className='text-sm text-github-fg-default'>
-              {tier === ProfileTier.FREE ? 'Free Tier' : `${tier} Member`}
-            </span>
+            <TierBadge tier={currentTier} size='md' hasProfile={true} />
           </div>
         </div>
 

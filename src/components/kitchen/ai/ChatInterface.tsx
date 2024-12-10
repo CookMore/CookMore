@@ -8,6 +8,7 @@ import { TypingIndicator } from './TypingIndicator'
 import { cn } from '@/lib/utils'
 import type { AIMessage } from '@/types/ai'
 import { ProfileTier } from '@/types/profile'
+import { ROUTES } from '@/lib/routes'
 
 const TIER_WELCOME_MESSAGES = {
   [ProfileTier.FREE]: `Hi! I'm your CookMore AI assistant. With your Free tier, I can help you with:

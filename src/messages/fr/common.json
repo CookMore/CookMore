@@ -1,0 +1,40 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "kitchen": "Cuisine",
+    "recipes": "Recettes",
+    "explore": "Explorer",
+    "profile": "Profil",
+    "admin": "Admin",
+    "calendar": "Calendrier"
+  },
+  "auth": {
+    "signIn": "Se Connecter",
+    "signOut": "Se Déconnecter",
+    "connectWallet": "Connecter le Portefeuille"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "Groupe"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "Nouvelle Recette",
+    "myRecipes": "Mes Recettes",
+    "sharedRecipes": "Recettes Partagées",
+    "collections": "Collections"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "update": "Mettre à jour"
+  }
+}

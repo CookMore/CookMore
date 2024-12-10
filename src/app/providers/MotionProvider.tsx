@@ -10,22 +10,24 @@ interface MotionContextType {
 const MotionContext = createContext<MotionContextType | undefined>(undefined)
 
 export function MotionProvider({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
-    // Check localStorage and system preferences on mount
+    setMounted(true)
     const savedPreference = localStorage.getItem('reduceMotion')
     const systemPreference = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
     const initialPreference = savedPreference ? savedPreference === 'true' : systemPreference
-
     setReduceMotion(initialPreference)
 
-    // Apply initial preference
     if (initialPreference) {
       document.documentElement.classList.add('reduce-motion')
     }
   }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   const toggleReduceMotion = () => {
     setReduceMotion((prev) => {

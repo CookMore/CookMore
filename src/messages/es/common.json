@@ -1,0 +1,41 @@
+{
+  "welcome": "Bienvenido a CookMore",
+  "navigation": {
+    "home": "Inicio",
+    "kitchen": "Cocina",
+    "recipes": "Recetas",
+    "explore": "Explorar",
+    "profile": "Perfil",
+    "admin": "Admin",
+    "calendar": "Calendario"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "connectWallet": "Conectar Billetera"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "Grupo"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "Nueva Receta",
+    "myRecipes": "Mis Recetas",
+    "sharedRecipes": "Recetas Compartidas",
+    "collections": "Colecciones"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar"
+  }
+}

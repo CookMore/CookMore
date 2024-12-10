@@ -1,9 +1,9 @@
 'use client'
 
-import * as Dialog from '@radix-ui/react-dialog'
+import { Dialog, DialogContent, DialogTitle } from '@radix-ui/react-dialog'
 import { useState, useRef, useEffect } from 'react'
 import { IconCamera, IconX, IconMove, IconDefaultAvatar, IconZoomIn, IconZoomOut } from './icons'
-import { Button } from './button'
+import { Button } from '@/components/ui/button'
 
 interface ImageUploadPopoverProps {
   onImageSelect: (file: File) => void

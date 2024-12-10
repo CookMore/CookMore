@@ -86,6 +86,20 @@ class IPFSService {
     const hash = ipfsUrl.replace('ipfs://', '')
     return `${PINATA_GATEWAY}/ipfs/${hash}`
   }
+
+  async getProfileMetadata(metadataURI: string): Promise<any> {
+    try {
+      const url = this.getIPFSUrl(metadataURI)
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch metadata: ${response.statusText}`)
+      }
+      return response.json()
+    } catch (error) {
+      console.error('Error fetching profile metadata:', error)
+      throw error
+    }
+  }
 }
 
 export const ipfsService = new IPFSService()

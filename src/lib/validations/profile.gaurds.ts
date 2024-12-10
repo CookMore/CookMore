@@ -17,8 +17,8 @@ export function isGroupProfile(profile: ProfileMetadata): profile is GroupProfil
   return 'organizationInfo' in profile
 }
 
-export function getProfileTier(profile: ProfileMetadata): 'free' | 'pro' | 'group' {
-  if (isGroupProfile(profile)) return 'group'
-  if (isProProfile(profile)) return 'pro'
-  return 'free'
+export function getProfileTier(profile: ProfileMetadata): 'Free' | 'Pro' | 'Group' {
+  if (isGroupProfile(profile)) return 'Group'
+  if (isProProfile(profile)) return 'Pro'
+  return 'Free'
 }

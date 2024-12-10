@@ -1,44 +1,75 @@
 import { ProfileTier } from '@/types/profile'
 
-// Define the ProfileStep type
-export type ProfileStep = {
+export interface Step {
   id: string
   label: string
+  description?: string
 }
 
-export const freeProfileSteps = [
-  { id: 'basic-info', label: 'Basic Information' },
-  { id: 'education', label: 'Education' },
-  { id: 'culinary-info', label: 'Culinary Information' },
-  { id: 'social-links', label: 'Social Links' },
+const BASE_STEPS: Step[] = [
+  {
+    id: 'basic-info',
+    label: 'Basic Information',
+    description: 'Your name, bio, and avatar',
+  },
+  {
+    id: 'culinary-info',
+    label: 'Culinary Information',
+    description: 'Your cooking expertise and specialties',
+  },
+  {
+    id: 'social-links',
+    label: 'Social Links',
+    description: 'Connect your social media profiles',
+  },
 ]
 
-export const proProfileSteps = [
-  ...freeProfileSteps,
-  { id: 'experience', label: 'Experience' },
-  { id: 'certifications', label: 'Certifications' },
-  { id: 'availability', label: 'Availability' },
-  { id: 'marketing', label: 'Marketing & Branding' },
+const PRO_STEPS: Step[] = [
+  ...BASE_STEPS,
+  {
+    id: 'experience',
+    label: 'Experience',
+    description: 'Your professional experience',
+  },
+  {
+    id: 'certifications',
+    label: 'Certifications',
+    description: 'Your professional certifications',
+  },
+  {
+    id: 'availability',
+    label: 'Availability',
+    description: 'Your availability for work',
+  },
 ]
 
-export const groupProfileSteps = [
-  ...proProfileSteps,
-  { id: 'organization-info', label: 'Organization Info' },
-  { id: 'business-operations', label: 'Business Operations' },
-  { id: 'team', label: 'Team' },
-  { id: 'suppliers', label: 'Suppliers' },
-  { id: 'compliance', label: 'Compliance' },
+const GROUP_STEPS: Step[] = [
+  ...PRO_STEPS,
+  {
+    id: 'organization-info',
+    label: 'Organization Info',
+    description: 'Information about your organization',
+  },
+  {
+    id: 'business-operations',
+    label: 'Business Operations',
+    description: 'Your business operations details',
+  },
+  {
+    id: 'team',
+    label: 'Team',
+    description: 'Your team structure',
+  },
 ]
 
-export const getStepsForTier = (tier: ProfileTier): ProfileStep[] => {
+export function getStepsForTier(tier: ProfileTier): Step[] {
   switch (tier) {
-    case ProfileTier.FREE:
-      return [...freeProfileSteps]
-    case ProfileTier.PRO:
-      return [...proProfileSteps]
     case ProfileTier.GROUP:
-      return [...groupProfileSteps]
+      return GROUP_STEPS
+    case ProfileTier.PRO:
+      return PRO_STEPS
+    case ProfileTier.FREE:
     default:
-      return [...freeProfileSteps]
+      return BASE_STEPS
   }
 }

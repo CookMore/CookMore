@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { usePairings } from '@/hooks/usePairings'
+import { usePairings } from '@/app/(authenticated)/kitchen/hooks/usePairings'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { BaseStep } from './BaseStep'
 import { RecipeData } from '@/types/recipe'

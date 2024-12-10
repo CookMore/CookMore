@@ -1,17 +1,44 @@
-import { useCallback } from 'react'
-import { RecipeData } from '@/types/recipe'
+'use client'
+
+import { useState, useCallback } from 'react'
+import { useRecipe } from '@/app/providers/RecipeProvider'
+import type { RecipeData } from '@/types/recipe'
 
 export function useRecipePreview() {
-  const updatePreview = useCallback(async (section: string, updates: Partial<RecipeData>) => {
-    // Update the preview component with new data
-    const previewElement = document.getElementById('recipe-preview')
-    if (previewElement) {
-      const event = new CustomEvent('recipe-update', {
-        detail: { section, updates },
-      })
-      previewElement.dispatchEvent(event)
+  const { recipeData } = useRecipe()
+  const [previewData, setPreviewData] = useState<Partial<RecipeData> | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const generatePreview = useCallback(async () => {
+    if (!recipeData) return null
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // For now, just return the current recipe data
+      // In the future, this could generate a preview with AI assistance
+      setPreviewData(recipeData)
+      return recipeData
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to generate preview'))
+      throw err
+    } finally {
+      setIsLoading(false)
     }
+  }, [recipeData])
+
+  const clearPreview = useCallback(() => {
+    setPreviewData(null)
+    setError(null)
   }, [])
 
-  return { updatePreview }
+  return {
+    previewData,
+    generatePreview,
+    clearPreview,
+    isLoading,
+    error,
+  }
 }

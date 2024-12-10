@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useServingPlating } from '@/hooks/useServingPlating'
+import { useServingPlating } from '@/app/(authenticated)/kitchen/hooks/useServingPlating'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import {
   IconAlertCircle,

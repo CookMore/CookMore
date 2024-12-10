@@ -1,22 +1,13 @@
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'CookMore',
+  description: 'Decentralized Recipe Management System',
+  viewport: 'width=device-width, initial-scale=1',
+  themeColor: '#000000',
   manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'CookMore',
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    minimumScale: 1,
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-    'application-name': 'CookMore',
-    'apple-mobile-web-app-title': 'CookMore',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 }

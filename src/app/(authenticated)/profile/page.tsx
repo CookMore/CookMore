@@ -3,20 +3,20 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
-import { useProfile } from '@/hooks/useProfile'
-import { useNFTTiers } from '@/hooks/useNFTTiers'
-import { ProfileTypeSwitcher } from '@/app/profile/ProfileTypeSwitcher'
-import { ProfileSidebar } from '@/app/profile/ProfileSidebar'
-import FreeProfileForm from '@/app/profile/FreeProfileForm'
-import ProProfileForm from '@/app/profile/ProProfileForm'
-import GroupProfileForm from '@/app/profile/GroupProfileForm'
-import { PageContainer } from '@/components/PageContainer'
+import { useProfile } from '@/lib/auth/hooks/useProfile'
+import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+import { ProfileTypeSwitcher } from './components/editor/ProfileTypeSwitcher'
+import { ProfileSidebar } from './components/ui/ProfileSidebar'
+import FreeProfileForm from './components/forms/FreeProfileForm'
+import ProProfileForm from './components/forms/ProProfileForm'
+import GroupProfileForm from './components/forms/GroupProfileForm'
 import { PanelContainer } from '@/components/panels/PanelContainer'
 import { FormSkeleton } from '@/components/ui/skeletons/FormSkeleton'
 import { ProfileTier } from '@/types/profile'
-import { getStepsForTier } from '@/app/profile/steps'
+import { getStepsForTier } from '@/app/(authenticated)/profile/steps'
 import Image from 'next/image'
 import { toast } from 'sonner'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 const PRO_IMAGE_URL = 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
 const GROUP_IMAGE_URL = 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
@@ -40,6 +40,7 @@ export default function ProfilePage() {
   // Set hydration state
   useEffect(() => {
     setIsHydrated(true)
+    return () => setIsHydrated(false) // Cleanup on unmount
   }, [])
 
   // Handle profile redirect
@@ -86,31 +87,35 @@ export default function ProfilePage() {
   const isLoading = !ready || profileLoading || profileFetching || tiersLoading
   if (isLoading) {
     return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-github-success-emphasis mb-4'></div>
-          <p className='text-sm text-github-fg-muted'>
-            {!ready ? 'Initializing...' : 'Loading profile...'}
-          </p>
+      <PanelContainer>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-github-success-emphasis mb-4'></div>
+            <p className='text-sm text-github-fg-muted'>
+              {!ready ? 'Initializing...' : 'Loading profile...'}
+            </p>
+          </div>
         </div>
-      </div>
+      </PanelContainer>
     )
   }
 
   if (profileError) {
     console.error('Profile error:', profileError)
     return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='text-center'>
-          <p className='text-red-500 mb-4'>Failed to load profile</p>
-          <button
-            onClick={() => window.location.reload()}
-            className='text-github-accent-fg hover:underline'
-          >
-            Try again
-          </button>
+      <PanelContainer>
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center'>
+            <p className='text-red-500 mb-4'>Failed to load profile</p>
+            <button
+              onClick={() => window.location.reload()}
+              className='text-github-accent-fg hover:underline'
+            >
+              Try again
+            </button>
+          </div>
         </div>
-      </div>
+      </PanelContainer>
     )
   }
 
@@ -146,45 +151,44 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
-      <PageContainer>
-        <PanelContainer>
-          <div className='flex min-h-screen'>
-            <div className='relative w-[280px]'>
-              <ProfileSidebar
-                isExpanded={isExpanded}
-                setIsExpanded={setIsExpanded}
-                currentStep={activeSection}
-                setCurrentStep={setActiveSection}
-                steps={getStepsForTier(actualTier)}
-              />
+    <div>
+      <PageHeader title='Profile Settings' />
+      <PanelContainer>
+        <div className='flex min-h-screen'>
+          <div className='relative w-[280px]'>
+            <ProfileSidebar
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
+              currentStep={activeSection}
+              setCurrentStep={setActiveSection}
+              steps={getStepsForTier(actualTier)}
+            />
 
-              {actualTier !== ProfileTier.FREE && getTierImage() && (
-                <div className='absolute top-3 right-4 z-[100000]'>
-                  <div className='relative w-8 h-8 transform hover:scale-105 transition-transform'>
-                    <Image
-                      src={getTierImage()!}
-                      alt={`${actualTier} NFT`}
-                      width={32}
-                      height={32}
-                      className='rounded-md ring-1 ring-github-border-default shadow-lg'
-                      priority
-                      unoptimized
-                    />
-                  </div>
+            {actualTier !== ProfileTier.FREE && getTierImage() && (
+              <div className='absolute top-3 right-4 z-[100000]'>
+                <div className='relative w-8 h-8 transform hover:scale-105 transition-transform'>
+                  <Image
+                    src={getTierImage()!}
+                    alt={`${actualTier} NFT`}
+                    width={32}
+                    height={32}
+                    className='rounded-md ring-1 ring-github-border-default shadow-lg'
+                    priority
+                    unoptimized
+                  />
                 </div>
-              )}
-            </div>
-
-            <main className={`flex-1 ${isExpanded ? 'ml-[280px]' : 'ml-[48px]'}`}>
-              <div className='p-6'>
-                <ProfileTypeSwitcher />
-                <Suspense fallback={<FormSkeleton />}>{renderActiveForm()}</Suspense>
               </div>
-            </main>
+            )}
           </div>
-        </PanelContainer>
-      </PageContainer>
-    </>
+
+          <main className={`flex-1 ${isExpanded ? 'ml-[280px]' : 'ml-[48px]'}`}>
+            <div className='p-6'>
+              <ProfileTypeSwitcher />
+              <Suspense fallback={<FormSkeleton />}>{renderActiveForm()}</Suspense>
+            </div>
+          </main>
+        </div>
+      </PanelContainer>
+    </div>
   )
 }

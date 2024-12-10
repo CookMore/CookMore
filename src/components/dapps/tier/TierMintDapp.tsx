@@ -1,24 +1,24 @@
 'use client'
 
-import { useToast } from '@/components/ui/use-toast'
 import { useState } from 'react'
-import { IconMint, IconGift } from '@/components/ui/icons'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { Button } from '@/components/ui/button'
-import { ProfileTier } from '@/types/profile'
+import { useWalletClient, useChainId, usePublicClient } from 'wagmi'
+import {
+  IconMint,
+  IconGift,
+  IconWallet,
+  IconAlertTriangle,
+  IconChevronRight,
+  IconSpinner,
+} from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
-import { ethers } from 'ethers'
-import { usePrivy } from '@privy-io/react-auth'
-import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses'
+import { ProfileTier } from '@/types/profile'
+import { toast } from 'sonner'
+import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
 import { TIER_CONTRACT_ABI } from '@/lib/web3/abis/TierContracts'
-
-// USDC Contract on Base Sepolia
-const USDC_ADDRESS = '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897'
-const USDC_ABI = [
-  'function approve(address spender, uint256 amount) external returns (bool)',
-  'function allowance(address owner, address spender) external view returns (uint256)',
-  'function balanceOf(address account) view returns (uint256)',
-]
+import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses'
+import { SUPPORTED_CHAINS } from '@/lib/web3/wagmi'
+import { useWalletState } from '@/lib/web3/hooks/useWalletState'
+import { tierInfo, tierStyles } from '@/lib/tiers'
 
 interface TierMintDappProps {
   onMintSuccess?: () => void
@@ -26,186 +26,352 @@ interface TierMintDappProps {
   targetTier: ProfileTier
 }
 
-export function TierMintDapp({
-  onMintSuccess,
-  currentTier = ProfileTier.FREE,
-  targetTier,
-}: TierMintDappProps) {
-  const { toast } = useToast()
+const getTierDisplayName = (tier: ProfileTier) => {
+  switch (tier) {
+    case ProfileTier.FREE:
+      return 'Lite'
+    case ProfileTier.PRO:
+      return 'Pro'
+    case ProfileTier.GROUP:
+      return 'Group'
+    default:
+      return tier
+  }
+}
+
+export function TierMintDapp({ onMintSuccess, targetTier }: TierMintDappProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isGifting, setIsGifting] = useState(false)
   const [giftAddress, setGiftAddress] = useState('')
-  const { user, authenticated, login } = usePrivy()
+  const [mintError, setMintError] = useState<string | null>(null)
+  const { address } = useWalletState()
+  const { data: walletClient } = useWalletClient()
+  const chainId = useChainId()
+  const publicClient = usePublicClient()
+  const { refetch: refetchTiers } = useNFTTiers()
+  const displayName = getTierDisplayName(targetTier)
 
-  const handleMint = async (recipientAddress?: string) => {
-    if (!authenticated) {
-      login()
-      return
-    }
+  // Get tier-specific styles
+  const style = tierStyles[targetTier]
+
+  // Network check
+  const isCorrectChain =
+    chainId === SUPPORTED_CHAINS.BASE_MAINNET || chainId === SUPPORTED_CHAINS.BASE_SEPOLIA
+
+  if (!isCorrectChain) {
+    return (
+      <div className='rounded-lg border border-github-danger-emphasis bg-github-danger-subtle p-4'>
+        <div className='flex items-center gap-3'>
+          <IconAlertTriangle className='h-5 w-5 text-github-danger-fg' />
+          <div className='flex-1'>
+            <h3 className='text-sm font-medium text-github-danger-fg'>Wrong Network</h3>
+            <p className='mt-1 text-sm text-github-danger-fg/70'>
+              Please switch to Base Mainnet or Base Sepolia network
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!address) {
+    return (
+      <div className='rounded-lg border border-github-border-default bg-github-canvas-subtle p-4'>
+        <div className='flex items-center gap-3'>
+          <IconWallet className='h-5 w-5 text-github-fg-muted' />
+          <div className='flex-1'>
+            <h3 className='text-sm font-medium text-github-fg-default'>Wallet Required</h3>
+            <p className='mt-1 text-sm text-github-fg-muted'>
+              Please connect your wallet to mint or gift NFTs
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const handleMint = async () => {
+    setMintError(null)
+    setIsLoading(true)
 
     try {
-      setIsLoading(true)
-
-      if (!user?.wallet) {
-        throw new Error('Wallet not connected')
+      if (!address || !walletClient || !publicClient) {
+        throw new Error('Please connect your wallet first')
       }
 
-      const provider = window.ethereum
-      if (!provider) {
-        throw new Error('No provider available')
+      const balance = await publicClient.getBalance({ address })
+      if (balance === BigInt(0)) {
+        throw new Error('Insufficient funds for transaction')
       }
 
-      console.log('Initializing contracts...')
-      const browserProvider = new ethers.BrowserProvider(provider)
-      const signer = await browserProvider.getSigner()
-      const userAddress = await signer.getAddress()
+      console.log('Starting mint transaction for tier:', targetTier)
 
-      // Create contract instances
-      const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer)
-      const tierContract = new ethers.Contract(TIER_CONTRACT_ADDRESS, TIER_CONTRACT_ABI, signer)
-
-      console.log('Checking USDC balance...')
-      const balance = await usdcContract.balanceOf(userAddress)
-      console.log('USDC Balance:', balance.toString())
-
-      // Get price based on tier
-      console.log('Getting tier price...')
-      const price =
-        targetTier === ProfileTier.PRO
-          ? await tierContract.proPrice()
-          : await tierContract.groupPrice()
-      console.log('Price:', price.toString())
-
-      // Check and handle USDC approval
-      console.log('Checking USDC allowance...')
-      const allowance = await usdcContract.allowance(userAddress, TIER_CONTRACT_ADDRESS)
-      console.log('Current allowance:', allowance.toString())
-
-      if (allowance < price) {
-        console.log('Approving USDC spend...')
-        const approveTx = await usdcContract.approve(TIER_CONTRACT_ADDRESS, price)
-        console.log('Waiting for approval confirmation...')
-        await approveTx.wait()
-        console.log('USDC approved')
-      }
-
-      // Now proceed with minting
-      console.log('Minting NFT...')
-      let tx
-      if (recipientAddress) {
-        tx = await tierContract.giftTier(recipientAddress, targetTier === ProfileTier.GROUP)
-      } else {
-        tx =
-          targetTier === ProfileTier.PRO
-            ? await tierContract.mintPro()
-            : await tierContract.mintGroup()
-      }
-
-      console.log('Waiting for mint confirmation...')
-      await tx.wait()
-      console.log('Mint successful')
-
-      toast({
-        title: 'Success!',
-        description: recipientAddress
-          ? `Successfully gifted ${targetTier} NFT to ${recipientAddress}`
-          : `Successfully minted ${targetTier} NFT`,
+      const { request } = await publicClient.simulateContract({
+        address: TIER_CONTRACT_ADDRESS,
+        abi: TIER_CONTRACT_ABI,
+        functionName: targetTier === ProfileTier.PRO ? 'mintPro' : 'mintGroup',
+        args: [],
+        account: address,
       })
 
-      if (recipientAddress) {
-        setGiftAddress('')
-        setIsGifting(false)
-      }
+      console.log('Transaction simulation successful')
+      const hash = await walletClient.writeContract(request)
+      console.log('Transaction hash:', hash)
 
-      onMintSuccess?.()
-    } catch (error: any) {
-      // Handle user rejection specifically
-      if (
-        error.code === 'ACTION_REJECTED' ||
-        error.code === 4001 || // MetaMask rejection code
-        error.message?.includes('user rejected') ||
-        error.message?.includes('User denied')
-      ) {
-        // Log as info instead of error since this is a user action
-        console.info('Transaction cancelled by user')
-        toast({
-          title: 'Transaction Cancelled',
-          description: 'You cancelled the transaction',
-          variant: 'default',
+      toast.info(
+        <div className='flex flex-col gap-2'>
+          <div className='flex items-center gap-2'>
+            <IconSpinner className='h-4 w-4 animate-spin' />
+            <span>Processing transaction...</span>
+          </div>
+          <a
+            href={hash ? `https://basescan.org/tx/${hash}` : '#'}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='flex items-center gap-1 text-sm text-github-accent-fg hover:underline'
+          >
+            View on BaseScan
+            <IconChevronRight className='h-3 w-3' />
+          </a>
+        </div>
+      )
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      console.log('Transaction receipt:', receipt)
+
+      // Parse logs for Minted event
+      const mintedEvents = receipt.logs
+        .filter((log) => {
+          try {
+            const event = publicClient.decodeEventLog({
+              abi: TIER_CONTRACT_ABI,
+              eventName: 'Minted',
+              data: log.data,
+              topics: log.topics,
+            })
+            return event !== null
+          } catch {
+            return false
+          }
         })
-        return
-      }
+        .map((log) => {
+          const event = publicClient.decodeEventLog({
+            abi: TIER_CONTRACT_ABI,
+            eventName: 'Minted',
+            data: log.data,
+            topics: log.topics,
+          })
+          console.log('Minted event data:', event)
+          return event
+        })
 
-      // Only log as error for actual errors
-      console.error('Error minting token:', error)
-      toast({
-        title: 'Error',
-        description: error?.reason || error?.message || 'Failed to mint token. Please try again.',
-        variant: 'destructive',
-      })
+      if (receipt.status === 'success') {
+        console.log('Mint successful, found events:', mintedEvents)
+        await refetchTiers()
+        onMintSuccess?.()
+        toast.success(`Successfully minted ${targetTier} NFT`)
+      } else {
+        console.error('Transaction failed:', receipt)
+        throw new Error('Transaction failed')
+      }
+    } catch (error) {
+      console.error('Mint error:', error)
+      setMintError(error instanceof Error ? error.message : 'Failed to mint NFT')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleGiftToken = () => handleMint(giftAddress)
+  const handleGift = async (recipientAddress: string) => {
+    setMintError(null)
+    setIsLoading(true)
 
-  if (targetTier === ProfileTier.FREE) return null
+    try {
+      if (!address || !walletClient) {
+        throw new Error('Wallet not connected')
+      }
+
+      const { request } = await publicClient.simulateContract({
+        address: targetTier === ProfileTier.PRO ? PRO_CONTRACT : GROUP_CONTRACT,
+        abi: TIER_CONTRACT_ABI,
+        functionName: 'giftTier',
+        args: [recipientAddress, targetTier === ProfileTier.GROUP],
+        account: address,
+      })
+
+      const hash = await walletClient.writeContract(request)
+
+      toast.info(
+        <div className='flex flex-col gap-2'>
+          <div className='flex items-center gap-2'>
+            <IconSpinner className='h-4 w-4 animate-spin' />
+            <span>Processing gift transaction...</span>
+          </div>
+          <a
+            href={hash ? `https://basescan.org/tx/${hash}` : '#'}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='flex items-center gap-1 text-sm text-github-accent-fg hover:underline'
+          >
+            View on BaseScan
+            <IconChevronRight className='h-3 w-3' />
+          </a>
+        </div>
+      )
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+
+      if (receipt.status === 'success') {
+        await refetchTiers()
+        onMintSuccess?.()
+        toast.success(`Successfully gifted ${targetTier} NFT to ${recipientAddress}`)
+        setIsGifting(false)
+        setGiftAddress('')
+      } else {
+        throw new Error('Transaction failed')
+      }
+    } catch (error: any) {
+      console.error('Gift error:', error)
+      setMintError(error.message || 'Failed to gift NFT')
+      toast.error(error.message || 'Failed to gift NFT. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <div className='space-y-4'>
-      <Button
-        className='w-full relative'
-        onClick={() => handleMint()}
-        disabled={isLoading}
-        variant={targetTier === ProfileTier.PRO ? 'secondary' : 'default'}
-      >
-        <span className={cn('flex items-center justify-center gap-2', isLoading && 'opacity-0')}>
-          <IconMint className='w-5 h-5' />
-          Mint {targetTier} NFT
-        </span>
-        {isLoading && <LoadingSpinner className='absolute inset-0 m-auto' />}
-      </Button>
-
-      <div className='border-t border-github-border-default' />
-
-      {isGifting ? (
-        <div className='space-y-3'>
-          <input
-            type='text'
-            placeholder='Enter recipient address'
-            value={giftAddress}
-            onChange={(e) => setGiftAddress(e.target.value)}
-            className='w-full px-3 py-2 rounded-md border bg-background text-sm'
-          />
-          <div className='flex gap-2'>
-            <Button
-              className='flex-1 relative'
-              onClick={handleGiftToken}
-              disabled={isLoading || !giftAddress}
-              variant={targetTier === ProfileTier.PRO ? 'secondary' : 'default'}
-            >
-              <span
-                className={cn('flex items-center justify-center gap-2', isLoading && 'opacity-0')}
-              >
-                <IconGift className='w-5 h-5' />
-                Gift NFT
-              </span>
-              {isLoading && <LoadingSpinner className='absolute inset-0 m-auto' />}
-            </Button>
-            <Button variant='outline' onClick={() => setIsGifting(false)}>
-              Cancel
-            </Button>
+    <div className='space-y-6'>
+      {mintError && (
+        <div className='rounded-md bg-github-danger-subtle p-3'>
+          <div className='flex items-center gap-2'>
+            <IconAlertTriangle className='h-4 w-4 text-github-danger-fg' />
+            <p className='text-sm text-github-danger-fg'>{mintError}</p>
           </div>
         </div>
-      ) : (
-        <Button className='w-full' variant='outline' onClick={() => setIsGifting(true)}>
-          <span className='flex items-center justify-center gap-2'>
-            <IconGift className='w-5 h-5' />
-            Gift NFT
-          </span>
-        </Button>
       )}
+
+      {/* Mint button */}
+      <button
+        type='button'
+        onClick={handleMint}
+        disabled={isLoading}
+        className={cn(
+          'relative w-full overflow-hidden rounded-lg border px-4 py-3 transition-all',
+          'flex items-center justify-center gap-2',
+          style.borderColor,
+          style.bgColor,
+          style.color,
+          'hover:brightness-95',
+          'disabled:cursor-not-allowed disabled:opacity-50'
+        )}
+      >
+        {isLoading ? (
+          <>
+            <IconSpinner className='h-5 w-5 animate-spin' />
+            <span>Processing...</span>
+          </>
+        ) : (
+          <>
+            <IconMint className='h-5 w-5' />
+            <span className='font-medium'>Mint {displayName} NFT</span>
+          </>
+        )}
+      </button>
+
+      {/* Gift section */}
+      <div className='border-t border-github-border-default pt-4'>
+        {isGifting ? (
+          <div className='space-y-3'>
+            <div className='space-y-2'>
+              <label htmlFor='giftAddress' className='text-sm font-medium text-github-fg-default'>
+                Recipient Address
+              </label>
+              <input
+                id='giftAddress'
+                type='text'
+                placeholder='0x...'
+                value={giftAddress}
+                onChange={(e) => setGiftAddress(e.target.value)}
+                className={cn(
+                  'w-full rounded-md border bg-github-canvas-default px-3 py-2',
+                  'border-github-border-default focus:border-github-accent-emphasis',
+                  'text-github-fg-default placeholder:text-github-fg-subtle',
+                  'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:ring-opacity-25',
+                  'disabled:cursor-not-allowed disabled:opacity-50'
+                )}
+                disabled={isLoading}
+              />
+            </div>
+            <div className='flex gap-2'>
+              <button
+                type='button'
+                onClick={() => handleGift(giftAddress)}
+                disabled={isLoading || !giftAddress}
+                className={cn(
+                  'flex-1 rounded-lg px-4 py-2 transition-all',
+                  'flex items-center justify-center gap-2',
+                  style.borderColor,
+                  style.bgColor,
+                  style.color,
+                  'hover:brightness-95',
+                  'disabled:cursor-not-allowed disabled:opacity-50'
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <IconSpinner className='h-5 w-5 animate-spin' />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconGift className='h-5 w-5' />
+                    <span>Gift {displayName} NFT</span>
+                  </>
+                )}
+              </button>
+              <button
+                type='button'
+                onClick={() => setIsGifting(false)}
+                disabled={isLoading}
+                className={cn(
+                  'rounded-lg border border-github-border-default px-4 py-2',
+                  'text-github-fg-default hover:bg-github-canvas-subtle',
+                  'disabled:cursor-not-allowed disabled:opacity-50'
+                )}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type='button'
+            onClick={() => setIsGifting(true)}
+            disabled={isLoading}
+            className={cn(
+              'w-full rounded-lg border border-github-border-default px-4 py-2',
+              'flex items-center justify-center gap-2',
+              'text-github-fg-default hover:bg-github-canvas-subtle',
+              'disabled:cursor-not-allowed disabled:opacity-50'
+            )}
+          >
+            <IconGift className='h-5 w-5' />
+            <span>Gift {displayName} NFT</span>
+          </button>
+        )}
+      </div>
     </div>
   )
+}
+
+// Helper function
+function getNetworkName(id: number) {
+  switch (id) {
+    case SUPPORTED_CHAINS.BASE_MAINNET:
+      return 'Base Mainnet'
+    case SUPPORTED_CHAINS.BASE_SEPOLIA:
+      return 'Base Sepolia'
+    default:
+      return `Unknown (${id})`
+  }
 }

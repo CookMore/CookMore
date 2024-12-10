@@ -8,7 +8,7 @@ export default function RecipeLayout({ children }: { children: React.ReactNode }
   const params = useParams()
   const pathname = usePathname()
   const recipeId = params.recipeId as string
-
+  if (!recipeId) return null
   const tabs = [
     { name: 'Overview', href: `/kitchen/${recipeId}` },
     { name: 'Edit', href: `/kitchen/${recipeId}/edit` },
@@ -27,7 +27,7 @@ export default function RecipeLayout({ children }: { children: React.ReactNode }
               return (
                 <Link
                   key={tab.name}
-                  href={tab.href}
+                  href={recipeId ? tab.href : "#"}
                   className={`py-4 px-2 border-b-2 ${
                     isActive
                       ? 'border-github-accent-fg text-github-accent-fg'

@@ -1,17 +1,87 @@
-{
-  "parser": "@typescript-eslint/parser",
-  "extends": ["next", "next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
-  "plugins": ["@typescript-eslint"],
-  "rules": {
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "caughtErrorsIgnorePattern": "^_"
-      }
-    ],
-    "react-hooks/exhaustive-deps": "warn",
-    "@next/next/no-img-element": "warn"
+module.exports = {
+  extends: ['next/core-web-vitals', 'plugin:@typescript-eslint/recommended', 'prettier'],
+  plugins: ['@typescript-eslint'],
+  rules: {
+    // Allow console logs in development
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    
+    // Allow global variables
+    'no-undef': 'off',
+    
+    // Allow unused variables (TypeScript will handle this)
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', {
+      'argsIgnorePattern': '^_',
+      'varsIgnorePattern': '^_',
+      'caughtErrorsIgnorePattern': '^_'
+    }],
+
+    // Allow redeclarations in d.ts files
+    'no-redeclare': 'off',
+    '@typescript-eslint/no-redeclare': ['error', {
+      'ignoreDeclarationMerge': true
+    }],
+
+    // React specific rules
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+
+    // TypeScript specific rules
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
+  },
+  globals: {
+    // Browser globals
+    'window': true,
+    'document': true,
+    'console': true,
+    'Event': true,
+    'WindowEventMap': true,
+
+    // Node.js globals
+    'process': 'readonly',
+    'Buffer': 'readonly',
+    'setTimeout': 'readonly',
+    'clearTimeout': 'readonly',
+    'setInterval': 'readonly',
+    'clearInterval': 'readonly',
+
+    // Test globals
+    'describe': 'readonly',
+    'it': 'readonly',
+    'expect': 'readonly',
+    'jest': 'readonly',
+    'beforeEach': 'readonly',
+    'afterEach': 'readonly',
+  },
+  ignorePatterns: [
+    'node_modules/',
+    '.next/',
+    'out/',
+    'public/',
+    '*.config.js',
+    '*.setup.js'
+  ],
+  settings: {
+    react: {
+      version: 'detect'
+    }
+  },
+  env: {
+    browser: true,
+    node: true,
+    es6: true,
+    worker: true,
+    serviceworker: true
+  },
+  parserOptions: {
+    project: './tsconfig.json',
+    ecmaVersion: 2020,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true
+    }
   }
 }

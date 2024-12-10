@@ -40,7 +40,7 @@ export function SystemStatus() {
       <div className='grid gap-3'>
         {contracts.map((contract) => (
           <div
-            key={contract.address}
+            key={`${contract.name}-${contract.address}`}
             className='flex justify-between items-center p-3 bg-github-canvas-subtle rounded-md'
           >
             <div>

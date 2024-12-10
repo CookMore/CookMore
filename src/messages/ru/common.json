@@ -1,0 +1,41 @@
+{
+  "welcome": "Добро пожаловать в CookMore",
+  "navigation": {
+    "home": "Главная",
+    "kitchen": "Кухня",
+    "recipes": "Рецепты",
+    "explore": "Обзор",
+    "profile": "Профиль",
+    "admin": "Админ",
+    "calendar": "Календарь"
+  },
+  "auth": {
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "connectWallet": "Подключить Кошелек"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "Группа"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "Новый Рецепт",
+    "myRecipes": "Мои Рецепты",
+    "sharedRecipes": "Общие Рецепты",
+    "collections": "Коллекции"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "create": "Создать",
+    "update": "Обновить"
+  }
+}

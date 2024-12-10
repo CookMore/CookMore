@@ -3,6 +3,7 @@
 import { IconCheck } from '@/components/ui/icons'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { ROUTES } from '@/lib/routes'
 
 const tiers = [
   {
@@ -51,6 +52,17 @@ const tiers = [
     buttonVariant: 'default' as const,
   },
 ]
+
+const getTierRoute = (tierTitle: string) => {
+  switch (tierTitle) {
+    case 'Pro':
+      return ROUTES.AUTH.TIER
+    case 'Group':
+      return ROUTES.AUTH.TIER
+    default:
+      return '#'
+  }
+}
 
 export function PricingSection() {
   return (
@@ -103,7 +115,7 @@ export function PricingSection() {
                 {tier.buttonText}
               </Button>
             ) : (
-              <Link href={`/${tier.title.toLowerCase()}-minting`} className='block'>
+              <Link href={getTierRoute(tier.title)} className='block'>
                 <Button variant={tier.buttonVariant} className='w-full'>
                   {tier.buttonText}
                 </Button>

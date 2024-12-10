@@ -47,7 +47,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps<any>>(
         })
       : null
 
-    const inputValue = controllerProps ? controllerProps.field.value : controlledValue ?? ''
+    const inputValue = controllerProps ? controllerProps.field.value : (controlledValue ?? '')
     const handleChange = controllerProps ? controllerProps.field.onChange : controlledOnChange
 
     const inputClasses = cn(
@@ -55,18 +55,22 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps<any>>(
       'bg-github-canvas-default',
       'border border-github-border-default',
       'text-github-fg-default placeholder:text-github-fg-subtle',
-      'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis',
-      error && 'border-github-danger-emphasis',
+      'transition-all duration-200 ease-in-out',
+      'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:border-github-accent-emphasis',
+      'hover:border-github-border-muted',
+      error &&
+        'border-github-danger-emphasis focus:ring-github-danger-emphasis focus:border-github-danger-emphasis',
       className
     )
 
     const labelClasses = cn(
-      'block text-sm font-medium mb-1',
+      'block text-sm font-medium mb-1.5',
+      'transition-colors duration-200',
       error ? 'text-github-danger-fg' : 'text-github-fg-default'
     )
 
     return (
-      <div className='w-full'>
+      <div className='w-full group'>
         {label && (
           <label htmlFor={name} className={labelClasses}>
             {label}
@@ -93,8 +97,30 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps<any>>(
             {...props}
           />
         )}
-        {error && <p className='mt-1 text-sm text-github-danger-fg'>{error}</p>}
-        {helperText && !error && <p className='mt-1 text-sm text-github-fg-muted'>{helperText}</p>}
+        {error && (
+          <p className='mt-1.5 text-sm text-github-danger-fg flex items-center gap-1.5'>
+            <svg className='w-4 h-4' viewBox='0 0 20 20' fill='currentColor'>
+              <path
+                fillRule='evenodd'
+                d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+                clipRule='evenodd'
+              />
+            </svg>
+            {error}
+          </p>
+        )}
+        {helperText && !error && (
+          <p className='mt-1.5 text-sm text-github-fg-muted flex items-center gap-1.5'>
+            <svg className='w-4 h-4' viewBox='0 0 20 20' fill='currentColor'>
+              <path
+                fillRule='evenodd'
+                d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z'
+                clipRule='evenodd'
+              />
+            </svg>
+            {helperText}
+          </p>
+        )}
       </div>
     )
   }

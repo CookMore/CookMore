@@ -1,31 +1,40 @@
 'use client'
 
 import { useCallback } from 'react'
-import { useProfileSystem } from '@/hooks/useProfileSystem'
-import type { ProfileMetadata, ProfileTier } from '@/types/profile'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { ProfileTier, type GroupProfileMetadata } from '@/types/profile'
+import { useProfileRegistry } from '@/lib/web3/hooks/useProfileRegistry'
 
 export function useProfileComplete() {
-  const { handleProfileSubmit } = useProfileSystem()
+  const router = useRouter()
+  const { createProfile } = useProfileRegistry()
 
   const handleProfileComplete = useCallback(
-    async (metadata: ProfileMetadata, tier: ProfileTier) => {
+    async (data: GroupProfileMetadata, tier: ProfileTier) => {
       try {
-        // Add tier to metadata
-        const submissionData = {
-          ...metadata,
-          tier,
+        const result = await createProfile(data, tier)
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to create profile')
         }
-        await handleProfileSubmit(submissionData, tier)
+
+        toast.success('Profile created successfully!', {
+          description: 'Redirecting to your profile...',
+        })
+
+        router.push('/profile')
+        return result
       } catch (error) {
-        console.error('Profile completion error:', error)
+        console.error('Error creating profile:', error)
+        toast.error('Error creating profile', {
+          description: 'Please try again later',
+        })
         throw error
       }
     },
-    [handleProfileSubmit]
+    [createProfile, router]
   )
 
-  return {
-    handleProfileComplete,
-    isReady: true,
-  }
+  return { handleProfileComplete }
 }

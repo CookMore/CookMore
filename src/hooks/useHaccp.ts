@@ -1,25 +1,81 @@
-import { useContract } from './useContract'
-import { RECIPE_NFT_ABI } from '@/lib/web3/abis'
-import { RECIPE_NFT_ADDRESS } from '@/lib/web3/addresses'
-import { useChangeLog } from './useChangeLog'
-import { useRecipePreview } from './useRecipePreview'
-import { RecipeData } from '@/types/recipe'
+'use client'
+
+import { useState, useCallback } from 'react'
+import { useRecipe } from '@/app/providers/RecipeProvider'
+import type { HaccpPlan } from '@/types/recipe'
 
 export function useHaccp() {
-  const contract = useContract(RECIPE_NFT_ADDRESS, RECIPE_NFT_ABI)
-  const { logChange } = useChangeLog()
-  const { updatePreview } = useRecipePreview()
+  const { recipeData, updateRecipe } = useRecipe()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
-  const updateHaccpPlan = async (recipeId: number, haccpPlan: RecipeData['haccpPlan']) => {
-    try {
-      const tx = await contract.updateHaccpPlan(recipeId, JSON.stringify(haccpPlan))
-      await tx.wait()
-      await logChange(recipeId, 'UPDATE_HACCP', 'Updated HACCP plan')
-    } catch (error) {
-      console.error('Error updating HACCP plan:', error)
-      throw error
-    }
+  const addHaccpPoint = useCallback(
+    async (point: HaccpPlan) => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const updatedPoints = [...(recipeData?.haccpPlan || []), point]
+        await updateRecipe({
+          haccpPlan: updatedPoints,
+        })
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to add HACCP point'))
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [recipeData?.haccpPlan, updateRecipe]
+  )
+
+  const updateHaccpPoint = useCallback(
+    async (index: number, point: HaccpPlan) => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const updatedPoints = [...(recipeData?.haccpPlan || [])]
+        updatedPoints[index] = point
+        await updateRecipe({
+          haccpPlan: updatedPoints,
+        })
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to update HACCP point'))
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [recipeData?.haccpPlan, updateRecipe]
+  )
+
+  const removeHaccpPoint = useCallback(
+    async (index: number) => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const updatedPoints = recipeData?.haccpPlan?.filter((_, i) => i !== index) || []
+        await updateRecipe({
+          haccpPlan: updatedPoints,
+        })
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to remove HACCP point'))
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [recipeData?.haccpPlan, updateRecipe]
+  )
+
+  return {
+    haccpPlan: recipeData?.haccpPlan || [],
+    addHaccpPoint,
+    updateHaccpPoint,
+    removeHaccpPoint,
+    isLoading,
+    error,
   }
-
-  return { updateHaccpPlan }
 }

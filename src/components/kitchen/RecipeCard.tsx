@@ -1,49 +1,59 @@
 'use client'
 
+import { Icons } from '@/components/icons'
+import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Recipe } from '@/types/recipe'
-import { IconStar, IconGitBranch } from '@/components/ui/icons'
-import { formatDistanceToNow } from 'date-fns'
 
 interface RecipeCardProps {
   recipe: Recipe
-  viewMode: 'list' | 'grid'
+  className?: string
 }
 
-export function RecipeCard({ recipe, viewMode }: RecipeCardProps) {
-  const cardClasses =
-    viewMode === 'grid'
-      ? 'p-4 border border-github-border-default rounded-md hover:border-github-border-default-hover'
-      : 'p-4 border-b border-github-border-default hover:bg-github-canvas-subtle'
-
+export function RecipeCard({ recipe, className }: RecipeCardProps) {
   return (
-    <div className={cardClasses}>
-      <div className='flex items-start justify-between'>
-        <div>
-          <Link
-            href={`/recipes/${recipe.id}`}
-            className='text-github-accent-fg hover:underline font-semibold'
-          >
-            {recipe.name}
-          </Link>
-          <p className='mt-1 text-sm text-github-fg-muted line-clamp-2'>{recipe.description}</p>
-        </div>
-        <button className='ml-4 text-github-fg-muted hover:text-github-accent-fg'>
-          <IconStar className='w-5 h-5' />
-        </button>
+    <Link
+      href={recipe?.id ? `/kitchen/recipe/${recipe.id}` : '#'}
+      className={cn(
+        'group relative overflow-hidden rounded-lg border border-github-border-default',
+        'hover:border-github-border-muted transition-all duration-200',
+        'hover:shadow-lg hover:-translate-y-1',
+        className
+      )}
+    >
+      <div className='aspect-video relative'>
+        {recipe.image ? (
+          <Image src={recipe.image} alt={recipe.title} fill className='object-cover' />
+        ) : (
+          <div className='absolute inset-0 bg-github-canvas-subtle flex items-center justify-center'>
+            <Icons.image className='h-8 w-8 text-github-fg-muted' />
+          </div>
+        )}
+        {recipe.isDraft && (
+          <div className='absolute top-2 right-2 bg-github-canvas-default rounded-full p-1'>
+            <Icons.lock className='h-4 w-4 text-github-fg-muted' />
+          </div>
+        )}
       </div>
 
-      <div className='mt-4 flex items-center text-sm text-github-fg-muted space-x-4'>
-        <div className='flex items-center space-x-1'>
-          <IconStar className='w-4 h-4' />
-          <span>{recipe.stars}</span>
+      <div className='p-4'>
+        <h3 className='font-medium mb-1 group-hover:text-github-accent-fg'>{recipe.title}</h3>
+        <p className='text-sm text-github-fg-muted line-clamp-2'>{recipe.description}</p>
+
+        <div className='mt-4 flex items-center text-sm text-github-fg-muted'>
+          <Icons.heart className='h-4 w-4 mr-1' />
+          <span>{recipe.likes ?? 0}</span>
+          <Icons.messageSquare className='h-4 w-4 ml-4 mr-1' />
+          <span>{recipe.comments ?? 0}</span>
+          {(recipe.cookCount ?? 0) > 0 && (
+            <>
+              <Icons.users className='h-4 w-4 ml-4 mr-1' />
+              <span>{recipe.cookCount}</span>
+            </>
+          )}
         </div>
-        <div className='flex items-center space-x-1'>
-          <IconGitBranch className='w-4 h-4' />
-          <span>{recipe.forks.length}</span>
-        </div>
-        <div>Updated {formatDistanceToNow(new Date(recipe.updatedAt), { addSuffix: true })}</div>
       </div>
-    </div>
+    </Link>
   )
 }

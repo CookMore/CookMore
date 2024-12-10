@@ -1,26 +1,28 @@
-import { createConfig, http } from 'wagmi'
-import { mainnet } from 'wagmi/chains'
-import { createPublicClient } from 'viem'
+import { createConfig } from 'wagmi'
+import { base, baseSepolia } from 'viem/chains'
+import { http } from 'viem'
+import { createPublicClient, fallback, webSocket } from 'viem'
 
-// Create the public client
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(),
+// Configure the chains and providers
+const transport = http()
+
+// Create public client
+export const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport,
 })
 
-// Create the Wagmi config
+// Create wagmi config
 export const config = createConfig({
-  chains: [mainnet],
+  chains: [base, baseSepolia],
   transports: {
-    [mainnet.id]: http(),
+    [base.id]: transport,
+    [baseSepolia.id]: transport,
   },
-  publicClient,
 })
 
-// Optional hydration helper
-export const hydrate = () => {
-  if (typeof window !== 'undefined') {
-    // Add any client-side initialization if needed
-    // This can be useful for persisting connection state, etc.
-  }
-}
+// Chain IDs for reference
+export const SUPPORTED_CHAINS = {
+  BASE_MAINNET: base.id, // 8453
+  BASE_SEPOLIA: baseSepolia.id, // 84532
+} as const

@@ -3,15 +3,16 @@ import localFont from 'next/font/local'
 export const inter = localFont({
   src: [
     {
-      path: 'inter/InterVariable.woff2',
+      path: '../fonts/inter/InterVariable.woff2',
       style: 'normal',
     },
     {
-      path: 'inter/InterVariable-Italic.woff2',
+      path: '../fonts/inter/InterVariable-Italic.woff2',
       style: 'italic',
     },
   ],
   variable: '--font-inter',
   display: 'swap',
   preload: true,
+  fallback: ['system-ui', 'arial'],
 })

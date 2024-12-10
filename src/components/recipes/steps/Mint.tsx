@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useContractWrite, useWaitForTransactionReceipt } from 'wagmi'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useLocalStorage } from '@/lib/ui/hooks/useLocalStorage'
 import { IconSpinner } from '@/components/ui/icons'
 import { RecipeData, RecipeMetadata } from '@/types/recipe'
 import { StepComponentProps } from './index'
@@ -148,7 +148,7 @@ export function Mint({ data, onChange, onNext, onBack }: StepComponentProps) {
         <div className='p-4 rounded-md bg-github-success-subtle text-github-success-fg'>
           Transaction submitted! View on{' '}
           <a
-            href={`https://goerli.basescan.org/tx/${mintTxHash}`}
+            href={mintTxHash ? `https://goerli.basescan.org/tx/${mintTxHash}` : '#'}
             target='_blank'
             rel='noopener noreferrer'
             className='underline'

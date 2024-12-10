@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useTags } from '@/hooks/useTags'
+import { useTags } from '@/app/(authenticated)/kitchen/hooks/useTags'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { IconAlertCircle, IconSpinner } from '@/components/ui/icons'
 import { BaseStep } from './BaseStep'

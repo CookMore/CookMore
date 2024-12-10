@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccessControl } from '@/hooks/useAccessControl'
+import { useAccessControl } from '@/lib/auth/hooks/useAccessControl'
 import { Button } from '@/components/ui/button'
 import { FormInput } from '@/components/ui/form/FormInput'
-import { useToast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { useWalletClient } from 'wagmi'
 
 export function RoleManager() {
@@ -13,7 +13,6 @@ export function RoleManager() {
   const [isReady, setIsReady] = useState(false)
   const { grantRole, revokeRole, hasRole, ROLES } = useAccessControl()
   const { data: walletClient } = useWalletClient()
-  const { toast } = useToast()
 
   useEffect(() => {
     if (walletClient) {
@@ -26,17 +25,10 @@ export function RoleManager() {
     try {
       setLoading(true)
       await grantRole(ROLES.METADATA_MANAGER, address)
-      toast({
-        title: 'Role Granted',
-        description: 'Successfully granted Feature Manager role',
-      })
+      toast.success('Successfully granted Feature Manager role')
       setAddress('')
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to grant role',
-        variant: 'destructive',
-      })
+      toast.error('Failed to grant role')
     } finally {
       setLoading(false)
     }
@@ -47,17 +39,10 @@ export function RoleManager() {
     try {
       setLoading(true)
       await revokeRole(ROLES.METADATA_MANAGER, address)
-      toast({
-        title: 'Role Revoked',
-        description: 'Successfully revoked Feature Manager role',
-      })
+      toast.success('Successfully revoked Feature Manager role')
       setAddress('')
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to revoke role',
-        variant: 'destructive',
-      })
+      toast.error('Failed to revoke role')
     } finally {
       setLoading(false)
     }
@@ -66,12 +51,11 @@ export function RoleManager() {
   const checkRole = async () => {
     if (!isReady || !address) return
     const hasManagerRole = await hasRole(ROLES.METADATA_MANAGER, address)
-    toast({
-      title: 'Role Status',
-      description: hasManagerRole
+    toast.info(
+      hasManagerRole
         ? 'Address has Feature Manager role'
-        : 'Address does not have Feature Manager role',
-    })
+        : 'Address does not have Feature Manager role'
+    )
   }
 
   if (!isReady) {
@@ -99,16 +83,13 @@ export function RoleManager() {
         onChange={(e) => setAddress(e.target.value)}
         placeholder='0x...'
       />
-
       <div className='flex gap-4'>
         <Button onClick={handleGrantRole} disabled={loading || !address}>
           Grant Role
         </Button>
-
         <Button onClick={handleRevokeRole} disabled={loading || !address} variant='destructive'>
           Revoke Role
         </Button>
-
         <Button onClick={checkRole} disabled={!address} variant='outline'>
           Check Role
         </Button>

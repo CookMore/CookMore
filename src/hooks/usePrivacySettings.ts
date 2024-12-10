@@ -1,4 +1,4 @@
-import { useContract } from './useContract'
+import { useContract } from '@/lib/web3/hooks/useContract'
 import { PRIVACY_SETTINGS_ABI } from '@/lib/web3/abis'
 import { PRIVACY_SETTINGS_ADDRESS } from '@/lib/web3/addresses'
 import { Contract } from 'ethers'

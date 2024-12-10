@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useParams } from 'next/navigation'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 export default function RecipeIdPage() {
   const params = useParams()
@@ -9,7 +10,7 @@ export default function RecipeIdPage() {
 
   return (
     <div>
-      <h1>Recipe {recipeId}</h1>
+      <PageHeader title={`Recipe ${recipeId}`} />
     </div>
   )
 }

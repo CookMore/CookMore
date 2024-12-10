@@ -9,26 +9,44 @@ import { CalendarPanel } from './CalendarPanel'
 import { NotificationsPanel } from './NotificationsPanel'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
 
 interface PanelContainerProps {
   children?: React.ReactNode
   className?: string
 }
 
-// Update the PanelType definition to include all panel types
-type PanelType = 'wallet' | 'user' | 'settings' | 'calendar' | 'notifications'
+const panels = [
+  { id: 'notifications' as const, Icon: IconBell, Panel: NotificationsPanel },
+  { id: 'calendar' as const, Icon: IconCalendar, Panel: CalendarPanel },
+  { id: 'user' as const, Icon: IconUser, Panel: ProfilePanel },
+  { id: 'wallet' as const, Icon: IconWallet, Panel: ConnectedPanel },
+  { id: 'settings' as const, Icon: IconSettings, Panel: DisplayPanel },
+] as const
+
+type PanelId = (typeof panels)[number]['id']
+type PanelType = PanelId | null
 
 export function PanelContainer({ children }: PanelContainerProps) {
   const { activePanel, setActivePanel, isExpanded, setIsExpanded } = usePanel()
   const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  const panels: Array<{ id: PanelType; Icon: any; Panel: React.ComponentType }> = [
-    { id: 'notifications', Icon: IconBell, Panel: NotificationsPanel },
-    { id: 'wallet', Icon: IconWallet, Panel: ConnectedPanel },
-    { id: 'user', Icon: IconUser, Panel: ProfilePanel },
-    { id: 'settings', Icon: IconSettings, Panel: DisplayPanel },
-    { id: 'calendar', Icon: IconCalendar, Panel: CalendarPanel },
-  ]
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className='fixed right-0 top-14 h-[calc(100vh-4rem)] w-12 bg-github-canvas-default border-l border-github-border-default'>
+        <div className='animate-pulse space-y-4 p-4'>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className='h-8 w-8 bg-github-canvas-subtle rounded-md' />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -122,7 +140,7 @@ export function PanelContainer({ children }: PanelContainerProps) {
           ))}
         </div>
 
-        {isExpanded && (
+        {isExpanded && mounted && (
           <div className='h-[calc(100%-3.5rem)] overflow-y-auto'>
             <div className='p-4'>
               {panels.map(

@@ -1,37 +1,67 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-
-interface ChangeLogEntry {
-  id: string
-  timestamp: string
-  description: string
-  author: string
-}
+import { useRecipe } from '@/app/providers/RecipeProvider'
+import type { ChangeLogEntry } from '@/types/recipe'
 
 export function useChangeLog() {
-  const [changes, setChanges] = useState<ChangeLogEntry[]>([])
+  const { recipeData, updateRecipe } = useRecipe()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
-  const addChange = useCallback((change: Omit<ChangeLogEntry, 'id' | 'timestamp'>) => {
-    setChanges((prev) => [
-      {
-        ...change,
-        id: Math.random().toString(36).substr(2, 9),
-        timestamp: new Date().toISOString(),
-      },
-      ...prev,
-    ])
-  }, [])
+  const addChange = useCallback(
+    async (description: string) => {
+      setIsLoading(true)
+      setError(null)
 
-  const clearChanges = useCallback(() => {
-    setChanges([])
-  }, [])
+      try {
+        const newChange: ChangeLogEntry = {
+          version: '1.0',
+          type: 'update',
+          date: new Date().toISOString(),
+          author: 'user',
+          message: description,
+        }
+
+        const updatedEntries = [...(recipeData?.changeLogDetails?.entries || []), newChange]
+        await updateRecipe({
+          changeLogDetails: {
+            entries: updatedEntries,
+          },
+        })
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to add change'))
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [recipeData?.changeLogDetails?.entries, updateRecipe]
+  )
+
+  const clearChangelog = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      await updateRecipe({
+        changeLogDetails: {
+          entries: [],
+        },
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to clear changelog'))
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [updateRecipe])
 
   return {
-    changes,
-    isLoading,
+    changes: recipeData?.changeLogDetails?.entries || [],
     addChange,
-    clearChanges,
+    clearChangelog,
+    isLoading,
+    error,
   }
 }

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useProfileRegistry } from '@/hooks/useProfileRegistry'
+import { useProfileRegistry } from '@/lib/web3/hooks/useProfileRegistry'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/components/ui/use-toast'
+import { toast } from 'sonner'
 import { ethers } from 'ethers'
 import { PROFILE_REGISTRY_ABI, PROFILE_REGISTRY_ADDRESS } from '@/lib/web3/abis/ProfileRegistry'
 import type { Log, EventLog } from 'ethers'
@@ -17,7 +17,13 @@ interface DeletedProfile {
 export function DeletedProfiles() {
   const [deletedProfiles, setDeletedProfiles] = useState<DeletedProfile[]>([])
   const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
+
+  const handleError = (error: any) => {
+    const errorMessage = error?.message || 'An error occurred'
+    toast.error('Error', {
+      description: errorMessage,
+    })
+  }
 
   // Listen for ProfileDeleted events
   useEffect(() => {
@@ -56,20 +62,9 @@ export function DeletedProfiles() {
         setDeletedProfiles(profiles)
       } catch (error) {
         console.error('Error fetching deleted profiles:', error)
-        let errorMessage = 'Failed to fetch deleted profiles'
-
-        // Handle specific RPC errors
-        if (error instanceof Error) {
-          if (error.message.includes('JsonRpcEngine')) {
-            errorMessage = 'RPC node error: Please try again later or contact support'
-          }
-        }
-
-        toast({
-          title: 'Error',
-          description: errorMessage,
-          variant: 'destructive',
-        })
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to fetch deleted profiles'
+        toast.error(errorMessage)
       } finally {
         setLoading(false)
       }
@@ -123,7 +118,7 @@ export function DeletedProfiles() {
         <h3 className='text-lg font-medium'>Deleted Profiles</h3>
         <Button
           variant='outline'
-          size='sm'
+          className='text-sm'
           onClick={() => setDeletedProfiles([])}
           disabled={deletedProfiles.length === 0 || loading}
         >

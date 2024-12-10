@@ -3,23 +3,32 @@ export const ROUTES = {
   MARKETING: {
     HOME: '/',
     FEATURES: '/features',
-    EXPLORE: '/explore',
+    DISCOVER: '/discover',
     PRICING: '/pricing',
     CLUB: '/club',
   },
 
   // Authenticated routes
   AUTH: {
+    LOGIN: '/login',
     KITCHEN: {
       HOME: '/kitchen',
-      EXPLORE: '/kitchen/explore',
       CLUB: '/kitchen/club',
-      TIER: '/kitchen/tier',
     },
+    CALENDAR: '/calendar',
+    EXPLORE: '/explore',
+    TIER: '/tier',
     PROFILE: {
       HOME: '/profile',
       CREATE: '/profile/create',
-      SETTINGS: '/profile/settings',
+      EDIT: '/profile/edit',
+      STEPS: {
+        SELECT_TIER: '/profile/create/select-tier',
+        BASIC: '/profile/create/basic',
+        PRO: '/profile/create/pro',
+        GROUP: '/profile/create/group',
+        MINT: '/profile/create/mint',
+      },
     },
     ADMIN: '/admin',
   },
@@ -31,27 +40,34 @@ export const routeConfig = {
   public: [
     ROUTES.MARKETING.HOME,
     ROUTES.MARKETING.FEATURES,
-    ROUTES.MARKETING.EXPLORE,
+    ROUTES.MARKETING.DISCOVER,
     ROUTES.MARKETING.PRICING,
     ROUTES.MARKETING.CLUB,
-  ],
+  ] as const,
 
   // Routes that require authentication
   protected: [
     ROUTES.AUTH.KITCHEN.HOME,
-    ROUTES.AUTH.KITCHEN.EXPLORE,
+    ROUTES.AUTH.EXPLORE,
     ROUTES.AUTH.KITCHEN.CLUB,
-    ROUTES.AUTH.KITCHEN.TIER,
+    ROUTES.AUTH.CALENDAR,
+    ROUTES.AUTH.TIER,
     ROUTES.AUTH.PROFILE.HOME,
-    ROUTES.AUTH.PROFILE.SETTINGS,
-  ],
+    ROUTES.AUTH.PROFILE.CREATE,
+    ROUTES.AUTH.PROFILE.EDIT,
+    ROUTES.AUTH.PROFILE.STEPS.BASIC,
+    ROUTES.AUTH.PROFILE.STEPS.PRO,
+    ROUTES.AUTH.PROFILE.STEPS.GROUP,
+    ROUTES.AUTH.PROFILE.STEPS.MINT,
+  ] as const,
 
   // Routes that require profile
   requiresProfile: [
     ROUTES.AUTH.KITCHEN.HOME,
-    ROUTES.AUTH.KITCHEN.EXPLORE,
+    ROUTES.AUTH.EXPLORE,
     ROUTES.AUTH.KITCHEN.CLUB,
-    ROUTES.AUTH.KITCHEN.TIER,
+    ROUTES.AUTH.CALENDAR,
+    ROUTES.AUTH.TIER,
   ],
 
   // Admin only routes
@@ -62,10 +78,3 @@ export const routeConfig = {
     profileCreate: ROUTES.AUTH.PROFILE.CREATE,
   },
 }
-
-// Helper functions
-export const isKitchenRoute = (pathname: string) => pathname.startsWith(ROUTES.AUTH.KITCHEN.HOME)
-
-export const isProfileRoute = (pathname: string) => pathname.startsWith(ROUTES.AUTH.PROFILE.HOME)
-
-export const isAdminRoute = (pathname: string) => pathname.startsWith(ROUTES.AUTH.ADMIN)

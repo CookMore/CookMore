@@ -1,37 +1,58 @@
 'use client'
 
-import { useProfile } from '@/hooks/useProfile'
-import { usePrivy } from '@privy-io/react-auth'
-import { useNFTTiers } from '@/hooks/useNFTTiers'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { Suspense, useState } from 'react'
-import { CreateProfileForm } from './CreateProfileForm'
-import { PageContainer } from '@/components/PageContainer'
-import { PanelContainer } from '@/components/panels/PanelContainer'
-import { FormSkeleton } from '@/components/ui/skeletons/FormSkeleton'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { DualSidebarLayout } from '@/components/layouts/DualSidebarLayout'
+import { ProfileSidebar } from '../components/ui/ProfileSidebar'
+import { CreateProfileForm } from '../components/forms/CreateProfileForm'
+import { ProfileTier } from '@/types/profile'
+import { getStepsForTier } from '../steps'
+import { FormProvider, useForm } from 'react-hook-form'
 
 export default function CreateProfilePage() {
-  const { isLoading: profileLoading } = useProfile()
-  const { ready } = usePrivy()
-  const { isLoading: tiersLoading } = useNFTTiers()
+  const t = useTranslations('profile')
+  const searchParams = useSearchParams()
+  const [currentStep, setCurrentStep] = useState(0)
   const [isExpanded, setIsExpanded] = useState(true)
 
-  // Show loading state while checking auth and profile
-  if (!ready || profileLoading || tiersLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <LoadingSpinner className='w-8 h-8' />
-      </div>
-    )
-  }
+  // Get tier from URL params
+  const tierParam = searchParams.get('tier')
+  const tier =
+    tierParam === 'group'
+      ? ProfileTier.GROUP
+      : tierParam === 'pro'
+        ? ProfileTier.PRO
+        : ProfileTier.FREE
+
+  const steps = getStepsForTier(tier)
+
+  const methods = useForm({
+    defaultValues: {
+      tier,
+      version: '1.0',
+    },
+  })
 
   return (
-    <PageContainer>
-      <PanelContainer>
-        <Suspense fallback={<FormSkeleton />}>
-          <CreateProfileForm isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-        </Suspense>
-      </PanelContainer>
-    </PageContainer>
+    <div className='container mx-auto px-4 py-8'>
+      <h1 className='text-3xl font-bold mb-8'>{t('createProfile')}</h1>
+      <FormProvider {...methods}>
+        <DualSidebarLayout
+          leftSidebar={
+            <ProfileSidebar
+              steps={steps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
+              tier={tier}
+            />
+          }
+        >
+          <CreateProfileForm currentStep={currentStep} tier={tier} />
+        </DualSidebarLayout>
+      </FormProvider>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useContract } from './useContract'
+import { useContract } from '@/lib/web3/hooks/useContract'
 import { RECIPE_NFT_ABI } from '@/lib/web3/abis'
 import { RECIPE_NFT_ADDRESS } from '@/lib/web3/addresses'
 import { useChangeLog } from './useChangeLog'

@@ -1,0 +1,41 @@
+{
+  "welcome": "مرحباً بك في CookMore",
+  "navigation": {
+    "home": "الرئيسية",
+    "kitchen": "المطبخ",
+    "recipes": "الوصفات",
+    "explore": "استكشاف",
+    "profile": "الملف الشخصي",
+    "admin": "الإدارة",
+    "calendar": "التقويم"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج",
+    "connectWallet": "ربط المحفظة"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "مجموعة"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "وصفة جديدة",
+    "myRecipes": "وصفاتي",
+    "sharedRecipes": "الوصفات المشتركة",
+    "collections": "المجموعات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "update": "تحديث"
+  }
+}

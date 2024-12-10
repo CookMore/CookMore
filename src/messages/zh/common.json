@@ -1,0 +1,41 @@
+{
+  "welcome": "欢迎使用 CookMore",
+  "navigation": {
+    "home": "首页",
+    "kitchen": "厨房",
+    "recipes": "食谱",
+    "explore": "探索",
+    "profile": "个人资料",
+    "admin": "管理",
+    "calendar": "日历"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signOut": "退出",
+    "connectWallet": "连接钱包"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "团队"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "新建食谱",
+    "myRecipes": "我的食谱",
+    "sharedRecipes": "共享食谱",
+    "collections": "收藏"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "update": "更新"
+  }
+}

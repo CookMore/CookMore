@@ -1,6 +1,13 @@
 import { z } from 'zod'
 import type { ProfileMetadata, ProfileTier } from '@/types/profile'
 
+// Define the enum for runtime use while keeping the type import
+export enum ProfileTierEnum {
+  FREE = 'free',
+  PRO = 'pro',
+  GROUP = 'group',
+}
+
 export const profileSchema = z
   .object({
     name: z.string().min(2).max(50),
@@ -35,13 +42,13 @@ export const profileSchema = z
   .strict()
 
 // Validation schemas for different tiers
-const freeProfileSchema = profileSchema
+export const freeProfileSchema = profileSchema
   .extend({
     // Add free-specific fields
   })
   .strict()
 
-const proProfileSchema = profileSchema
+export const proProfileSchema = profileSchema
   .extend({
     culinaryInfo: z.object({
       expertise: z.enum(['beginner', 'intermediate', 'advanced', 'professional']),
@@ -73,7 +80,7 @@ const proProfileSchema = profileSchema
   })
   .strict()
 
-const groupProfileSchema = proProfileSchema
+export const groupProfileSchema = proProfileSchema
   .extend({
     organizationInfo: z.object({
       type: z.enum(['restaurant', 'catering', 'food_service', 'other']),
@@ -89,6 +96,19 @@ const groupProfileSchema = proProfileSchema
   })
   .strict()
 
+export function getTierValidation(tier: ProfileTier) {
+  switch (tier) {
+    case ProfileTierEnum.FREE:
+      return freeProfileSchema
+    case ProfileTierEnum.PRO:
+      return proProfileSchema
+    case ProfileTierEnum.GROUP:
+      return groupProfileSchema
+    default:
+      return freeProfileSchema
+  }
+}
+
 export async function validateProfile(
   metadata: ProfileMetadata,
   tier: ProfileTier
@@ -97,13 +117,13 @@ export async function validateProfile(
     let validationSchema: z.ZodSchema
 
     switch (tier) {
-      case 'FREE':
+      case ProfileTierEnum.FREE:
         validationSchema = freeProfileSchema
         break
-      case 'PRO':
+      case ProfileTierEnum.PRO:
         validationSchema = proProfileSchema
         break
-      case 'GROUP':
+      case ProfileTierEnum.GROUP:
         validationSchema = groupProfileSchema
         break
       default:

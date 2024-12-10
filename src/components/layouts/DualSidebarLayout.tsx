@@ -1,26 +1,22 @@
 'use client'
 
-import { PanelContainer } from '@/components/panels/PanelContainer'
+import { cn } from '@/lib/utils'
 
 interface DualSidebarLayoutProps {
   children: React.ReactNode
   leftSidebar?: React.ReactNode
+  className?: string
 }
 
-export function DualSidebarLayout({ children, leftSidebar }: DualSidebarLayoutProps) {
+export function DualSidebarLayout({ children, leftSidebar, className }: DualSidebarLayoutProps) {
   return (
-    <div className='flex justify-center'>
-      {/* Left Sidebar - Hidden on mobile */}
-      <div className='hidden lg:block w-[240px] flex-shrink-0'>{leftSidebar}</div>
+    <div className={cn('flex justify-center', className)}>
+      {/* Left Sidebar - Mobile: Absolute, Desktop: Relative */}
+      {leftSidebar}
 
-      {/* Main Content - Centered on large screens */}
+      {/* Main Content */}
       <div className='flex-1 max-w-4xl'>
         <div className='w-full px-4 sm:px-6 md:px-8'>{children}</div>
-      </div>
-
-      {/* Right Panel Container - Slides in on mobile */}
-      <div className='fixed right-0 top-[56px] bottom-0 w-full sm:w-[320px]'>
-        <PanelContainer />
       </div>
     </div>
   )

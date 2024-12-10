@@ -1,25 +1,61 @@
-import { useContract } from './useContract'
-import { RECIPE_NFT_ABI } from '@/lib/web3/abis'
-import { RECIPE_NFT_ADDRESS } from '@/lib/web3/addresses'
-import { useChangeLog } from './useChangeLog'
-import { useRecipePreview } from './useRecipePreview'
-import { RecipeData } from '@/types/recipe'
+'use client'
+
+import { useState, useCallback } from 'react'
+import { useRecipe } from '@/app/providers/RecipeProvider'
+import { ipfsService } from '@/lib/services/ipfs-service'
 
 export function useFinalImage() {
-  const contract = useContract(RECIPE_NFT_ADDRESS, RECIPE_NFT_ABI)
-  const { logChange } = useChangeLog()
-  const { updatePreview } = useRecipePreview()
+  const { recipeData, updateRecipe } = useRecipe()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
-  const updateFinalImage = async (recipeId: number, imageUrl: string | undefined) => {
+  const uploadImage = useCallback(
+    async (file: File) => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const ipfsHash = await ipfsService.upload(file)
+        const imageUrl = `ipfs://${ipfsHash}`
+        await updateRecipe({
+          finalImageDetails: {
+            finalImage: imageUrl,
+          },
+        })
+        return imageUrl
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to upload image'))
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [updateRecipe]
+  )
+
+  const removeImage = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+
     try {
-      const tx = await contract.updateFinalImage(recipeId, imageUrl || '')
-      await tx.wait()
-      await logChange(recipeId, 'UPDATE_IMAGE', 'Updated final recipe image')
-    } catch (error) {
-      console.error('Error updating final image:', error)
-      throw error
+      await updateRecipe({
+        finalImageDetails: {
+          finalImage: '',
+        },
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to remove image'))
+      throw err
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [updateRecipe])
 
-  return { updateFinalImage }
+  return {
+    finalImage: recipeData?.finalImageDetails?.finalImage,
+    uploadImage,
+    removeImage,
+    isLoading,
+    error,
+  }
 }

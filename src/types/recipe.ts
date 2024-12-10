@@ -35,6 +35,16 @@ export interface RecipeData {
   videoUrl?: string
   inspiration?: Inspiration
   signatures?: Signature[]
+  versions?: RecipeVersion[]
+  currentVersionId?: string
+  createdAt?: Date
+  updatedAt?: Date
+  forks?: string[]
+  isDraft?: boolean
+  cookCount?: number
+  likes?: number
+  comments?: number
+  image?: string
 }
 
 // Supporting Types and Interfaces
@@ -225,4 +235,29 @@ export interface Inspiration {
   sources?: string[]
   images?: string[]
   notes?: string
+}
+
+// Type aliases for backward compatibility
+export type Recipe = RecipeData
+export type RecipeMetadata = Omit<RecipeData, 'id' | 'owner'>
+
+// Version-related types
+export interface RecipeVersion {
+  id: string
+  message: string
+  changes: Partial<RecipeData>
+  timestamp: Date
+  parentId: string | null
+}
+
+// Service response types
+export interface ServiceResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+}
+
+export interface RecipeActionResponse extends ServiceResponse<RecipeData> {
+  action: 'create' | 'update' | 'delete' | 'fork'
+  timestamp: Date
 }

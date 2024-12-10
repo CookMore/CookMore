@@ -1,0 +1,41 @@
+{
+  "welcome": "CookMore에 오신 것을 환영합니다",
+  "navigation": {
+    "home": "홈",
+    "kitchen": "주방",
+    "recipes": "레시피",
+    "explore": "탐색",
+    "profile": "프로필",
+    "admin": "관리자",
+    "calendar": "달력"
+  },
+  "auth": {
+    "signIn": "로그인",
+    "signOut": "로그아웃",
+    "connectWallet": "지갑 연결"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "그룹"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "새 레시피",
+    "myRecipes": "내 레시피",
+    "sharedRecipes": "공유된 레시피",
+    "collections": "컬렉션"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "생성",
+    "update": "업데이트"
+  }
+}

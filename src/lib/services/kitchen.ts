@@ -1,89 +1,50 @@
-import { KitchenDraft, PartialRecipeData } from '@/types/recipe'
+'use client'
 
-const STORAGE_KEY = 'kitchen_recipes'
+import { kitchenEdgeService } from '@/lib/edge/services'
+import type {
+  Recipe,
+  RecipeMetadata,
+  ServiceResponse,
+  RecipeActionResponse,
+  RecipeVersion
+} from '@/types/recipe'
 
-// Helper function to get recipes from localStorage
-function getStoredRecipes(): KitchenDraft[] {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  return stored ? JSON.parse(stored) : []
-}
+export class KitchenService {
+  private edgeService = kitchenEdgeService
 
-// Helper function to save recipes to localStorage
-function saveRecipes(recipes: KitchenDraft[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes))
-}
-
-export function createDraft(data: Partial<KitchenDraft>): KitchenDraft {
-  const recipes = getStoredRecipes()
-  const newDraft: KitchenDraft = {
-    draftId: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    draftStatus: 'draft',
-    recipeStatus: 'active',
-    title: data.title || 'Untitled Recipe',
-    description: data.description || '',
-    version: data.version || '1.0.0',
-    equipment: data.equipment || [],
-    servingPlating: data.servingPlating || '',
-    pairings: data.pairings || [],
-    skills: data.skills || [],
-    ...data,
+  static async getRecipe(recipeId: string): Promise<ServiceResponse<Recipe>> {
+    return kitchenEdgeService.getRecipe(recipeId)
   }
 
-  recipes.push(newDraft)
-  saveRecipes(recipes)
-  return newDraft
-}
-
-export function updateDraft(draftId: string, data: Partial<KitchenDraft>): KitchenDraft {
-  const recipes = getStoredRecipes()
-  const index = recipes.findIndex((r) => r.draftId === draftId)
-
-  if (index === -1) {
-    throw new Error('Draft not found')
+  static async updateRecipe(
+    recipeId: string,
+    data: Partial<RecipeMetadata>
+  ): Promise<RecipeActionResponse> {
+    return kitchenEdgeService.updateRecipe(recipeId, data)
   }
 
-  const updatedDraft: KitchenDraft = {
-    ...recipes[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
+  static async getCollection(userId: string): Promise<ServiceResponse<Recipe[]>> {
+    return kitchenEdgeService.getCollection(userId)
   }
 
-  recipes[index] = updatedDraft
-  saveRecipes(recipes)
-  return updatedDraft
-}
-
-export function getDraft(draftId: string): KitchenDraft | null {
-  const recipes = getStoredRecipes()
-  return recipes.find((r) => r.draftId === draftId) || null
-}
-
-export function listDrafts(): KitchenDraft[] {
-  return getStoredRecipes()
-}
-
-export function deleteDraft(draftId: string): void {
-  const recipes = getStoredRecipes()
-  const filtered = recipes.filter((r) => r.draftId !== draftId)
-  saveRecipes(filtered)
-}
-
-export function publishDraft(draftId: string): KitchenDraft {
-  const recipes = getStoredRecipes()
-  const index = recipes.findIndex((r) => r.draftId === draftId)
-
-  if (index === -1) {
-    throw new Error('Draft not found')
+  static async getVersions(recipeId: string): Promise<ServiceResponse<RecipeVersion[]>> {
+    return kitchenEdgeService.getVersions(recipeId)
   }
 
-  recipes[index] = {
-    ...recipes[index],
-    draftStatus: 'published',
-    updatedAt: new Date().toISOString(),
+  static async invalidateRecipe(recipeId: string): Promise<void> {
+    return kitchenEdgeService.invalidateRecipe(recipeId)
   }
 
-  saveRecipes(recipes)
-  return recipes[index]
+  static async invalidateCollection(userId: string): Promise<void> {
+    return kitchenEdgeService.invalidateCollection(userId)
+  }
 }
+
+// Export singleton instance and individual methods for convenience
+export const kitchenService = new KitchenService()
+export const getRecipe = KitchenService.getRecipe
+export const updateRecipe = KitchenService.updateRecipe
+export const getCollection = KitchenService.getCollection
+export const getVersions = KitchenService.getVersions
+export const invalidateRecipe = KitchenService.invalidateRecipe
+export const invalidateCollection = KitchenService.invalidateCollection

@@ -7,7 +7,7 @@ import { RecipePreview } from '@/components/recipes/RecipePreview'
 import { RecipeProvider } from '@/app/providers/RecipeProvider'
 import { PanelContainer } from '@/components/panels/PanelContainer'
 import { IconEye, IconEdit } from '@/components/ui/icons'
-import { Header } from '@/components/Header'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { SessionWarning } from '@/components/recipes/steps/SessionWarning'
 
 export default function NewRecipePage() {
@@ -18,7 +18,7 @@ export default function NewRecipePage() {
   return (
     <RecipeProvider>
       <div className='flex flex-col'>
-        <Header />
+        <PageHeader title='Create Recipe' />
         <SessionWarning />
         <div className='flex'>
           <StepsSidebar

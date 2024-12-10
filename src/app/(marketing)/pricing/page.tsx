@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import EnterprisePopover from '@/components/ui/EnterprisePopover'
 import { IconCheck } from '@/components/ui/icons'
+import { ROUTES } from '@/lib/routes'
 
 export default function PricingPage() {
   const { login, ready } = usePrivy()
@@ -20,6 +21,39 @@ export default function PricingPage() {
     setIsPopoverOpen(false)
   }
 
+  const tiers = [
+    {
+      title: 'Free',
+      price: '$0',
+      description: 'Perfect for home cooks',
+      features: [
+        'Unlimited public recipes',
+        'Basic recipe versioning',
+        'Community features',
+        '$1 platform fee per Recipe NFT minted',
+      ],
+      buttonText: 'Get Started',
+      buttonAction: () => login(),
+    },
+    {
+      title: 'Pro',
+      price: '$25 USDC',
+      description: 'Unlocks premium features',
+      features: ['Soul Bound Token', 'No mint fee for recipes', 'Lifetime access to all features'],
+      buttonText: 'Try Pro',
+      buttonLink: ROUTES.AUTH.TIER,
+      popular: true,
+    },
+    {
+      title: 'Group',
+      price: '$100 USDC',
+      description: 'For collaborative teams',
+      features: ['Soul Bound Token', 'Group recipe editing', 'Shared resources and analytics'],
+      buttonText: 'Contact Us',
+      buttonLink: ROUTES.AUTH.TIER,
+    },
+  ]
+
   return (
     <div className='relative'>
       <div className={`container mx-auto px-4 py-12 ${isPopoverOpen ? 'blur-sm' : ''}`}>
@@ -28,47 +62,7 @@ export default function PricingPage() {
         </h1>
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto'>
-          {/* Pricing Tier */}
-          {[
-            {
-              title: 'Free',
-              price: '$0',
-              description: 'Perfect for home cooks',
-              features: [
-                'Unlimited public recipes',
-                'Basic recipe versioning',
-                'Community features',
-                '$1 platform fee per Recipe NFT minted',
-              ],
-              buttonText: 'Get Started',
-              buttonAction: () => login(),
-            },
-            {
-              title: 'Pro',
-              price: '$25 USDC',
-              description: 'Unlocks premium features',
-              features: [
-                'Soul Bound Token',
-                'No mint fee for recipes',
-                'Lifetime access to all features',
-              ],
-              buttonText: 'Try Pro',
-              buttonLink: '/pro-minting',
-              popular: true,
-            },
-            {
-              title: 'Group',
-              price: '$100 USDC',
-              description: 'For collaborative teams',
-              features: [
-                'Soul Bound Token',
-                'Group recipe editing',
-                'Shared resources and analytics',
-              ],
-              buttonText: 'Contact Us',
-              buttonLink: '/group-minting',
-            },
-          ].map((tier, index) => (
+          {tiers.map((tier, index) => (
             <div
               key={index}
               className={`flex flex-col justify-between bg-github-canvas-subtle p-6 rounded-lg border ${

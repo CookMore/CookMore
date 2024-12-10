@@ -11,7 +11,7 @@ import {
   IconLoader,
 } from '@/components/ui/icons'
 import { useState } from 'react'
-import { useProductionMethod } from '@/hooks/useProductionMethod'
+import { useProductionMethod } from '@/app/(authenticated)/kitchen/hooks/useProductionMethod'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { StepComponentProps } from './index'
 
@@ -28,7 +28,7 @@ export function MethodProduction({ data, onChange, onNext, onBack }: StepCompone
       type: 'step',
       content: '',
       time: undefined,
-      timeUnit: 'minutes',
+      timeUnit: 'minutes' as const,
       ingredients: [],
     }
 

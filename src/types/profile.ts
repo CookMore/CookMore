@@ -349,9 +349,50 @@ export interface Preferences {
 }
 
 export interface Profile {
-  tokenId: string
-  owner: string
+  id: string
+  address: string
+  type: 'Free' | 'Pro' | 'Group'
   metadata: ProfileMetadata
   createdAt: Date
   updatedAt: Date
+}
+
+// Define ProfileFormData if not already defined
+export interface ProfileFormData {
+  name: string
+  bio: string
+  tier?: ProfileTier
+  version?: string
+  avatar?: string
+  social?: {
+    urls: string[]
+    labels: string[]
+  }
+  preferences?: {
+    theme: 'system' | 'light' | 'dark'
+    notifications: boolean
+    displayEmail: boolean
+    displayLocation: boolean
+  }
+  culinaryInfo?: {
+    expertise: 'beginner' | 'intermediate' | 'advanced' | 'professional'
+    specialties: string[]
+    dietaryPreferences: string[]
+    cuisineTypes: string[]
+    techniques: string[]
+    equipment: string[]
+    certifications: Array<{
+      name: string
+      issuer: string
+      date: string
+      expiryDate?: string
+      verificationLink?: string
+    }>
+  }
+  achievements?: {
+    recipesCreated: number
+    recipesForked: number
+    totalLikes: number
+    badges: string[]
+  }
 }

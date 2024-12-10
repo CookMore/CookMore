@@ -176,7 +176,7 @@ export function ChangeLog({ data, onChange, onNext, onBack }: StepComponentProps
                   <div className='flex items-center space-x-2'>
                     <span className='text-xs text-github-fg-muted'>Transaction:</span>
                     <a
-                      href={`https://etherscan.io/tx/${change.txHash}`}
+                      href={change?.txHash ? `https://etherscan.io/tx/${change.txHash}` : "#"}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='text-xs font-mono text-github-accent-fg hover:underline'

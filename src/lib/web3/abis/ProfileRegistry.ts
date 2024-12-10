@@ -399,6 +399,13 @@ export const PROFILE_REGISTRY_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    inputs: [{ name: 'address', type: 'address' }],
+    name: 'getTier',
+    outputs: [{ name: '', type: 'uint8' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ] as const
 
 export type ProfileRegistryABI = typeof PROFILE_REGISTRY_ABI

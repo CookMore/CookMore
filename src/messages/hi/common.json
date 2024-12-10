@@ -1,0 +1,41 @@
+{
+  "welcome": "CookMore में आपका स्वागत है",
+  "navigation": {
+    "home": "होम",
+    "kitchen": "रसोई",
+    "recipes": "व्यंजन",
+    "explore": "खोजें",
+    "profile": "प्रोफ़ाइल",
+    "admin": "एडमिन",
+    "calendar": "कैलेंडर"
+  },
+  "auth": {
+    "signIn": "साइन इन",
+    "signOut": "साइन आउट",
+    "connectWallet": "वॉलेट कनेक्ट करें"
+  },
+  "profile": {
+    "tier": {
+      "free": "Lite",
+      "pro": "Pro",
+      "group": "समूह"
+    }
+  },
+  "kitchen": {
+    "newRecipe": "नई रेसिपी",
+    "myRecipes": "मेरी रेसिपी",
+    "sharedRecipes": "साझा रेसिपी",
+    "collections": "संग्रह"
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "update": "अपडेट करें"
+  }
+}

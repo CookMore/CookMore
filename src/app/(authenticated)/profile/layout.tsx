@@ -2,6 +2,10 @@
 
 import { DualSidebarLayout } from '@/components/layouts/DualSidebarLayout'
 
-export default function ProfileLayout({ children }: { children: React.ReactNode }) {
+interface ProfileLayoutProps {
+  children: React.ReactNode
+}
+
+export default function ProfileLayout({ children }: ProfileLayoutProps) {
   return <DualSidebarLayout>{children}</DualSidebarLayout>
 }

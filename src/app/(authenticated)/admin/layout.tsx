@@ -1,11 +1,11 @@
 'use client'
 
-import { PageContainer } from '@/components/PageContainer'
+import { BasePageLayout } from '@/components/layouts/BasePageLayout'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className='min-h-screen bg-github-canvas-default'>
-      <PageContainer>{children}</PageContainer>
+      <BasePageLayout>{children}</BasePageLayout>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Button } from './button'
+import { Button } from './Button'
 import { IconSettings } from './icons'
 import { useAdminCheck } from '@/hooks/useAdminCheck'
 import { useCallback, useState, useEffect } from 'react'

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Panel } from '@/components/ui/Panel'
+import { useState, useEffect } from 'react'
+import { BasePanel } from './BasePanel'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { Toggle } from '@/components/ui/Toggle'
 import { useTheme } from '@/app/providers/ThemeProvider'
@@ -14,11 +14,12 @@ import {
   IconCaptions,
   IconPalette,
 } from '@/components/ui/icons'
-import { cn } from '@/lib/utils'
+import { ThemePreview } from './ThemePreview'
 
 export function DisplayPanel() {
   const { theme } = useTheme()
   const { reduceMotion, toggleReduceMotion } = useMotion()
+  const [mounted, setMounted] = useState(false)
 
   // Local state for accessibility options
   const [highContrast, setHighContrast] = useState(false)
@@ -26,89 +27,31 @@ export function DisplayPanel() {
   const [reduceSounds, setReduceSounds] = useState(false)
   const [alwaysCaptions, setAlwaysCaptions] = useState(false)
 
-  // Enhanced preview with accessibility demonstrations
-  const ThemePreview = () => (
-    <div className={cn('mt-4 space-y-4', theme === 'neo' && 'rotate-[-0.1deg]')}>
-      <h3 className={cn('text-sm font-medium mb-2', theme === 'neo' && 'font-mono tracking-tight')}>
-        Theme Preview
-      </h3>
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [])
 
-      {/* Main Theme Preview */}
-      <div className='p-4 rounded-md border border-github-border-default'>
-        <div
-          className={cn(
-            'w-full rounded-md bg-github-canvas-default overflow-hidden',
-            `bg-pattern-${theme}`,
-            highContrast && 'contrast-150',
-            largeText && 'text-lg',
-            !reduceMotion && 'hover:scale-[1.02] transition-transform'
-          )}
-        >
-          {/* Theme-specific content */}
-          <div className='p-4 space-y-3'>
-            <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 rounded bg-github-canvas-subtle' />
-              <div className='space-y-1 flex-1'>
-                <div className='h-4 w-24 bg-github-canvas-subtle rounded' />
-                <div className='h-3 w-32 bg-github-canvas-subtle rounded' />
-              </div>
-            </div>
-
-            {/* Accessibility Indicators */}
-            <div className='flex gap-2 text-xs text-github-fg-muted'>
-              {highContrast && <span>High Contrast</span>}
-              {largeText && <span>Large Text</span>}
-              {reduceSounds && <span>🔇</span>}
-              {alwaysCaptions && <span>CC</span>}
-            </div>
-
-            {/* Theme-specific effects */}
-            {theme === 'neo' && (
-              <div className='space-y-4'>
-                <div className='neo-container p-4'>
-                  <div className='neo-button'>Neo Style</div>
-                  <input
-                    type='text'
-                    className='neo-input mt-4 w-full'
-                    placeholder='Brutalist Input'
-                  />
-                </div>
-              </div>
-            )}
-            {theme === 'wooden' && (
-              <div className='border border-github-border-muted p-2'>Wood Grain</div>
-            )}
-            {theme === 'steel' && <div className='bg-steel-gradient p-2'>Brushed Steel</div>}
-            {theme === 'silicone' && <div className='bg-silicone-texture p-2'>Silicone Mat</div>}
-            {theme === 'copper' && (
-              <div
-                className={cn(
-                  'p-2 bg-github-canvas-default shine-effect copper-shine',
-                  'border-2 border-github-border-default rounded-md',
-                  'relative overflow-hidden shadow-[var(--copper-shadow)]',
-                  'transition-all duration-300 hover:scale-105',
-                  'before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-black/10'
-                )}
-              >
-                <div className='relative z-10 font-medium text-white/90'>Copper Finish</div>
-                <div className='absolute inset-0 bg-copper-patina opacity-90 mix-blend-soft-light' />
-              </div>
-            )}
+  if (!mounted) {
+    return (
+      <BasePanel title='Display'>
+        <div className='animate-pulse space-y-4'>
+          <div className='h-8 bg-github-canvas-subtle rounded' />
+          <div className='h-48 bg-github-canvas-subtle rounded' />
+          <div className='space-y-2'>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className='h-8 bg-github-canvas-subtle rounded' />
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Accessibility Impact Note */}
-      <div className='text-xs text-github-fg-muted'>
-        {highContrast && <p>High contrast mode enhances visibility in {theme} theme</p>}
-        {largeText && <p>Text size increased for better readability</p>}
-        {!reduceMotion && <p>Hover over preview to see motion effects</p>}
-      </div>
-    </div>
-  )
+      </BasePanel>
+    )
+  }
 
   return (
-    <Panel title='Display'>
+    <BasePanel title='Display'>
       <div className='space-y-4'>
         {/* Theme Selector */}
         <div className='flex items-center justify-between'>
@@ -120,7 +63,13 @@ export function DisplayPanel() {
         </div>
 
         {/* Theme Preview */}
-        <ThemePreview />
+        <ThemePreview
+          highContrast={highContrast}
+          largeText={largeText}
+          reduceSounds={reduceSounds}
+          alwaysCaptions={alwaysCaptions}
+          reduceMotion={reduceMotion}
+        />
 
         {/* Other toggles remain the same */}
         <div className='flex items-center justify-between'>
@@ -167,6 +116,6 @@ export function DisplayPanel() {
           <Toggle checked={alwaysCaptions} onChange={() => setAlwaysCaptions(!alwaysCaptions)} />
         </div>
       </div>
-    </Panel>
+    </BasePanel>
   )
 }

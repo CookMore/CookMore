@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useEquipment } from '@/hooks/useEquipment'
+import { useEquipment } from '@/app/(authenticated)/kitchen/hooks'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import {
   IconAlertCircle,

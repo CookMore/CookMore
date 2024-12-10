@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { BaseStep } from './BaseStep'
 import { RecipeData } from '@/types/recipe'
-import { useVersionControl } from '@/hooks/useVersionControl'
+import { useVersionControl } from '@/app/(authenticated)/kitchen/hooks/useVersionControl'
 import { useChangeLog } from '@/hooks/useChangeLog'
 import { useRecipePreview } from '@/hooks/useRecipePreview'
 import { StepComponentProps } from './index'

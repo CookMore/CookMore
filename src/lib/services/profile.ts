@@ -1,103 +1,91 @@
 'use client'
 
-import { getContract } from '@/lib/web3/client'
-import { PROFILE_REGISTRY_ABI } from '@/lib/web3/abis'
-import { PROFILE_REGISTRY_ADDRESS } from '@/lib/web3/addresses'
-import { ipfsService } from './ipfs-service'
-import { Interface, EventFilter } from 'ethers'
-import { cache } from 'react'
-import { defaultAvatarDataUrl } from './avatar'
+import { profileEdgeService } from '@/lib/edge/services'
 import type {
+  Profile,
   ProfileMetadata,
-  ProfileTier,
-  ProfileNFT,
-  ProfileResponse,
-  TransactionResponse,
   ServiceResponse,
+  ProfileActionResponse,
+  ProfileTier,
 } from '@/types/profile'
 
-function getAuthToken() {
-  const cookies = document.cookie.split(';')
-  const privyToken = cookies.find((cookie) => cookie.trim().startsWith('privy-token='))
-  return privyToken ? privyToken.split('=')[1].trim() : ''
-}
+export class ProfileService {
+  private static edgeService = profileEdgeService
 
-// Restore the missing exports
-export const getProfile = cache(async (): Promise<ProfileResponse> => {
-  try {
-    const token = getAuthToken()
-    const response = await fetch('/api/profile', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    if (!response.ok) {
-      throw new Error('Failed to fetch profile')
+  static async getProfile(address: string): Promise<ServiceResponse<Profile>> {
+    try {
+      const response = await this.edgeService.getProfile(address)
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch profile')
+      }
+      return response
+    } catch (error) {
+      console.error('Profile Service Error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch profile',
+      }
     }
-    const data = await response.json()
-    if (!data.avatar) {
-      data.avatar = defaultAvatarDataUrl
-    }
-    return data
-  } catch (error) {
-    throw new ProfileError('Failed to fetch profile', 'FETCH_ERROR', error as Error)
   }
-})
 
-export const createProfile = async (data: ProfileMetadata): Promise<ServiceResponse> => {
-  try {
-    const response = await fetch('/api/profile/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to create profile')
+  static async updateProfile(
+    address: string,
+    data: Partial<ProfileMetadata>
+  ): Promise<ProfileActionResponse> {
+    try {
+      const response = await this.edgeService.updateProfile(address, data)
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to update profile')
+      }
+      return response
+    } catch (error) {
+      console.error('Profile Update Error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update profile',
+      }
     }
-    return await response.json()
-  } catch (error) {
-    throw new ProfileError('Failed to create profile', 'CREATE_ERROR', error as Error)
   }
-}
 
-export const updateProfile = async (data: ProfileMetadata): Promise<ServiceResponse> => {
-  try {
-    const response = await fetch('/api/profile/update', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to update profile')
+  static async upgradeProfile(address: string, tier: ProfileTier): Promise<ProfileActionResponse> {
+    try {
+      const response = await this.edgeService.upgradeProfile(address, tier)
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to upgrade profile')
+      }
+      return response
+    } catch (error) {
+      console.error('Profile Upgrade Error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to upgrade profile',
+      }
     }
-    return await response.json()
-  } catch (error) {
-    throw new ProfileError('Failed to update profile', 'UPDATE_ERROR', error as Error)
   }
-}
 
-export const upgradeProfile = async (tier: ProfileTier): Promise<TransactionResponse> => {
-  try {
-    const response = await fetch('/api/profile/upgrade', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier }),
-    })
-    if (!response.ok) {
-      throw new Error('Failed to upgrade profile')
+  static async verifyProfile(address: string): Promise<boolean> {
+    try {
+      const response = await this.getProfile(address)
+      return response.success && !!response.data
+    } catch {
+      return false
     }
-    return await response.json()
-  } catch (error) {
-    throw new ProfileError('Failed to upgrade profile', 'UPGRADE_ERROR', error as Error)
+  }
+
+  static async verifyTier(address: string, tier: ProfileTier): Promise<boolean> {
+    try {
+      const response = await this.getProfile(address)
+      return response.success && response.data?.metadata?.tier === tier
+    } catch {
+      return false
+    }
   }
 }
 
-// Error class definition
-class ProfileError extends Error {
-  constructor(message: string, public code: string, public originalError?: Error) {
-    super(message)
-    this.name = 'ProfileError'
-  }
-}
-
-// ... any other existing exports ...
+// Export singleton instance and individual methods for convenience
+export const profileService = new ProfileService()
+export const getProfile = ProfileService.getProfile.bind(ProfileService)
+export const updateProfile = ProfileService.updateProfile.bind(ProfileService)
+export const upgradeProfile = ProfileService.upgradeProfile.bind(ProfileService)
+export const verifyProfile = ProfileService.verifyProfile.bind(ProfileService)
+export const verifyTier = ProfileService.verifyTier.bind(ProfileService)

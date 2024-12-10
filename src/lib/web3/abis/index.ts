@@ -1,4 +1,5 @@
 export * from './TierContracts'
 export * from './AccessControl'
-export * from './ProfileRegistry'
 export * from './Metadata'
+export * from './ProfileRegistry'
+export * from './ProfileSystem'

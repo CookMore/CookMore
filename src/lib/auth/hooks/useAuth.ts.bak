@@ -1,0 +1,18 @@
+'use client'
+
+import { usePrivy } from '@privy-io/react-auth'
+import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
+import { useProfile } from './useProfile'
+import { useWalletState } from './useWalletState'
+import { useNFTTiers } from '@/lib/web3/hooks'
+
+export function useAuth() {
+  const { user, isAuthenticated, isLoading } = usePrivy()
+
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+  }
+}

@@ -1,10 +1,24 @@
-import '@testing-library/jest-dom'
+/// <reference types="node" />
+/// <reference types="react" />
+/// <reference types="react-dom" />
 
 declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toBeInTheDocument(): R
-      toHaveAttribute(attr: string, value?: string): R
+  interface Window {
+    ethereum?: any;
+    workbox?: any;
+  }
+
+  namespace NodeJS {
+    interface ProcessEnv {
+      NEXT_PUBLIC_PRIVY_APP_ID: string;
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: string;
+      // Add other env variables here
     }
   }
+
+  interface SVGElement extends Element {
+    classList: DOMTokenList;
+  }
 }
+
+export {};

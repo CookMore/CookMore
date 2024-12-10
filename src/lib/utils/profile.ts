@@ -1,13 +1,19 @@
-// Keep existing profile utils code as is
 import type { FreeProfileMetadata, ProProfileMetadata, GroupProfileMetadata } from '@/types/profile'
-import { CURRENT_PROFILE_VERSION } from '@/types/profile'
+import { CURRENT_PROFILE_VERSION, ProfileTier } from '@/types/profile'
 
 export function createEmptyFreeProfile(): FreeProfileMetadata {
   return {
-    name: '',
-    bio: '',
-    avatarUrl: '',
-    socialLinks: [],
+    version: CURRENT_PROFILE_VERSION,
+    tier: ProfileTier.FREE,
+    basicInfo: {
+      name: '',
+      bio: '',
+      avatar: '',
+      banner: '',
+      location: '',
+      website: '',
+    },
+    education: [],
     culinaryInfo: {
       expertise: 'beginner',
       specialties: [],
@@ -15,6 +21,14 @@ export function createEmptyFreeProfile(): FreeProfileMetadata {
       cuisineTypes: [],
       techniques: [],
       equipment: [],
+      certifications: [],
+    },
+    socialLinks: {
+      twitter: '',
+      instagram: '',
+      facebook: '',
+      linkedin: '',
+      youtube: '',
     },
   }
 }
@@ -22,11 +36,15 @@ export function createEmptyFreeProfile(): FreeProfileMetadata {
 export function createEmptyProProfile(): ProProfileMetadata {
   return {
     ...createEmptyFreeProfile(),
-    // Pro-specific defaults
+    tier: ProfileTier.PRO,
     title: '',
     company: '',
     experience: {
-      current: undefined,
+      current: {
+        title: '',
+        company: '',
+        startDate: '',
+      },
       history: [],
     },
     education: [],
@@ -37,78 +55,7 @@ export function createEmptyProProfile(): ProProfileMetadata {
       collaborations: false,
       teaching: false,
     },
-    businessInfo: {
-      services: [],
-      rates: {
-        hourly: '',
-        daily: '',
-        project: '',
-      },
-      serviceAreas: [],
-    },
-    culinaryInfo: {
-      ...createEmptyFreeProfile().culinaryInfo,
-      certifications: [],
-      techniques: [],
-      equipment: [],
-    },
-    achievements: {
-      recipesCreated: 0,
-      recipesForked: 0,
-      totalLikes: 0,
-      totalComments: 0,
-      totalShares: 0,
-      badges: [],
-    },
-    settings: {
-      visibility: 'public',
-      notifications: {
-        email: true,
-        push: true,
-        marketing: false,
-      },
-      theme: 'system',
-      language: 'en',
-    },
-  }
-}
-
-export function createEmptyGroupProfile(): GroupProfileMetadata {
-  return {
-    ...createEmptyProProfile(),
-    // Group-specific defaults
-    members: [],
-    groupName: '',
-    groupDescription: '',
-    groupPrivacy: 'private',
-    organizationInfo: {
-      type: 'restaurant',
-      establishedYear: new Date().getFullYear().toString(),
-      size: 'small',
-      team: [],
-      branches: [],
-      facilities: {
-        kitchens: [],
-        storageAreas: [],
-        diningAreas: [],
-      },
-    },
-    compliance: {
-      certifications: [],
-      licenses: [],
-      inspections: [],
-      insurance: [],
-    },
-    businessOperations: {
-      operatingHours: [],
-      serviceTypes: [],
-      capacity: {},
-      specializations: [],
-      seasonalMenu: false,
-      cateringMinimum: 0,
-      deliveryRadius: 0,
-      reservationPolicy: '',
-    },
+    certifications: [],
     marketing: {
       brandColors: [],
       tagline: '',
@@ -117,6 +64,42 @@ export function createEmptyGroupProfile(): GroupProfileMetadata {
       socialMedia: [],
       promotions: [],
     },
+  }
+}
+
+export function createEmptyGroupProfile(): GroupProfileMetadata {
+  return {
+    ...createEmptyProProfile(),
+    tier: ProfileTier.GROUP,
+    organizationInfo: {
+      name: '',
+      type: 'restaurant',
+      size: 'small',
+      establishedYear: new Date().getFullYear().toString(),
+      team: [],
+      branches: [],
+    },
+    businessOperations: {
+      operatingHours: [],
+      serviceTypes: [],
+      capacity: {
+        seating: 0,
+        eventSpace: 0,
+        trainingCapacity: 0,
+        maxOccupancy: 0,
+      },
+      services: [],
+    },
+    team: {
+      size: 0,
+      roles: [],
+      structure: '',
+    },
     suppliers: [],
+    compliance: {
+      certifications: [],
+      licenses: [],
+      insurance: [],
+    },
   }
 }

@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useState } from 'react'
 
-type PanelType = 'wallet' | 'user' | 'settings' | null
+const panels = ['notifications', 'calendar', 'user', 'wallet', 'settings'] as const
+
+type PanelType = (typeof panels)[number] | null
 
 interface PanelContextType {
   activePanel: PanelType
