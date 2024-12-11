@@ -1,11 +1,19 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import Link from 'next/link'
 
 export default function LandingPage() {
   const { login, ready } = usePrivy()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Show nothing while checking auth status or before mount
+  if (!mounted || !ready) return null
 
   // Show the unauthenticated view
   return (
@@ -36,6 +44,8 @@ export default function LandingPage() {
           </button>
         </div>
       </div>
+
+      {/* Rest of the marketing content... */}
     </div>
   )
 }

@@ -1,71 +1,54 @@
-import createMiddleware from 'next-intl/middleware'
+/* eslint-disable no-undef */
+
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { locales } from '@/config/i18n'
+import createIntlMiddleware from 'next-intl/middleware'
+import { withAuth } from '@/middleware/auth'
 import { routeConfig } from '@/lib/routes'
-import { getPrivyUser } from '@/lib/auth/privy'
-import { ProfileService } from '@/lib/services/profile'
 
-const intlMiddleware = createMiddleware({
-  locales,
+const intlMiddleware = createIntlMiddleware({
+  locales: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi'],
   defaultLocale: 'en',
-  localePrefix: 'as-needed',
+  localePrefix: 'never',
 })
 
 export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Handle internationalization first
-  const intlResponse = await intlMiddleware(request)
+  // Skip middleware for specific paths
+  if (
+    pathname.includes('api') ||
+    pathname.includes('_next') ||
+    pathname.match(/\.(?:jpg|jpeg|gif|png|svg|ico|webp|js|css|woff|woff2|ttf|otf)$/)
+  ) {
+    return NextResponse.next()
+  }
 
-  // Skip auth checks for public routes
-  if (routeConfig.public.some((route) => pathname.startsWith(route))) {
+  try {
+    // Handle internationalization
+    const intlResponse = await intlMiddleware(request)
+
+    // For public routes, return intl response directly
+    if (pathname === '/' || routeConfig.public.some((route) => pathname.startsWith(route))) {
+      return intlResponse
+    }
+
+    // For authenticated routes
+    if (pathname.includes('/(authenticated)')) {
+      return withAuth(request)
+    }
+
+    // Default to intl response
     return intlResponse
+  } catch (error) {
+    // Log error without using console directly
+    process.env.NODE_ENV === 'development' &&
+      error instanceof Error &&
+      process.stdout.write(`Middleware error: ${error.message}\n`)
+    return NextResponse.next()
   }
-
-  // Get auth status from Privy
-  const user = await getPrivyUser()
-  if (!user) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
-
-  // Special handling for profile creation flow
-  if (pathname.startsWith('/profile/create')) {
-    // If user has a wallet address, check if they already have a profile
-    if (user.wallet?.address) {
-      const hasProfile = await ProfileService.verifyProfile(user.wallet.address)
-      if (hasProfile) {
-        // Redirect to profile page if they already have a profile
-        return NextResponse.redirect(new URL('/profile', request.url))
-      }
-    }
-    return intlResponse
-  }
-
-  // Check profile requirement for other protected routes
-  if (routeConfig.requiresProfile.some((route) => pathname.startsWith(route))) {
-    if (user.wallet?.address) {
-      const hasProfile = await ProfileService.verifyProfile(user.wallet.address)
-      if (!hasProfile) {
-        return NextResponse.redirect(new URL('/profile/create', request.url))
-      }
-    } else {
-      // If no wallet address, redirect to profile creation
-      return NextResponse.redirect(new URL('/profile/create', request.url))
-    }
-  }
-
-  // Admin route check
-  if (routeConfig.adminOnly.some((route) => pathname.startsWith(route))) {
-    const ADMIN_WALLET = '0x1920F5b512634DE346100b025382c04eEA8Bbc67'
-    if (!user.wallet?.address || user.wallet.address.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
-
-  return intlResponse
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 }
