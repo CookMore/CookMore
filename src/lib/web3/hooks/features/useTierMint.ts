@@ -1,38 +1,39 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useContract } from './useContract'
+import { useContract } from '../contracts/useContract'
 import { TIER_NFT_ABI } from '@/lib/web3/abis'
-import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 export function useTierMint() {
+  const t = useTranslations('nft')
   const [isLoading, setIsLoading] = useState(false)
-  const contract = useContract(TIER_CONTRACT_ADDRESS, TIER_NFT_ABI)
+  const { contract: wagmiContract, write } = useContract('TIER_CONTRACT', TIER_NFT_ABI)
 
   const mintTier = useCallback(
     async (tier: 'Pro' | 'Group') => {
-      if (!contract) return
-
       try {
         setIsLoading(true)
-        const tx = await contract.mint(tier)
-        await tx.wait()
+        toast.loading(t('mint.start'))
 
-        toast.success(`Successfully minted ${tier} tier NFT`)
+        const hash = await write('mint', [tier])
+        toast.success(t('mint.success'))
+        return hash
       } catch (error) {
         console.error('Error minting tier:', error)
-        toast.error('Failed to mint tier NFT')
+        toast.error(t('mint.error'))
         throw error
       } finally {
         setIsLoading(false)
       }
     },
-    [contract]
+    [write, t]
   )
 
   return {
     isLoading,
     mintTier,
+    contract: wagmiContract,
   }
 }

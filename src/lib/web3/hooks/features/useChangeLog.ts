@@ -1,64 +1,67 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useContract } from './useContract'
+import { useContract } from '../contracts/useContract'
 import { CHANGELOG_ABI } from '@/lib/web3/abis'
-import { CHANGELOG_ADDRESS } from '@/lib/web3/addresses'
+import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
-interface ChangeLogEntry {
+export interface ChangeLogEntry {
   timestamp: number
   description: string
   author: string
 }
 
 export function useChangeLog() {
+  const t = useTranslations('changelog')
   const [entries, setEntries] = useState<ChangeLogEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const contract = useContract(CHANGELOG_ADDRESS, CHANGELOG_ABI)
+  const { contract: wagmiContract, write, read } = useContract('CHANGELOG', CHANGELOG_ABI)
 
   const addEntry = useCallback(
     async (description: string) => {
-      if (!contract) return
-
       try {
         setIsLoading(true)
-        // TODO: Implement contract interaction
-        const tx = await contract.addEntry(description)
-        await tx.wait()
+        toast.loading(t('entry.adding'))
 
-        // Refresh entries
-        const newEntries = await contract.getEntries()
-        setEntries(newEntries)
+        const hash = await write('addEntry', [description])
+        await getEntries()
+        
+        toast.success(t('entry.added'))
+        return hash
       } catch (error) {
         console.error('Error adding changelog entry:', error)
+        toast.error(t('entry.error'))
         throw error
       } finally {
         setIsLoading(false)
       }
     },
-    [contract]
+    [write, t]
   )
 
   const getEntries = useCallback(async () => {
-    if (!contract) return []
-
     try {
       setIsLoading(true)
-      const entries = await contract.getEntries()
+      toast.loading(t('entries.loading'))
+      
+      const entries = await read('getEntries', [])
       setEntries(entries)
       return entries
     } catch (error) {
       console.error('Error getting changelog entries:', error)
+      toast.error(t('entries.error'))
       return []
     } finally {
       setIsLoading(false)
     }
-  }, [contract])
+  }, [read, t])
 
   return {
     entries,
     isLoading,
     addEntry,
     getEntries,
+    contract: wagmiContract,
   }
 }

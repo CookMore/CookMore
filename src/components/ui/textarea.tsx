@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { forwardRef } from 'react'
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string
 }
 
@@ -15,18 +15,19 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           className={cn(
-            'px-4 py-2 w-full transition-all min-h-[80px]',
+            'px-4 py-2 w-full transition-all min-h-[100px]',
             theme === 'neo' && [
               'neo-input',
               'focus:rotate-[0.5deg]',
               'placeholder:text-github-fg-subtle',
+              error && 'border-github-danger-emphasis',
             ],
             theme !== 'neo' && [
               'rounded-md',
               'border border-github-border-default',
               'focus:border-github-accent-emphasis focus:outline-none',
+              error && 'border-github-danger-emphasis',
             ],
-            error && 'border-github-danger-emphasis',
             className
           )}
           {...props}

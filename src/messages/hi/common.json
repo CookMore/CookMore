@@ -1,41 +1,97 @@
 {
-  "welcome": "CookMore में आपका स्वागत है",
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
+  },
   "navigation": {
-    "home": "होम",
-    "kitchen": "रसोई",
-    "recipes": "व्यंजन",
-    "explore": "खोजें",
-    "profile": "प्रोफ़ाइल",
-    "admin": "एडमिन",
-    "calendar": "कैलेंडर"
+    "home": "Home",
+    "explore": "Explore",
+    "kitchen": "Kitchen",
+    "profile": "Profile",
+    "settings": "Settings"
   },
-  "auth": {
-    "signIn": "साइन इन",
-    "signOut": "साइन आउट",
-    "connectWallet": "वॉलेट कनेक्ट करें"
-  },
-  "profile": {
-    "tier": {
-      "free": "Lite",
-      "pro": "Pro",
-      "group": "समूह"
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
     }
   },
-  "kitchen": {
-    "newRecipe": "नई रेसिपी",
-    "myRecipes": "मेरी रेसिपी",
-    "sharedRecipes": "साझा रेसिपी",
-    "collections": "संग्रह"
+  "profile": {
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "group": "Group"
+    },
+    "actions": {
+      "create": "Create Profile",
+      "edit": "Edit Profile",
+      "save": "Save Changes",
+      "delete": "Delete Profile"
+    },
+    "status": {
+      "loading": "Loading Profile...",
+      "error": "Error Loading Profile",
+      "notFound": "Profile Not Found",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    }
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Updating Tier...",
+      "error": "Error Checking Tier"
+    }
   },
   "common": {
-    "loading": "लोड हो रहा है...",
-    "error": "त्रुटि",
-    "success": "सफल",
-    "save": "सहेजें",
-    "cancel": "रद्द करें",
-    "delete": "हटाएं",
-    "edit": "संपादित करें",
-    "create": "बनाएं",
-    "update": "अपडेट करें"
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "confirm": "Confirm"
   }
 }

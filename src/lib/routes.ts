@@ -37,29 +37,10 @@ export const ROUTES = {
 // Route protection configurations
 export const routeConfig = {
   // Public routes that don't require auth
-  public: [
-    ROUTES.MARKETING.HOME,
-    ROUTES.MARKETING.FEATURES,
-    ROUTES.MARKETING.DISCOVER,
-    ROUTES.MARKETING.PRICING,
-    ROUTES.MARKETING.CLUB,
-  ] as const,
+  public: ['/club', '/discover', '/features', '/pricing', '/(marketing)'],
 
   // Routes that require authentication
-  protected: [
-    ROUTES.AUTH.KITCHEN.HOME,
-    ROUTES.AUTH.EXPLORE,
-    ROUTES.AUTH.KITCHEN.CLUB,
-    ROUTES.AUTH.CALENDAR,
-    ROUTES.AUTH.TIER,
-    ROUTES.AUTH.PROFILE.HOME,
-    ROUTES.AUTH.PROFILE.CREATE,
-    ROUTES.AUTH.PROFILE.EDIT,
-    ROUTES.AUTH.PROFILE.STEPS.BASIC,
-    ROUTES.AUTH.PROFILE.STEPS.PRO,
-    ROUTES.AUTH.PROFILE.STEPS.GROUP,
-    ROUTES.AUTH.PROFILE.STEPS.MINT,
-  ] as const,
+  protected: ['/(authenticated)'],
 
   // Routes that require profile
   requiresProfile: [

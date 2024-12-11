@@ -1,41 +1,97 @@
 {
-  "welcome": "مرحباً بك في CookMore",
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
+  },
   "navigation": {
-    "home": "الرئيسية",
-    "kitchen": "المطبخ",
-    "recipes": "الوصفات",
-    "explore": "استكشاف",
-    "profile": "الملف الشخصي",
-    "admin": "الإدارة",
-    "calendar": "التقويم"
+    "home": "Home",
+    "explore": "Explore",
+    "kitchen": "Kitchen",
+    "profile": "Profile",
+    "settings": "Settings"
   },
-  "auth": {
-    "signIn": "تسجيل الدخول",
-    "signOut": "تسجيل الخروج",
-    "connectWallet": "ربط المحفظة"
-  },
-  "profile": {
-    "tier": {
-      "free": "Lite",
-      "pro": "Pro",
-      "group": "مجموعة"
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
     }
   },
-  "kitchen": {
-    "newRecipe": "وصفة جديدة",
-    "myRecipes": "وصفاتي",
-    "sharedRecipes": "الوصفات المشتركة",
-    "collections": "المجموعات"
+  "profile": {
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "group": "Group"
+    },
+    "actions": {
+      "create": "Create Profile",
+      "edit": "Edit Profile",
+      "save": "Save Changes",
+      "delete": "Delete Profile"
+    },
+    "status": {
+      "loading": "Loading Profile...",
+      "error": "Error Loading Profile",
+      "notFound": "Profile Not Found",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    }
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Updating Tier...",
+      "error": "Error Checking Tier"
+    }
   },
   "common": {
-    "loading": "جاري التحميل...",
-    "error": "خطأ",
-    "success": "نجاح",
-    "save": "حفظ",
-    "cancel": "إلغاء",
-    "delete": "حذف",
-    "edit": "تعديل",
-    "create": "إنشاء",
-    "update": "تحديث"
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "confirm": "Confirm"
   }
 }

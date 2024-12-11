@@ -1,104 +1,65 @@
-import type { ProfileMetadata, ProfileTier } from '@/types/profile'
-
-const PINATA_API_URL = 'https://api.pinata.cloud'
-const PINATA_GATEWAY = 'https://gateway.pinata.cloud'
+import { ipfsClient, getIpfsUrl, type IpfsGateway } from '@/lib/web3/config/ipfs'
 
 class IPFSService {
-  private headers = {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
-  }
+  private defaultGateway: IpfsGateway = 'pinata'
 
-  async uploadProfileMetadata(
-    metadata: ProfileMetadata & { tier: ProfileTier },
-    tier: ProfileTier
-  ) {
+  async uploadFile(file: File, options?: { onProgress?: (progress: number) => void }): Promise<string> {
+    if (!ipfsClient) throw new Error('IPFS client not configured')
+    
     try {
-      // Prepare metadata for IPFS
-      const ipfsMetadata = {
-        name: metadata.name,
-        description: metadata.bio,
-        image: metadata.avatar,
-        version: metadata.version,
-        banner: metadata.banner,
-        location: metadata.location,
-        social: metadata.social,
-        preferences: metadata.preferences,
-        culinaryInfo: metadata.culinaryInfo,
-        achievements: metadata.achievements,
-        ...(metadata.experience && { experience: metadata.experience }),
-        ...(metadata.organizationInfo && { organizationInfo: metadata.organizationInfo }),
-        tier,
-      }
-
-      // Upload metadata to Pinata
-      const formData = new FormData()
-      formData.append(
-        'file',
-        new Blob([JSON.stringify(ipfsMetadata)], { type: 'application/json' })
+      const buffer = await file.arrayBuffer()
+      const result = await ipfsClient.add(
+        buffer,
+        {
+          progress: (prog) => options?.onProgress?.(Math.round((prog / file.size) * 100))
+        }
       )
-      formData.append('pinataOptions', JSON.stringify({ cidVersion: 1 }))
-      formData.append('pinataMetadata', JSON.stringify({ name: `${metadata.name}-profile` }))
-
-      const response = await fetch(`${PINATA_API_URL}/pinning/pinFileToIPFS`, {
-        method: 'POST',
-        headers: this.headers,
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to upload metadata: ${response.statusText}`)
-      }
-
-      const { IpfsHash } = await response.json()
-      return `ipfs://${IpfsHash}`
+      return result.path
     } catch (error) {
       console.error('IPFS upload error:', error)
-      throw error
+      throw new Error('Failed to upload file to IPFS')
     }
   }
 
-  async uploadProfileImage(file: File): Promise<string> {
+  async uploadJson(data: any): Promise<string> {
+    if (!ipfsClient) throw new Error('IPFS client not configured')
+    
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('pinataOptions', JSON.stringify({ cidVersion: 1 }))
-      formData.append('pinataMetadata', JSON.stringify({ name: file.name }))
-
-      const response = await fetch(`${PINATA_API_URL}/pinning/pinFileToIPFS`, {
-        method: 'POST',
-        headers: this.headers,
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to upload image: ${response.statusText}`)
-      }
-
-      const { IpfsHash } = await response.json()
-      return `ipfs://${IpfsHash}`
+      const result = await ipfsClient.add(JSON.stringify(data))
+      return result.path
     } catch (error) {
-      console.error('Profile image upload error:', error)
-      throw error
+      console.error('IPFS JSON upload error:', error)
+      throw new Error('Failed to upload JSON to IPFS')
     }
   }
 
-  getIPFSUrl(ipfsUrl: string): string {
-    const hash = ipfsUrl.replace('ipfs://', '')
-    return `${PINATA_GATEWAY}/ipfs/${hash}`
-  }
-
-  async getProfileMetadata(metadataURI: string): Promise<any> {
+  async getFile(cid: string): Promise<Uint8Array> {
+    if (!ipfsClient) throw new Error('IPFS client not configured')
+    
     try {
-      const url = this.getIPFSUrl(metadataURI)
-      const response = await fetch(url)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch metadata: ${response.statusText}`)
+      const chunks = []
+      for await (const chunk of ipfsClient.cat(cid)) {
+        chunks.push(chunk)
       }
-      return response.json()
+      return new Uint8Array(Buffer.concat(chunks))
     } catch (error) {
-      console.error('Error fetching profile metadata:', error)
-      throw error
+      console.error('IPFS download error:', error)
+      throw new Error('Failed to download file from IPFS')
     }
+  }
+
+  async getJson<T>(cid: string): Promise<T> {
+    const data = await this.getFile(cid)
+    const text = new TextDecoder().decode(data)
+    return JSON.parse(text)
+  }
+
+  getUrl(cid: string, gateway?: IpfsGateway): string {
+    return getIpfsUrl(cid, gateway || this.defaultGateway)
+  }
+
+  setDefaultGateway(gateway: IpfsGateway) {
+    this.defaultGateway = gateway
   }
 }
 

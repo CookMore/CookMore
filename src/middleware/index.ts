@@ -1,21 +1,20 @@
-/* eslint-disable no-undef */
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import createIntlMiddleware from 'next-intl/middleware'
-import { withAuth } from '@/middleware/auth'
+import { withAuth } from './auth'
 import { routeConfig } from '@/lib/routes'
+import { locales, defaultLocale } from '@/config/i18n'
 
 const intlMiddleware = createIntlMiddleware({
-  locales: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko', 'ar', 'hi'],
-  defaultLocale: 'en',
-  localePrefix: 'never',
+  locales,
+  defaultLocale,
+  localePrefix: 'as-needed',
 })
 
 export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Skip middleware for specific paths
+  // Skip middleware for static files
   if (
     pathname.includes('api') ||
     pathname.includes('_next') ||
@@ -24,28 +23,42 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Redirect root to locale path
+  if (pathname === '/') {
+    const locale = request.cookies.get('NEXT_LOCALE')?.value || defaultLocale
+    return NextResponse.redirect(new URL(`/${locale}`, request.url))
+  }
+
   try {
     // Handle internationalization
     const intlResponse = await intlMiddleware(request)
 
     // For public routes, return intl response directly
-    if (pathname === '/' || routeConfig.public.some((route) => pathname.startsWith(route))) {
+    if (routeConfig.public.some((route) => pathname.startsWith(route))) {
       return intlResponse
     }
 
     // For authenticated routes
     if (pathname.includes('/(authenticated)')) {
+      // Check if route requires profile
+      if (routeConfig.requiresProfile.some((route) => pathname.startsWith(route))) {
+        return withAuth(request, { requireProfile: true })
+      }
+
+      // Check if route is admin only
+      if (routeConfig.adminOnly.some((route) => pathname.startsWith(route))) {
+        return withAuth(request, { requireAdmin: true })
+      }
+
       return withAuth(request)
     }
 
-    // Default to intl response
     return intlResponse
   } catch (error) {
-    // Log error without using console directly
-    process.env.NODE_ENV === 'development' &&
-      error instanceof Error &&
+    if (process.env.NODE_ENV === 'development' && error instanceof Error) {
       process.stdout.write(`Middleware error: ${error.message}\n`)
-    return NextResponse.next()
+    }
+    return NextResponse.redirect(new URL(`/${defaultLocale}`, request.url))
   }
 }
 

@@ -1,108 +1,77 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { useEffect, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
-import { IconUser, IconEdit } from '@/components/ui/icons'
 import { BasePanel } from './BasePanel'
-import Image from 'next/image'
-import { ProfileTier } from '@/types/profile'
-import { TierBadge } from '@/components/ui/TierBadge'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
-
-const PRO_IMAGE_URL = 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
-const GROUP_IMAGE_URL = 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
-
-// Contract addresses
-const PRO_CONTRACT = '0xa859Ca4cF5Fc201E710C1A8Dc8540beaa9878C02'
-const GROUP_CONTRACT = '0x6c927C8F1661460c5f3adDcd26d7698910077492'
-
-// Simplified ABI for balance checking
-const NFT_ABI = ['function balanceOf(address owner) view returns (uint256)']
+import { DefaultAvatar } from '../ui/DefaultAvatar'
+import { useAccount } from 'wagmi'
 
 export function ProfilePanel() {
-  const { user, authenticated, ready } = usePrivy()
-  const { hasGroup, hasPro } = useNFTTiers()
-  const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
+  const { user, ready } = usePrivy()
+  const { address: wagmiAddress, isConnected: isWagmiConnected } = useAccount()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    checkUserTier()
-  }, [authenticated, ready])
+    setMounted(true)
+  }, [])
 
-  const checkUserTier = async () => {
-    if (!authenticated || !ready || !window.ethereum) {
-      setTier(ProfileTier.FREE)
-      return
-    }
-
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const address = await signer.getAddress()
-
-      const proContract = new ethers.Contract(PRO_CONTRACT, NFT_ABI, provider)
-      const groupContract = new ethers.Contract(GROUP_CONTRACT, NFT_ABI, provider)
-
-      const proBalance = await proContract.balanceOf(address)
-      const groupBalance = await groupContract.balanceOf(address)
-
-      if (groupBalance > 0) {
-        setTier(ProfileTier.GROUP)
-      } else if (proBalance > 0) {
-        setTier(ProfileTier.PRO)
-      } else {
-        setTier(ProfileTier.FREE)
-      }
-    } catch (error) {
-      console.error('Error checking NFT balance:', error)
-      setTier(ProfileTier.FREE)
-    }
+  if (!mounted || !ready || !user) {
+    return (
+      <BasePanel title='Profile'>
+        <div className='flex items-center justify-center min-h-[200px]'>
+          <div className='text-github-fg-muted'>Loading...</div>
+        </div>
+      </BasePanel>
+    )
   }
+
+  // Get the active wallet address (either from Privy or Wagmi)
+  const activeAddress = isWagmiConnected ? wagmiAddress : user.wallet?.address
+
+  // Get the authentication method used
+  const authMethod = user.linkedAccounts?.find(
+    account => account.type === 'email' || 
+               account.type === 'google' || 
+               account.type === 'apple' ||
+               account.type === 'discord' ||
+               account.type === 'twitter' ||
+               account.type === 'farcaster'
+  )
 
   return (
     <BasePanel title='Profile'>
       <div className='space-y-6'>
-        {/* Avatar Section */}
+        {/* Avatar and Basic Info */}
         <div className='flex items-center space-x-4'>
-          <div className='w-16 h-16 rounded-full bg-github-canvas-default border border-github-border-default flex items-center justify-center'>
-            {user?.avatar ? (
-              <img src={user.avatar} alt='Profile' className='w-full h-full rounded-full' />
-            ) : (
-              <IconUser className='w-8 h-8 text-github-fg-muted' />
-            )}
-          </div>
-          <button className='text-sm text-github-accent-fg hover:text-github-accent-emphasis'>
-            <IconEdit className='w-4 h-4 inline mr-1' />
-            Change avatar
-          </button>
-        </div>
-
-        {/* Tier Section */}
-        <div className='space-y-2'>
-          <h3 className='text-sm font-medium text-github-fg-default'>Membership Tier</h3>
-          <div className='flex items-center space-x-3'>
-            <TierBadge tier={currentTier} size='md' hasProfile={true} />
+          <DefaultAvatar size={64} address={activeAddress || ''} />
+          <div>
+            <h3 className='text-github-fg-default font-medium'>
+              {user.email || 'Anonymous User'}
+            </h3>
+            <p className='text-sm text-github-fg-muted'>
+              {authMethod ? `Authenticated via ${authMethod.type}` : 'No authentication method'}
+            </p>
           </div>
         </div>
 
-        {/* Profile Info */}
-        <div className='space-y-4'>
-          <div>
-            <label className='block text-sm font-medium text-github-fg-default mb-1'>
-              Display Name
-            </label>
-            <input
-              type='text'
-              defaultValue={user?.displayName || ''}
-              className='w-full px-3 py-2 bg-github-canvas-default border border-github-border-default rounded-md text-github-fg-default'
-            />
+        {/* Wallet Info */}
+        {activeAddress && (
+          <div className='p-4 bg-github-canvas-default rounded-lg border border-github-border-default'>
+            <h4 className='text-sm font-medium text-github-fg-default mb-2'>Wallet Address</h4>
+            <p className='text-xs font-mono text-github-fg-muted break-all'>{activeAddress}</p>
           </div>
-          <div>
-            <label className='block text-sm font-medium text-github-fg-default mb-1'>Bio</label>
-            <textarea
-              className='w-full px-3 py-2 bg-github-canvas-default border border-github-border-default rounded-md text-github-fg-default'
-              rows={3}
-            />
+        )}
+
+        {/* Authentication Method */}
+        <div className='p-4 bg-github-canvas-default rounded-lg border border-github-border-default'>
+          <h4 className='text-sm font-medium text-github-fg-default mb-2'>Authentication</h4>
+          <div className='space-y-2'>
+            {user.linkedAccounts?.map((account, index) => (
+              <div key={index} className='flex items-center space-x-2'>
+                <div className='w-2 h-2 bg-github-success-emphasis rounded-full' />
+                <span className='text-sm text-github-fg-muted capitalize'>{account.type}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

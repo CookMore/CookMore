@@ -1,31 +1,15 @@
 {
-  "welcome": "Welcome to CookMore",
-  "navigation": {
-    "home": "Home",
-    "kitchen": "Kitchen",
-    "recipes": "Recipes",
-    "explore": "Explore",
-    "profile": "Profile",
-    "admin": "Admin",
-    "calendar": "Calendar"
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
   },
-  "auth": {
-    "signIn": "Sign In",
-    "signOut": "Sign Out",
-    "connectWallet": "Connect Wallet"
-  },
-  "profile": {
-    "tier": {
-      "free": "Lite",
-      "pro": "Pro",
-      "group": "Group"
-    }
-  },
-  "kitchen": {
-    "newRecipe": "New Recipe",
-    "myRecipes": "My Recipes",
-    "sharedRecipes": "Shared Recipes",
-    "collections": "Collections"
+  "language": {
+    "select": "Select Language",
+    "switch": "Switch Language",
+    "suggestion": "Would you like to switch to {language}?",
+    "current": "Current Language",
+    "controls": "Language Controls"
   },
   "common": {
     "loading": "Loading...",
@@ -36,6 +20,84 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "update": "Update"
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "decline": "No, thanks"
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "download": {
+      "start": "Downloading...",
+      "success": "Download Complete",
+      "error": "Download Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Tier Status Updated",
+      "error": "Error Checking Tier"
+    }
+  },
+  "profile": {
+    "routing": {
+      "createGroup": "Creating Group Profile",
+      "createPro": "Creating Pro Profile",
+      "createFree": "Creating Free Profile",
+      "upgrade": "Profile Upgrade Available",
+      "error": "Error in Profile Routing"
+    }
+  },
+  "changelog": {
+    "entry": {
+      "adding": "Adding Entry...",
+      "added": "Entry Added Successfully",
+      "error": "Failed to Add Entry"
+    },
+    "entries": {
+      "loading": "Loading Entries...",
+      "error": "Failed to Load Entries"
+    }
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
+    }
   }
 }

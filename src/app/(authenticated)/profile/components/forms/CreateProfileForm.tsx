@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
-import { useProfileSystem } from '@/lib/web3/hooks/useProfileSystem'
+import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
+import { useProfileRegistry } from '@/lib/web3/hooks/contracts/useProfileRegistry'
 import { ProfileTier, type ProfileFormData } from '@/types/profile'
 import { toast } from 'sonner'
 import { FormSkeleton } from '../ui/FormSkeleton'
@@ -19,6 +19,7 @@ import {
   BusinessOperationsSection,
 } from '../sections'
 import { getStepsForTier } from '../../steps'
+import { useTheme } from '@/app/providers/ThemeProvider'
 
 interface CreateProfileFormProps {
   tier: ProfileTier
@@ -27,8 +28,9 @@ interface CreateProfileFormProps {
 
 export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps) {
   const t = useTranslations('profile')
+  const { theme } = useTheme()
   const { hasGroup, hasPro, isLoading: tiersLoading } = useNFTTiers()
-  const { createProfile, isLoading: profileLoading } = useProfileSystem()
+  const { createProfile } = useProfileRegistry()
   const {
     control,
     formState: { errors },
@@ -48,17 +50,18 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      const result = await createProfile(data)
-      if (result.success) {
-        toast.success(t('success.profileCreated'))
-      }
+      toast.loading(t('create.submitting'))
+      const hash = await createProfile(data, tier)
+      toast.success(t('create.success'))
+      return hash
     } catch (error) {
       console.error('Error creating profile:', error)
-      toast.error(error instanceof Error ? error.message : t('errors.createFailed'))
+      toast.error(t('create.error'))
+      throw error
     }
   }
 
-  if (tiersLoading || profileLoading) {
+  if (tiersLoading) {
     return <FormSkeleton />
   }
 
@@ -69,6 +72,7 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
     const sectionProps = {
       control,
       errors,
+      theme,
     }
 
     switch (step.id) {
@@ -91,8 +95,21 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
     }
   }
 
+  // Apply theme-specific styles
+  const formClasses = `space-y-8 ${
+    theme === 'neo'
+      ? 'neo-container'
+      : theme === 'wooden'
+        ? 'wooden-container texture-wood'
+        : theme === 'steel'
+          ? 'steel-container'
+          : theme === 'copper'
+            ? 'copper-container shine-effect'
+            : 'bg-github-canvas-default'
+  }`
+
   return (
-    <form id='create-profile-form' onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
+    <form id='create-profile-form' onSubmit={handleSubmit(onSubmit)} className={formClasses}>
       {renderStep()}
     </form>
   )

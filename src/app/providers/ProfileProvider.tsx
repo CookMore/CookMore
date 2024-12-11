@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useProfileData } from '@/lib/auth/hooks/useProfile'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
 import { ProfileTier } from '@/types/profile'
 import type { Profile } from '@/types/profile'
 

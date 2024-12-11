@@ -1,41 +1,97 @@
 {
-  "welcome": "Bienvenido a CookMore",
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
+  },
   "navigation": {
-    "home": "Inicio",
-    "kitchen": "Cocina",
-    "recipes": "Recetas",
-    "explore": "Explorar",
-    "profile": "Perfil",
-    "admin": "Admin",
-    "calendar": "Calendario"
+    "home": "Home",
+    "explore": "Explore",
+    "kitchen": "Kitchen",
+    "profile": "Profile",
+    "settings": "Settings"
   },
-  "auth": {
-    "signIn": "Iniciar Sesión",
-    "signOut": "Cerrar Sesión",
-    "connectWallet": "Conectar Billetera"
-  },
-  "profile": {
-    "tier": {
-      "free": "Lite",
-      "pro": "Pro",
-      "group": "Grupo"
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
     }
   },
-  "kitchen": {
-    "newRecipe": "Nueva Receta",
-    "myRecipes": "Mis Recetas",
-    "sharedRecipes": "Recetas Compartidas",
-    "collections": "Colecciones"
+  "profile": {
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "group": "Group"
+    },
+    "actions": {
+      "create": "Create Profile",
+      "edit": "Edit Profile",
+      "save": "Save Changes",
+      "delete": "Delete Profile"
+    },
+    "status": {
+      "loading": "Loading Profile...",
+      "error": "Error Loading Profile",
+      "notFound": "Profile Not Found",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    }
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Updating Tier...",
+      "error": "Error Checking Tier"
+    }
   },
   "common": {
-    "loading": "Cargando...",
+    "loading": "Loading...",
     "error": "Error",
-    "success": "Éxito",
-    "save": "Guardar",
-    "cancel": "Cancelar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "create": "Crear",
-    "update": "Actualizar"
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "confirm": "Confirm"
   }
 }

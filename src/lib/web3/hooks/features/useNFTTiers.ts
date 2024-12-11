@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
-import { useContract } from './useContract'
-import { TIER_CONTRACT_ABI } from '../abis'
-import { TIER_CONTRACT_ADDRESS } from '../addresses'
+import { useContract } from '../contracts/useContract'
+import { TIER_CONTRACT_ABI } from '@/lib/web3/abis'
 import { usePublicClient } from 'wagmi'
 import { ProfileTier } from '@/types/profile'
+import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
 interface TierState {
   isLoading: boolean
@@ -17,6 +18,7 @@ interface TierState {
 }
 
 export function useNFTTiers() {
+  const t = useTranslations('nft')
   const { ready, authenticated, user } = usePrivy()
   const publicClient = usePublicClient()
   const [state, setState] = useState<TierState>({
@@ -27,17 +29,19 @@ export function useNFTTiers() {
     currentTier: ProfileTier.FREE,
   })
 
-  const contract = useContract(TIER_CONTRACT_ADDRESS, TIER_CONTRACT_ABI)
+  const { contract: wagmiContract } = useContract('TIER_CONTRACT', TIER_CONTRACT_ABI)
 
   const checkTierStatus = useCallback(async () => {
-    if (!contract || !user?.wallet?.address) {
+    if (!user?.wallet?.address) {
       setState((prev) => ({ ...prev, isLoading: false }))
       return
     }
 
     try {
       console.log('Checking tier status for address:', user.wallet.address)
-      const balance = await contract.balanceOf(user.wallet.address)
+      toast.loading(t('tiers.check'))
+      
+      const balance = await wagmiContract.balanceOf(user.wallet.address)
       console.log('NFT balance:', balance.toString())
       const balanceNumber = Number(balance)
 
@@ -53,13 +57,13 @@ export function useNFTTiers() {
       }
 
       // Check if the user has a group tier token
-      const hasGroup = await contract.isGroupTier(balance)
+      const hasGroup = await wagmiContract.isGroupTier(balance)
       console.log('Has Group tier:', hasGroup)
 
       setState({
         isLoading: false,
         hasGroup: hasGroup,
-        hasPro: !hasGroup && balanceNumber > 0, // If they have a token but it's not group, it must be pro
+        hasPro: !hasGroup && balanceNumber > 0,
         error: null,
         currentTier: hasGroup
           ? ProfileTier.GROUP
@@ -67,6 +71,8 @@ export function useNFTTiers() {
             ? ProfileTier.PRO
             : ProfileTier.FREE,
       })
+      
+      toast.success(t('tiers.update'))
     } catch (error) {
       console.error('Error checking tier status:', error)
       setState({
@@ -76,21 +82,22 @@ export function useNFTTiers() {
         error: error as Error,
         currentTier: ProfileTier.FREE,
       })
+      toast.error(t('tiers.error'))
     }
-  }, [contract, user?.wallet?.address])
+  }, [wagmiContract, user?.wallet?.address, t])
 
   // Listen for contract events
   useEffect(() => {
-    if (!contract || !user?.wallet?.address || !publicClient) return
+    if (!user?.wallet?.address || !publicClient) return
 
     try {
       const unwatch = publicClient.watchContractEvent({
-        address: TIER_CONTRACT_ADDRESS,
+        address: wagmiContract.address as `0x${string}`,
         abi: TIER_CONTRACT_ABI,
         eventName: 'Minted',
         onLogs: (logs) => {
           console.log('Minted event:', logs)
-          checkTierStatus() // Refresh state when new token is minted
+          checkTierStatus()
         },
       })
 
@@ -100,14 +107,13 @@ export function useNFTTiers() {
     } catch (error) {
       console.error('Error watching contract events:', error)
     }
-  }, [contract, user?.wallet?.address, publicClient, checkTierStatus])
+  }, [wagmiContract, user?.wallet?.address, publicClient, checkTierStatus])
 
   useEffect(() => {
-    // Only check tier status when we're ready and authenticated
     if (ready && authenticated) {
       checkTierStatus()
     }
-  }, [ready, authenticated, user?.wallet?.address, checkTierStatus])
+  }, [ready, authenticated, checkTierStatus])
 
   return {
     ...state,

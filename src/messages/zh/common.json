@@ -1,41 +1,97 @@
 {
-  "welcome": "欢迎使用 CookMore",
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
+  },
   "navigation": {
-    "home": "首页",
-    "kitchen": "厨房",
-    "recipes": "食谱",
-    "explore": "探索",
-    "profile": "个人资料",
-    "admin": "管理",
-    "calendar": "日历"
+    "home": "Home",
+    "explore": "Explore",
+    "kitchen": "Kitchen",
+    "profile": "Profile",
+    "settings": "Settings"
   },
-  "auth": {
-    "signIn": "登录",
-    "signOut": "退出",
-    "connectWallet": "连接钱包"
-  },
-  "profile": {
-    "tier": {
-      "free": "Lite",
-      "pro": "Pro",
-      "group": "团队"
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
     }
   },
-  "kitchen": {
-    "newRecipe": "新建食谱",
-    "myRecipes": "我的食谱",
-    "sharedRecipes": "共享食谱",
-    "collections": "收藏"
+  "profile": {
+    "tiers": {
+      "free": "Free",
+      "pro": "Pro",
+      "group": "Group"
+    },
+    "actions": {
+      "create": "Create Profile",
+      "edit": "Edit Profile",
+      "save": "Save Changes",
+      "delete": "Delete Profile"
+    },
+    "status": {
+      "loading": "Loading Profile...",
+      "error": "Error Loading Profile",
+      "notFound": "Profile Not Found",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    }
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Updating Tier...",
+      "error": "Error Checking Tier"
+    }
   },
   "common": {
-    "loading": "加载中...",
-    "error": "错误",
-    "success": "成功",
-    "save": "保存",
-    "cancel": "取消",
-    "delete": "删除",
-    "edit": "编辑",
-    "create": "创建",
-    "update": "更新"
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "confirm": "Confirm"
   }
 }

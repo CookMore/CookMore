@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth'
 import { useRouter } from 'next/navigation'
 import { useEffect, useCallback } from 'react'
 import { useProfileData } from '@/lib/auth/hooks/useProfile'
-import { useProfileRegistry } from '@/lib/web3/hooks/useProfileRegistry'
+import { useProfileRegistry } from '@/lib/web3/hooks/contracts/useProfileRegistry'
 import { ROUTES } from '@/lib/routes'
 
 export function useAuth() {

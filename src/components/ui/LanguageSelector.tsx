@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Select } from '@/components/ui/form/FormSelect'
 import { locales } from '@/config/i18n'
 
@@ -21,18 +21,16 @@ const languages = {
 } as const
 
 export function LanguageSelector() {
+  const t = useTranslations('common')
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLocale = e.target.value
-    // Get the path segments
     const segments = pathname.split('/')
-    // Find the locale segment index (should be the first segment after the empty string)
     const localeIndex = segments.findIndex((segment) => locales.includes(segment as any))
     if (localeIndex !== -1) {
-      // Replace the locale segment
       segments[localeIndex] = newLocale
       const newPath = segments.join('/')
       router.push(newPath)
@@ -40,7 +38,12 @@ export function LanguageSelector() {
   }
 
   return (
-    <Select value={locale} onChange={handleLocaleChange} className='w-32'>
+    <Select
+      value={locale}
+      onChange={handleLocaleChange}
+      className='w-32'
+      aria-label={t('language.select')}
+    >
       {Object.entries(languages).map(([code, name]) => (
         <option key={code} value={code}>
           {name}
