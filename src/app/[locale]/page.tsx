@@ -1,41 +1,25 @@
 'use client'
 
-import React from 'react'
-import { usePrivy } from '@privy-io/react-auth'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 
-export default function LandingPage() {
-  const { login, ready } = usePrivy()
+export default function HomePage() {
+  const params = useParams()
+  console.log('🟡 [HomePage] Rendering with params:', params)
 
-  // Show the unauthenticated view
+  let t
+  try {
+    t = useTranslations('common')
+    console.log('🟢 [HomePage] Successfully loaded translations')
+  } catch (error) {
+    console.error('🔴 [HomePage] Failed to load translations:', error)
+    return <div>Error loading translations</div>
+  }
+
   return (
-    <div className='container mx-auto px-4'>
-      {/* Additional Unauthenticated Content */}
-      <div className='py-16 text-center'>
-        <h1 className='text-5xl font-bold mb-6 text-github-fg-default'>
-          Version Control for Your Recipes
-        </h1>
-        <p className='text-xl mb-8 text-github-fg-muted'>
-          Fork, branch, and merge your culinary creations. Track changes, collaborate with others,
-          and build upon existing recipes.
-        </p>
-
-        {/* CTA buttons for unauthenticated users */}
-        <div className='space-x-4'>
-          <Link
-            href='/explore'
-            className='bg-github-success-emphasis hover:bg-github-success-fg px-6 py-3 rounded-md inline-block transition-colors'
-          >
-            Explore Recipes
-          </Link>
-          <button
-            onClick={() => login()}
-            className='border border-github-success-emphasis hover:border-github-success-fg px-6 py-3 rounded-md inline-block transition-colors'
-          >
-            Get Started
-          </button>
-        </div>
-      </div>
+    <div className='container mx-auto px-4 py-8'>
+      <h1 className='text-4xl font-bold mb-6'>{t('welcome')}</h1>
+      <div className='text-sm text-gray-500'>Current locale: {params.locale}</div>
     </div>
   )
 }
