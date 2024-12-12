@@ -1,4 +1,11 @@
-import { type BrowserProvider, type JsonRpcSigner } from 'ethers'
+import {
+  BrowserProvider,
+  JsonRpcProvider,
+  JsonRpcSigner,
+  Contract,
+  type Provider as EthersProvider,
+  type Signer as EthersSigner,
+} from 'ethers'
 import { createPublicClient, http, type PublicClient, type WalletClient } from 'viem'
 import { type Provider } from '@wagmi/core'
 import { getChainConfig } from '../config/chains'
@@ -9,13 +16,14 @@ const chainConfig = getChainConfig()
 // Ethers.js provider
 export const getEthersProvider = () => {
   const rpcUrl = chainConfig.chain.rpcUrls.default.http[0]
-  return new ethers.JsonRpcProvider(rpcUrl)
+  return new JsonRpcProvider(rpcUrl)
 }
 
 // Ethers.js signer
-export const getEthersSigner = async (provider?: ethers.Provider) => {
+export const getEthersSigner = async (provider?: EthersProvider) => {
   const ethersProvider = provider || getEthersProvider()
-  return new ethers.JsonRpcSigner(ethersProvider, await ethersProvider.getSigner().getAddress())
+  const signer = await ethersProvider.getSigner()
+  return signer
 }
 
 // Viem public client
@@ -34,38 +42,38 @@ export const walletClientToSigner = (walletClient: WalletClient) => {
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   }
-  const provider = new ethers.JsonRpcProvider(transport.url, network)
-  return new ethers.JsonRpcSigner(provider, account.address)
+  const provider = new JsonRpcProvider(transport.url, network)
+  return new JsonRpcSigner(provider, account.address)
 }
 
 // Convert Wagmi provider to ethers provider
 export const wagmiProviderToEthers = (provider: Provider) => {
   const { chain, transport } = provider
-  return new ethers.JsonRpcProvider(transport.url, {
+  return new JsonRpcProvider(transport.url, {
     chainId: chain.id,
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   })
 }
 
-// Helper to get contract instance with either ethers or viem
+// Helper to get contract instance
 export const getContract = (
   address: string,
   abi: any[],
-  signerOrProvider?: ethers.Signer | ethers.Provider | WalletClient | PublicClient
+  signerOrProvider?: EthersSigner | EthersProvider | WalletClient | PublicClient
 ) => {
   if (!signerOrProvider) {
-    return new ethers.Contract(address, abi, getEthersProvider())
+    return new Contract(address, abi, getEthersProvider())
   }
 
   // Handle different types of signers/providers
-  if (signerOrProvider instanceof ethers.Signer || signerOrProvider instanceof ethers.Provider) {
-    return new ethers.Contract(address, abi, signerOrProvider)
+  if ('signMessage' in signerOrProvider || 'getCode' in signerOrProvider) {
+    return new Contract(address, abi, signerOrProvider)
   }
 
   // Convert Wagmi/Viem clients to ethers
   if ('account' in signerOrProvider) {
-    return new ethers.Contract(address, abi, walletClientToSigner(signerOrProvider))
+    return new Contract(address, abi, walletClientToSigner(signerOrProvider))
   }
 
   // Use viem public client

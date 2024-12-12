@@ -1,16 +1,22 @@
 import { NextResponse } from 'next/server'
-import { getProfileRegistryContract } from '@/lib/web3/contracts'
-import { ipfsService } from '@/lib/services/ipfs-service'
-import { isValidAddress } from '@/lib/web3/addresses'
+import { isValidAddress } from '@/lib/web3/config/chains'
+import { fetchFromIpfs } from '@/lib/web3/config/ipfs'
+import { publicClient } from '@/lib/web3/config/client'
+import { PROFILE_REGISTRY_ABI } from '@/lib/web3/abis'
+import { getAddresses } from '@/lib/web3/utils/addresses'
+
+export const runtime = 'edge'
 
 export async function GET(request: Request) {
   try {
     // Get the user's address from the request
     const { searchParams } = new URL(request.url)
     const address = searchParams.get('address')
+    console.log('Profile request for address:', address)
 
     // Validate address presence and format
     if (!address) {
+      console.log('No address provided')
       return NextResponse.json(
         { success: false, error: 'Address parameter is required' },
         { status: 400 }
@@ -18,34 +24,63 @@ export async function GET(request: Request) {
     }
 
     if (!isValidAddress(address)) {
+      console.log('Invalid address format:', address)
       return NextResponse.json(
         { success: false, error: 'Invalid Ethereum address format' },
         { status: 400 }
       )
     }
 
-    // Get contract instance with error handling
-    let contract
+    // Get contract address
+    const addresses = getAddresses()
+    const contractAddress = addresses.PROFILE_REGISTRY
+
+    // First check if the address has a profile
+    let hasProfile
     try {
-      contract = await getProfileRegistryContract()
+      hasProfile = await publicClient.readContract({
+        address: contractAddress,
+        abi: PROFILE_REGISTRY_ABI,
+        functionName: 'hasProfile',
+        args: [address as `0x${string}`],
+      })
+      console.log('Has profile:', hasProfile)
+
+      if (!hasProfile) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Profile not found',
+            details: `No profile exists for address ${address}`,
+          },
+          { status: 404 }
+        )
+      }
     } catch (error) {
-      console.error('Error getting contract instance:', error)
+      console.error('Contract read error (hasProfile):', error)
       return NextResponse.json(
         {
           success: false,
-          error: 'Failed to connect to blockchain network',
+          error: 'Failed to check profile existence',
           details: error instanceof Error ? error.message : 'Unknown error',
         },
-        { status: 503 }
+        { status: 502 }
       )
     }
 
     // Get profile with error handling
     let profile
     try {
-      profile = await contract.getProfile(address)
+      console.log('Fetching profile from contract...')
+      profile = await publicClient.readContract({
+        address: contractAddress,
+        abi: PROFILE_REGISTRY_ABI,
+        functionName: 'getProfile',
+        args: [address as `0x${string}`],
+      })
+      console.log('Profile fetched:', profile)
     } catch (error) {
-      console.error('Error fetching profile from contract:', error)
+      console.error('Contract read error (getProfile):', error)
       return NextResponse.json(
         {
           success: false,
@@ -56,47 +91,41 @@ export async function GET(request: Request) {
       )
     }
 
-    if (!profile) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Profile not found',
-          details: `No profile exists for address ${address}`,
-        },
-        { status: 404 }
-      )
-    }
-
     // Fetch metadata from IPFS if available
     let metadata = null
     if (profile.metadataURI) {
       try {
-        metadata = await ipfsService.getProfileMetadata(profile.metadataURI)
+        console.log('Fetching IPFS metadata from:', profile.metadataURI)
+        metadata = await fetchFromIpfs(profile.metadataURI)
+        console.log('IPFS metadata fetched:', !!metadata)
       } catch (error) {
-        console.error('Error fetching IPFS metadata:', error)
+        console.error('IPFS metadata fetch error:', error)
         // Log but don't fail the request, continue with null metadata
         metadata = null
       }
     }
 
-    // Validate and normalize profile data
-    const normalizedType = profile.type?.toLowerCase() || 'free'
-    if (!['free', 'pro', 'group'].includes(normalizedType)) {
-      console.warn(`Invalid profile type: ${profile.type}, defaulting to 'free'`)
-    }
+    // Map tier number to string
+    const tierMap = {
+      0: 'free',
+      1: 'pro',
+      2: 'group',
+    } as const
 
     // Convert BigInt values to strings and ensure consistent response structure
     const serializedProfile = {
       success: true,
       data: {
-        id: profile.id?.toString() || '',
-        address: profile.address || address,
-        type: ['free', 'pro', 'group'].includes(normalizedType) ? normalizedType : 'free',
-        metadata: metadata || profile.metadata || {},
-        createdAt: profile.createdAt?.toString() || '',
-        updatedAt: profile.updatedAt?.toString() || '',
+        id: profile.profileId?.toString() || '',
+        address: profile.wallet || address,
+        type: tierMap[profile.tier as keyof typeof tierMap] || 'free',
+        metadata: metadata || {},
+        createdAt: Date.now().toString(),
+        updatedAt: Date.now().toString(),
       },
     }
+
+    console.log('Returning serialized profile:', JSON.stringify(serializedProfile, null, 2))
 
     // Set cache headers
     const headers = new Headers({

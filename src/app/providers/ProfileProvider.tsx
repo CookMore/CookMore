@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useProfileData } from '@/lib/auth/hooks/useProfile'
 import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
@@ -27,16 +27,17 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   } = useProfileData(user?.wallet?.address)
 
   const [currentTier, setCurrentTier] = useState<ProfileTier>(ProfileTier.FREE)
-  const isInitialMount = useRef(true)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
-  // Only update tier when we have all the necessary data
+  // Handle client-side mounting
   useEffect(() => {
-    if (!ready || !authenticated || tiersLoading) return
+    setIsClient(true)
+  }, [])
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false
-      return
-    }
+  // Initialize tier based on NFT ownership
+  useEffect(() => {
+    if (!isClient || !ready || !authenticated || tiersLoading) return
 
     let newTier = ProfileTier.FREE
     if (hasGroup) {
@@ -45,10 +46,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       newTier = ProfileTier.PRO
     }
 
-    if (newTier !== currentTier) {
-      setCurrentTier(newTier)
-    }
-  }, [ready, authenticated, tiersLoading, hasGroup, hasPro, currentTier])
+    setCurrentTier(newTier)
+    setIsInitialized(true)
+  }, [isClient, ready, authenticated, tiersLoading, hasGroup, hasPro])
 
   const canAccessTier = (tier: ProfileTier): boolean => {
     if (!ready || !authenticated) return false
@@ -65,11 +65,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  if (!isClient) {
+    return null // Return null on server-side to prevent hydration issues
+  }
+
   const value = {
     profile,
     currentTier,
     canAccessTier,
-    isLoading: !ready || profileLoading || tiersLoading,
+    isLoading: !ready || profileLoading || tiersLoading || !isInitialized,
     error: profileError,
   }
 

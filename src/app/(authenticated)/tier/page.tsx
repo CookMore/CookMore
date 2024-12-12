@@ -1,6 +1,6 @@
 'use client'
 
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
 import { ProfileTier } from '@/types/profile'
 import { TierCard } from '@/components/ui/TierCard'
 import { IconStar } from '@/components/ui/icons'

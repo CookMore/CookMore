@@ -1,19 +1,20 @@
 'use client'
 
+import React from 'react'
 import { Control, FieldErrors } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { FormField } from '@/components/ui/form'
-import type { ProfileMetadata } from '@/types/profile'
+import type { ProfileFormData } from '@/types/profile'
 import { useTranslations } from 'next-intl'
 import { type Theme } from '@/app/providers/ThemeProvider'
 import { profileSchema } from '@/lib/validations/profile'
 
 interface BasicInfoSectionProps {
-  control: Control<ProfileMetadata>
-  errors: FieldErrors<ProfileMetadata>
-  theme: Theme
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme: string
 }
 
 export function BasicInfoSection({ control, errors, theme }: BasicInfoSectionProps) {
@@ -47,8 +48,8 @@ export function BasicInfoSection({ control, errors, theme }: BasicInfoSectionPro
   return (
     <div className={sectionClasses}>
       <div className={fieldClasses}>
-        <Label htmlFor='name' required>
-          {t('name.label')}
+        <Label htmlFor='name'>
+          {t('name.label')} <span className='text-red-500'>*</span>
         </Label>
         <FormField
           control={control}

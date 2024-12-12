@@ -46,5 +46,6 @@ export default [
         version: 'detect',
       },
     },
+    ignores: ['**/node_modules/**', '**/.next/**', '**/dist/**', '**/coverage/**'],
   },
 ]

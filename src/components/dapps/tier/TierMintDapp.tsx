@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { useWalletClient, useChainId, usePublicClient } from 'wagmi'
+import { toast } from 'sonner'
+
+// UI Components
 import {
   IconMint,
   IconGift,
@@ -11,13 +14,16 @@ import {
   IconSpinner,
 } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
-import { ProfileTier } from '@/types/profile'
-import { toast } from 'sonner'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+
+// Web3 Imports
 import { TIER_CONTRACT_ABI } from '@/lib/web3/abis/TierContracts'
-import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses'
-import { SUPPORTED_CHAINS } from '@/lib/web3/wagmi'
-import { useWalletState } from '@/lib/web3/hooks/useWalletState'
+import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses/contracts'
+import { SUPPORTED_CHAINS } from '@/lib/web3/config/chains'
+import { useWalletState } from '@/lib/web3/hooks/wallet'
+import { useNFTTiers } from '@/lib/web3/hooks/features'
+
+// Types and Constants
+import { ProfileTier } from '@/types/profile'
 import { tierInfo, tierStyles } from '@/lib/tiers'
 
 interface TierMintDappProps {

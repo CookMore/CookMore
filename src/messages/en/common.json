@@ -56,12 +56,74 @@
     }
   },
   "profile": {
+    "createProfile": "Create Profile",
+    "basicInfo": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Enter your name",
+        "required": "Name is required",
+        "tooShort": "Name must be at least 2 characters",
+        "tooLong": "Name must be less than 50 characters"
+      },
+      "bio": {
+        "label": "Bio",
+        "placeholder": "Tell us about yourself"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "Where are you based?"
+      },
+      "website": {
+        "label": "Website",
+        "placeholder": "Your website URL"
+      },
+      "social": {
+        "twitter": {
+          "label": "Twitter",
+          "placeholder": "Your Twitter handle"
+        }
+      }
+    },
+    "tier": {
+      "checking": "Checking tier status...",
+      "checked": "Tier status checked",
+      "current": "Current Tier",
+      "upgrade": "Upgrade Available",
+      "mintPro": "Mint Pro NFT",
+      "mintGroup": "Mint Group NFT",
+      "mintSuccess": "Successfully minted NFT",
+      "mintError": "Error checking tier status"
+    },
     "routing": {
       "createGroup": "Creating Group Profile",
       "createPro": "Creating Pro Profile",
       "createFree": "Creating Free Profile",
       "upgrade": "Profile Upgrade Available",
       "error": "Error in Profile Routing"
+    },
+    "errors": {
+      "needGroupNFT": "You need a Group NFT to create a group profile",
+      "needProNFT": "You need a Pro NFT to create a pro profile",
+      "tierMismatch": "Your current tier does not match the required tier"
+    },
+    "create": {
+      "uploading": "Uploading profile data...",
+      "metadata": "Creating metadata...",
+      "profile": "Creating profile...",
+      "success": "Profile created successfully",
+      "error": "Failed to create profile"
+    },
+    "update": {
+      "uploading": "Uploading profile data...",
+      "metadata": "Updating metadata...",
+      "profile": "Updating profile...",
+      "success": "Profile updated successfully",
+      "error": "Failed to update profile"
+    },
+    "profile": {
+      "loading": "Loading profile...",
+      "loaded": "Profile loaded",
+      "error": "Failed to load profile"
     }
   },
   "changelog": {

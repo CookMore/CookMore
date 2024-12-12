@@ -6,6 +6,30 @@ import { createPublicClient, http } from 'viem'
 export const IS_MAINNET = process.env.NEXT_PUBLIC_NETWORK === 'mainnet'
 export const CHAIN = IS_MAINNET ? base : baseSepolia
 
+// RPC URLs
+const RPC_URLS = {
+  [base.id]: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org',
+  [baseSepolia.id]: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
+} as const
+
+// Public client for direct contract calls
+export const publicClient = createPublicClient({
+  chain: CHAIN,
+  transport: http(RPC_URLS[CHAIN.id]),
+  batch: {
+    multicall: true,
+  },
+})
+
+// Wagmi config for hooks
+export const config = createConfig({
+  chains: [base, baseSepolia],
+  transports: {
+    [base.id]: http(RPC_URLS[base.id]),
+    [baseSepolia.id]: http(RPC_URLS[baseSepolia.id]),
+  },
+})
+
 // Contract configuration
 export const CONTRACT_CONFIG = {
   // Core NFTs
@@ -118,24 +142,6 @@ export const NETWORK_CONFIG = {
     },
   },
 } as const
-
-// Public client for direct contract calls
-export const publicClient = createPublicClient({
-  chain: CHAIN,
-  transport: http(),
-  batch: {
-    multicall: true,
-  },
-})
-
-// Wagmi config for hooks
-export const config = createConfig({
-  chains: [base, baseSepolia],
-  transports: {
-    [base.id]: http(),
-    [baseSepolia.id]: http(),
-  },
-})
 
 // Type definitions
 export type ContractName = keyof typeof CONTRACT_CONFIG

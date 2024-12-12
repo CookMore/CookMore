@@ -1,3 +1,3 @@
 export * from './addresses'
 export * from './contracts'
-export * from './profile-registry'
+export * from './providers'

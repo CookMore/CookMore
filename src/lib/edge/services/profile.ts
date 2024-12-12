@@ -7,22 +7,31 @@ class ProfileEdgeService extends BaseEdgeService {
   async getProfile(address: string, options?: any): Promise<ServiceResponse<Profile>> {
     try {
       const cacheKey = `profile:${address}`
+      console.log('Fetching profile for address:', address)
 
       return this.withCache(
         cacheKey,
         async () => {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
-          const response = await fetch(`${baseUrl}/api/profile?address=${address}`, {
+          const apiUrl = `/api/profile?address=${address}`
+          console.log('Making API request to:', apiUrl)
+
+          const response = await fetch(apiUrl, {
             headers: this.getHeaders(options),
+            next: { revalidate: 30 }, // Cache for 30 seconds
           })
 
+          console.log('API response status:', response.status)
           if (!response.ok) {
+            const errorText = await response.text()
+            console.error('API error response:', errorText)
             throw new Error(`Failed to fetch profile: ${response.status}`)
           }
 
           const result = await response.json()
+          console.log('API response parsed:', result.success ? 'success' : 'failed')
 
           if (!result.success) {
+            console.error('API returned error:', result.error)
             throw new Error(result.error || 'Failed to fetch profile')
           }
 
@@ -31,7 +40,7 @@ class ProfileEdgeService extends BaseEdgeService {
             data: result.data,
           }
         },
-        options
+        { ...options, revalidate: 30 } // Cache for 30 seconds
       )
     } catch (error) {
       console.error('Profile Edge Service Error:', error)
@@ -44,8 +53,7 @@ class ProfileEdgeService extends BaseEdgeService {
 
   async updateProfile(address: string, data: any): Promise<ServiceResponse<any>> {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
-      const response = await fetch(`${baseUrl}/api/profile/${address}`, {
+      const response = await fetch(`/api/profile/${address}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -82,8 +90,7 @@ class ProfileEdgeService extends BaseEdgeService {
 
   async upgradeProfile(address: string, tier: string): Promise<ServiceResponse<any>> {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
-      const response = await fetch(`${baseUrl}/api/profile/${address}/upgrade`, {
+      const response = await fetch(`/api/profile/${address}/upgrade`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

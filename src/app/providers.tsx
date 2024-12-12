@@ -10,33 +10,12 @@ import { PanelProvider } from './providers/PanelProvider'
 import { MotionProvider } from './providers/MotionProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface ProvidersProps {
   children: React.ReactNode
   locale: string
   messages: Record<string, unknown>
-}
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    // Only log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🟢 Client mounted')
-    }
-  }, [])
-
-  if (!mounted) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🟡 Client not mounted yet')
-    }
-    return null
-  }
-
-  return children
 }
 
 export function Providers({ children, locale, messages }: ProvidersProps) {
@@ -57,24 +36,22 @@ export function Providers({ children, locale, messages }: ProvidersProps) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider>
-          <ThemeProvider>
-            <MotionProvider>
-              <ClientOnly>
-                <PrivyProvider>
-                  <ProfileProvider>
-                    <PanelProvider>
-                      {children}
-                      {process.env.NODE_ENV === 'development' && (
-                        <ReactQueryDevtools initialIsOpen={false} />
-                      )}
-                    </PanelProvider>
-                  </ProfileProvider>
-                </PrivyProvider>
-              </ClientOnly>
-            </MotionProvider>
-          </ThemeProvider>
-        </WagmiProvider>
+        <ThemeProvider>
+          <MotionProvider>
+            <WagmiProvider>
+              <PrivyProvider>
+                <ProfileProvider>
+                  <PanelProvider>
+                    {children}
+                    {process.env.NODE_ENV === 'development' && (
+                      <ReactQueryDevtools initialIsOpen={false} />
+                    )}
+                  </PanelProvider>
+                </ProfileProvider>
+              </PrivyProvider>
+            </WagmiProvider>
+          </MotionProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </NextIntlClientProvider>
   )

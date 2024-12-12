@@ -5,7 +5,7 @@ import { IconChevronLeft, IconLock } from '@/components/ui/icons'
 import { type Step } from '@/app/(authenticated)/profile/steps'
 import { type Dispatch, type SetStateAction } from 'react'
 import { ProfileTier } from '@/types/profile'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
 
 interface ProfileSidebarProps {
   steps: Step[]

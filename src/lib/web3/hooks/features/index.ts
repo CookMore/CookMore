@@ -1,9 +1,9 @@
 // Feature hooks
+export { useNFTTiers } from './useNFTTiers'
 export * from './useChangeLog'
-export * from './useNFTTiers'
+export * from './useIpfs'
 export * from './useTierMint'
 export * from './useTierRouting'
-export * from './useIpfs'
 
 // Types
 export interface ChangeLogEntry {

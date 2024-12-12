@@ -2,23 +2,27 @@
 
 import { useCallback, useMemo } from 'react'
 import { usePublicClient, useWalletClient } from 'wagmi'
-import { type Address, getContract } from 'viem'
+import { type Address, getContract, type Abi, type GetContractReturnType } from 'viem'
 import { getAddresses } from '../../utils/addresses'
 import { toast } from 'sonner'
 
-export interface ContractHookResult {
-  contract: ReturnType<typeof getContract>
-  write: (functionName: string, args: any[], options?: { value?: bigint }) => Promise<`0x${string}`>
-  read: (functionName: string, args: any[]) => Promise<any>
+export interface ContractHookResult<TAbi extends Abi> {
+  contract: GetContractReturnType<TAbi>
+  write: (
+    functionName: string,
+    args: unknown[],
+    options?: { value?: bigint }
+  ) => Promise<`0x${string}`>
+  read: (functionName: string, args: unknown[]) => Promise<unknown>
   address: Address
   isLoading?: boolean
   error?: Error
 }
 
-export function useContract<T extends keyof ReturnType<typeof getAddresses>>(
+export function useContract<T extends keyof ReturnType<typeof getAddresses>, TAbi extends Abi>(
   contractName: T,
-  abi: any[] // TODO: Add proper ABI type
-): ContractHookResult {
+  abi: TAbi
+): ContractHookResult<TAbi> {
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const addresses = getAddresses()
@@ -39,28 +43,24 @@ export function useContract<T extends keyof ReturnType<typeof getAddresses>>(
   const write = useCallback(
     async (
       functionName: string,
-      args: any[],
+      args: unknown[],
       options?: { value?: bigint }
-    ) => {
+    ): Promise<`0x${string}`> => {
       try {
         if (!walletClient) throw new Error('Wallet not connected')
-        
+
         const { request } = await publicClient.simulateContract({
           address,
           abi,
           functionName,
           args,
           value: options?.value,
+          account: walletClient.account,
         })
 
-        const hash = await walletClient.writeContract(request)
-        await publicClient.waitForTransactionReceipt({ hash })
-
-        toast.success('Transaction successful')
-        return hash
+        return await walletClient.writeContract(request)
       } catch (error) {
         console.error('Contract write error:', error)
-        toast.error('Transaction failed')
         throw error
       }
     },
@@ -68,15 +68,14 @@ export function useContract<T extends keyof ReturnType<typeof getAddresses>>(
   )
 
   const read = useCallback(
-    async (functionName: string, args: any[]) => {
+    async (functionName: string, args: unknown[]): Promise<unknown> => {
       try {
-        const data = await publicClient.readContract({
+        return await publicClient.readContract({
           address,
           abi,
           functionName,
           args,
         })
-        return data
       } catch (error) {
         console.error('Contract read error:', error)
         throw error

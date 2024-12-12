@@ -1,11 +1,12 @@
 'use client'
 
+import React from 'react'
 import { useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, Control, FieldErrors } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
 import { useNFTTiers } from '@/lib/web3/hooks/features/useNFTTiers'
 import { useProfileRegistry } from '@/lib/web3/hooks/contracts/useProfileRegistry'
-import { ProfileTier, type ProfileFormData } from '@/types/profile'
+import { ProfileTier, type ProfileFormData, type ProfileMetadata } from '@/types/profile'
 import { toast } from 'sonner'
 import { FormSkeleton } from '../ui/FormSkeleton'
 import {
@@ -26,6 +27,12 @@ interface CreateProfileFormProps {
   currentStep: number
 }
 
+interface SectionProps {
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme: string
+}
+
 export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps) {
   const t = useTranslations('profile')
   const { theme } = useTheme()
@@ -39,12 +46,14 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
 
   // Verify tier access
   useEffect(() => {
-    if (tier === ProfileTier.GROUP && !hasGroup) {
-      toast.error(t('errors.needGroupNFT'))
-    } else if (tier === ProfileTier.PRO && !hasPro && !hasGroup) {
-      toast.error(t('errors.needProNFT'))
+    if (!tiersLoading) {
+      if (tier === ProfileTier.GROUP && !hasGroup) {
+        toast.error(t('errors.needGroupNFT'))
+      } else if (tier === ProfileTier.PRO && !hasPro && !hasGroup) {
+        toast.error(t('errors.needProNFT'))
+      }
     }
-  }, [tier, hasGroup, hasPro, t])
+  }, [tier, hasGroup, hasPro, tiersLoading, t])
 
   const steps = getStepsForTier(tier)
 
@@ -69,7 +78,7 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
     const step = steps[currentStep]
     if (!step) return null
 
-    const sectionProps = {
+    const sectionProps: SectionProps = {
       control,
       errors,
       theme,

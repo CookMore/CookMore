@@ -1,6 +1,6 @@
 // Re-export all hooks
-export * from './contracts'
 export * from './features'
+export * from './contracts'
 export * from './wallet'
 
 // Types
@@ -16,3 +16,7 @@ export {
   wagmiProviderToEthers,
   getContract,
 } from '../utils/providers'
+
+// Re-export hooks
+export * from './features/useNFTTiers'
+export * from './contracts/useProfileRegistry'

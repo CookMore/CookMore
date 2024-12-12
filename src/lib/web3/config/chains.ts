@@ -37,35 +37,29 @@ export const baseSepoliaChain: Chain = {
 export const CONTRACT_ADDRESSES = {
   mainnet: {
     // Core Profile System
-    PROFILE_REGISTRY: '0x...', // TODO: Add mainnet addresses
-    PROFILE_SYSTEM: '0x...',
-    ACCESS_CONTROL: '0x...',
-    METADATA: '0x...',
+    PROFILE_REGISTRY: process.env.NEXT_PUBLIC_MAINNET_PROFILE_REGISTRY as `0x${string}`,
+    PROFILE_SYSTEM: process.env.NEXT_PUBLIC_MAINNET_PROFILE_SYSTEM as `0x${string}`,
+    ACCESS_CONTROL: process.env.NEXT_PUBLIC_MAINNET_ACCESS_CONTROL as `0x${string}`,
+    METADATA: process.env.NEXT_PUBLIC_MAINNET_METADATA as `0x${string}`,
 
     // Membership NFTs
-    TIER_CONTRACT: '0x...',
-    PRO_NFT: '0x...',
-    GROUP_NFT: '0x...',
-
-    // Other contracts
-    USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    TIER_CONTRACT: process.env.NEXT_PUBLIC_MAINNET_TIER_CONTRACT as `0x${string}`,
+    PRO_NFT: process.env.NEXT_PUBLIC_MAINNET_PRO_NFT as `0x${string}`,
+    GROUP_NFT: process.env.NEXT_PUBLIC_MAINNET_GROUP_NFT as `0x${string}`,
   },
   testnet: {
     // Core Profile System
-    PROFILE_REGISTRY: '0x4Ab687D7D89FC4FFc5F814e465Fa94346e9CEe5b',
-    PROFILE_SYSTEM: '0x4Ab687D7D89FC4FFc5F814e465Fa94346e9CEe5b',
-    ACCESS_CONTROL: '0x29298493c8269dA20fd89058ED2AA82799d148ab',
-    METADATA: '0xA11522CD73c532D348bba775f22c9B14A112F65A',
+    PROFILE_REGISTRY: process.env.NEXT_PUBLIC_TESTNET_PROFILE_REGISTRY as `0x${string}`,
+    PROFILE_SYSTEM: process.env.NEXT_PUBLIC_TESTNET_PROFILE_SYSTEM as `0x${string}`,
+    ACCESS_CONTROL: process.env.NEXT_PUBLIC_TESTNET_ACCESS_CONTROL as `0x${string}`,
+    METADATA: process.env.NEXT_PUBLIC_TESTNET_METADATA as `0x${string}`,
 
     // Membership NFTs
-    TIER_CONTRACT: '0xf7577d49C5F3C1b776Fe8757B5b973dcCa88D828',
-    PRO_NFT: '0xa859Ca4cF5Fc201E710C1A8Dc8540beaa9878C02',
-    GROUP_NFT: '0x6c927C8F1661460c5f3adDcd26d7698910077492',
-
-    // Other contracts
-    USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897',
+    TIER_CONTRACT: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT as `0x${string}`,
+    PRO_NFT: process.env.NEXT_PUBLIC_TESTNET_PRO_NFT as `0x${string}`,
+    GROUP_NFT: process.env.NEXT_PUBLIC_TESTNET_GROUP_NFT as `0x${string}`,
   },
-} as const
+}
 
 // Chain configurations with contracts
 export const CHAIN_CONFIG = {
@@ -81,14 +75,6 @@ export const CHAIN_CONFIG = {
   },
 } as const
 
-// Helper functions
-export const getChainConfig = () => (IS_MAINNET ? CHAIN_CONFIG.mainnet : CHAIN_CONFIG.testnet)
-export const getContractAddresses = () =>
-  IS_MAINNET ? CONTRACT_ADDRESSES.mainnet : CONTRACT_ADDRESSES.testnet
-
-// Export supported chains
-export const SUPPORTED_CHAINS = [baseChain, baseSepoliaChain] as const
-
 // Chain IDs
 export const chainIds = {
   BASE_MAINNET: baseChain.id,
@@ -103,7 +89,7 @@ export const chainNames = {
 
 // Types
 export type SupportedChainId = (typeof chainIds)[keyof typeof chainIds]
-export type SupportedChain = (typeof SUPPORTED_CHAINS)[number]
+export type SupportedChain = (typeof SUPPORTED_CHAINS)[keyof typeof SUPPORTED_CHAINS]
 export type ContractAddresses = typeof CONTRACT_ADDRESSES.testnet
 export type ContractName = keyof ContractAddresses
 
@@ -128,3 +114,19 @@ export const getTierType = (address: string): 'Pro' | 'Group' | 'unknown' => {
 export const isValidAddress = (address: string): boolean => {
   return /^0x[a-fA-F0-9]{40}$/.test(address)
 }
+
+// Chain helper functions
+export const getChainConfig = () => (IS_MAINNET ? CHAIN_CONFIG.mainnet : CHAIN_CONFIG.testnet)
+export const getContractAddresses = () =>
+  IS_MAINNET ? CONTRACT_ADDRESSES.mainnet : CONTRACT_ADDRESSES.testnet
+
+export function isChainSupported(chainId: SupportedChainId): boolean {
+  return Object.values(chainIds).includes(chainId)
+}
+
+export function getChainName(chainId: SupportedChainId): string {
+  return chainNames[chainId] || `Unknown Chain (${chainId})`
+}
+
+// Export supported chains
+export const SUPPORTED_CHAINS = chainIds
