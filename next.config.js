@@ -28,12 +28,92 @@ const nextConfig = {
     NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL,
   },
   images: {
-    domains: ['ipfs.io', 'gateway.pinata.cloud'],
+    domains: [
+      'ipfs.io',
+      'gateway.pinata.cloud',
+      'explorer-api.walletconnect.com',
+      'dynamic-assets.coinbase.com',
+      'www.coinbase.com',
+    ],
+    unoptimized: true,
+  },
+  async headers() {
+    // Different CSP for development and production
+    const isDev = process.env.NODE_ENV === 'development'
+
+    const CSP = isDev
+      ? // Development CSP - more permissive
+        `
+          default-src 'self' 'unsafe-eval' 'unsafe-inline';
+          script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.privy.io https://*.coinbase.com https://*.walletconnect.com;
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' blob: data: https: http:;
+          font-src 'self' data:;
+          connect-src 'self' https: wss: http: ws:;
+          frame-src 'self' https://*.privy.io https://*.coinbase.com;
+          frame-ancestors 'none';
+          form-action 'self';
+        `
+      : // Production CSP - more restrictive
+        `
+          default-src 'self';
+          script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.privy.io https://*.coinbase.com https://*.walletconnect.com;
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' blob: data: 
+            https://*.privy.io 
+            https://ipfs.io 
+            https://gateway.pinata.cloud
+            https://*.walletconnect.com
+            https://explorer-api.walletconnect.com
+            https://dynamic-assets.coinbase.com
+            https://*.coinbase.com;
+          font-src 'self';
+          connect-src 'self' 
+            ${process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || ''} 
+            https://*.privy.io 
+            https://ipfs.infura.io 
+            wss://*.walletconnect.com 
+            https://*.walletconnect.com
+            https://pulse.walletconnect.org
+            https://explorer-api.walletconnect.com
+            https://*.coinbase.com
+            wss://*.coinbase.com;
+          frame-src 'self' https://*.privy.io https://*.coinbase.com;
+          frame-ancestors 'none';
+          form-action 'self';
+        `
+
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: CSP.replace(/\s{2,}/g, ' ').trim(),
+          },
+          {
+            key: 'Set-Cookie',
+            value: 'SameSite=None; Secure',
+          },
+        ],
+      },
+    ]
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false }
     return config
   },
+  // Next.js 15 specific options
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'cookmore.xyz'],
+    },
+  },
+  // External packages configuration
+  serverExternalPackages: ['ethers'],
+  // Hybrid rendering settings
+  output: 'standalone',
+  poweredByHeader: false,
 }
 
 module.exports = withNextIntl(withPWA(nextConfig))

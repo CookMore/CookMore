@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "lib": [
       "dom",
       "dom.iterable",
@@ -52,7 +52,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "global.d.ts",
-    "src/types/**/*.d.ts"
+    "src/app/api/types/**/*.d.ts"
   ],
   "exclude": ["node_modules"]
 }

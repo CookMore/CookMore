@@ -1,50 +1,57 @@
-import { NextIntlClientProvider } from 'next-intl'
+import { defaultLocale, locales, getMessages } from '@/i18n'
+import { Providers } from '@/app/api/providers/providers'
 import { notFound } from 'next/navigation'
-import { getMessages } from 'next-intl/server'
-import { locales } from '@/config/i18n'
-import { LanguageUI } from '@/components/ui/LanguageUI'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
+import { Toaster } from 'sonner'
+import { ErrorBoundaryWrapper } from '@/app/api/error/ErrorBoundaryWrapper'
+import { Header } from '@/app/api/header/Header'
+import { Header as MarketingHeader } from '@/app/api/header/marketing/Header'
+import { FooterWrapper } from '@/app/api/footer/FooterWrapper'
+import { LanguageUI } from '@/app/api/language/LanguageUI'
 
-export function generateStaticParams() {
+interface LocaleLayoutProps {
+  children: React.ReactNode
+  params: { locale?: string }
+}
+
+export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
 }
 
-async function getLocaleMessages(locale: string) {
-  try {
-    console.log('🟡 [LocaleLayout] Loading messages for locale:', locale)
-    const messages = await getMessages(locale)
-    console.log('🟢 [LocaleLayout] Successfully loaded messages:', {
-      locale,
-      messageKeys: Object.keys(messages),
-    })
-    return messages
-  } catch (error) {
-    console.error('🔴 [LocaleLayout] Failed to load messages:', error)
-    // Fallback to English messages
-    return getMessages('en')
-  }
-}
+export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
+  // Validate locale parameter
+  const locale = params?.locale || defaultLocale
+  const validLocale = locales.includes(locale) ? locale : defaultLocale
 
-export default async function LocaleLayout({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode
-  params: { locale: string }
-}) {
-  if (!locales.includes(locale as any)) {
-    notFound()
+  // In development, be more lenient with locale validation
+  if (process.env.NODE_ENV === 'production') {
+    if (!validLocale || !locales.includes(validLocale)) {
+      notFound()
+    }
   }
 
-  const messages = await getLocaleMessages(locale)
-  console.log('🟢 [LocaleLayout] Rendering with locale:', locale)
+  // Get messages for the locale
+  const messages = await getMessages(validLocale)
 
   return (
-    <html lang={locale}>
+    <html lang={validLocale}>
       <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <LanguageUI />
-          {children}
-        </NextIntlClientProvider>
+        <Providers messages={messages} locale={validLocale}>
+          <TooltipProvider>
+            <div className='flex min-h-screen flex-col'>
+              <ErrorBoundaryWrapper name='root'>
+                <Header />
+                <MarketingHeader />
+                <main className='flex-1 overflow-y-auto'>
+                  <LanguageUI />
+                  {children}
+                </main>
+                <FooterWrapper />
+              </ErrorBoundaryWrapper>
+              <Toaster />
+            </div>
+          </TooltipProvider>
+        </Providers>
       </body>
     </html>
   )

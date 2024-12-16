@@ -329,7 +329,7 @@
   outline: none;
 }
 
-@import '../styles/svg-patterns.css';
+@import './api/styles/svg-patterns.css';
 
 [data-theme='wooden'] {
   color-scheme: dark;

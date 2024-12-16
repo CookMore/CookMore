@@ -1,0 +1,129 @@
+{
+  "title": "Profile",
+  "createProfile": "Create Profile",
+  "steps": {
+    "basic-info": {
+      "title": "Basic Information",
+      "description": "Your name, bio, and avatar"
+    },
+    "culinary-info": {
+      "title": "Culinary Information",
+      "description": "Your cooking expertise and specialties"
+    },
+    "social-links": {
+      "title": "Social Links",
+      "description": "Connect your social media profiles"
+    },
+    "experience": {
+      "title": "Experience",
+      "description": "Your professional experience"
+    }
+  },
+  "basicInfo": {
+    "name": {
+      "label": "Name",
+      "placeholder": "Enter your name",
+      "required": "Name is required",
+      "tooShort": "Name must be at least 2 characters",
+      "tooLong": "Name must be less than 50 characters"
+    },
+    "bio": {
+      "label": "Bio",
+      "placeholder": "Tell us about yourself"
+    },
+    "location": {
+      "label": "Location",
+      "placeholder": "Where are you based?"
+    },
+    "website": {
+      "label": "Website",
+      "placeholder": "Your website URL"
+    },
+    "social": {
+      "twitter": {
+        "label": "Twitter",
+        "placeholder": "Your Twitter handle"
+      }
+    }
+  },
+  "form": {
+    "culinaryInfo": {
+      "title": "Culinary Information",
+      "expertise": {
+        "label": "Expertise Level",
+        "placeholder": "Select your expertise level",
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "professional": "Professional"
+      }
+    },
+    "education": {
+      "title": "Education & Certifications",
+      "description": "Share your culinary education and certifications",
+      "institution": {
+        "label": "School/Institution",
+        "placeholder": "Culinary Institute of America",
+        "required": "Institution is required"
+      },
+      "degree": {
+        "label": "Degree/Certification",
+        "placeholder": "Bachelor of Culinary Arts"
+      },
+      "field": {
+        "label": "Field of Study",
+        "placeholder": "Culinary Arts"
+      },
+      "startYear": {
+        "label": "Start Year",
+        "placeholder": "2020",
+        "required": "Start year is required"
+      },
+      "endYear": {
+        "label": "End Year",
+        "placeholder": "2024"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "New York, NY"
+      },
+      "status": {
+        "label": "Status",
+        "placeholder": "Select status",
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "planned": "Planned"
+      }
+    },
+    "navigation": {
+      "next": "Next",
+      "back": "Back",
+      "save": "Save Profile",
+      "update": "Update Profile"
+    }
+  },
+  "service": {
+    "loading": "Loading profile...",
+    "loaded": "Profile loaded successfully",
+    "error": "Error loading profile",
+    "updating": "Updating profile...",
+    "updated": "Profile updated successfully",
+    "updateError": "Error updating profile",
+    "upgrading": "Upgrading profile...",
+    "upgraded": "Profile upgraded successfully",
+    "upgradeError": "Error upgrading profile"
+  },
+  "tier": {
+    "checking": "Checking tier status...",
+    "checked": "Tier status checked",
+    "current": "Current Tier",
+    "upgrade": "Upgrade Available",
+    "mintPro": "Mint Pro NFT",
+    "mintGroup": "Mint Group NFT",
+    "mintSuccess": "Successfully minted NFT",
+    "mintError": "Error checking tier status",
+    "free": "Free",
+    "pro": "Pro",
+    "group": "Group"
+  }
+}

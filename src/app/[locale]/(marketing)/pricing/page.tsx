@@ -3,9 +3,9 @@
 import { usePrivy } from '@privy-io/react-auth'
 import Link from 'next/link'
 import { useState } from 'react'
-import EnterprisePopover from '@/components/ui/EnterprisePopover'
-import { IconCheck } from '@/components/ui/icons'
-import { ROUTES } from '@/lib/routes'
+import EnterprisePopover from '@/app/api/components/ui/EnterprisePopover'
+import { IconCheck } from '@/app/api/icons'
+import { ROUTES } from '@/app/api/routes/routes'
 
 export default function PricingPage() {
   const { login, ready } = usePrivy()

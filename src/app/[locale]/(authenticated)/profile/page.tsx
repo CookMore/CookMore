@@ -4,15 +4,15 @@ import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { useProfile } from '@/lib/auth/hooks/useProfile'
-import { useNFTTiers } from '@/lib/web3/hooks'
-import { ProfileTypeSwitcher } from './components/editor/ProfileTypeSwitcher'
+import { useNFTTiers } from '@/lib/web3'
+import { ProfileTypeSwitcher } from './components/ui/ProfileTypeSwitcher'
 import { ProfileSidebar } from './components/ui/ProfileSidebar'
 import FreeProfileForm from './components/forms/FreeProfileForm'
-import ProProfileForm from './components/forms/ProProfileForm'
+import ProProfileForm from './components/ui/forms/ProProfileForm'
 import GroupProfileForm from './components/forms/GroupProfileForm'
 import { PanelContainer } from '@/components/panels/PanelContainer'
 import { FormSkeleton } from '@/components/ui/skeletons/FormSkeleton'
-import { ProfileTier } from '@/types/profile'
+import { ProfileTier } from '@/app/api/types/profile'
 import { getStepsForTier } from '@/app/[locale]/(authenticated)/profile/steps'
 import Image from 'next/image'
 import { toast } from 'sonner'
@@ -132,9 +132,6 @@ export default function ProfilePage() {
 
   // Determine actual tier based on NFT ownership
   const actualTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
-  console.log('NFT Status:', { hasGroup, hasPro })
-  console.log('Actual Tier:', actualTier)
-  console.log('Steps:', getStepsForTier(actualTier))
 
   const renderActiveForm = () => {
     switch (actualTier) {
@@ -165,7 +162,6 @@ export default function ProfilePage() {
               currentStep={activeSection}
               setCurrentStep={setActiveSection}
               steps={getStepsForTier(actualTier)}
-              tier={actualTier}
             />
 
             {actualTier !== ProfileTier.FREE && getTierImage() && (

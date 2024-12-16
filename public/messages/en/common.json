@@ -1,0 +1,283 @@
+{
+  "app": {
+    "name": "CookMore",
+    "description": "Decentralized Recipe Management",
+    "tagline": "Cook, Share, Earn"
+  },
+  "language": {
+    "select": "Select Language",
+    "switch": "Switch Language",
+    "suggestion": "Would you like to switch to {language}?",
+    "current": "Current Language",
+    "controls": "Language Controls"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "decline": "No, thanks"
+  },
+  "ipfs": {
+    "upload": {
+      "start": "Starting Upload...",
+      "progress": "Uploading: {progress}%",
+      "success": "Upload Complete",
+      "error": "Upload Failed"
+    },
+    "download": {
+      "start": "Downloading...",
+      "success": "Download Complete",
+      "error": "Download Failed"
+    },
+    "gateway": {
+      "pinata": "Pinata Gateway",
+      "infura": "Infura Gateway",
+      "fallback": "Fallback Gateway"
+    }
+  },
+  "nft": {
+    "mint": {
+      "start": "Starting Mint...",
+      "pending": "Transaction Pending...",
+      "success": "NFT Minted Successfully",
+      "error": "Mint Failed"
+    },
+    "tiers": {
+      "check": "Checking Tier Status...",
+      "update": "Tier Status Updated",
+      "error": "Error Checking Tier"
+    }
+  },
+  "service": {
+    "loading": "Loading profile...",
+    "loaded": "Profile loaded successfully",
+    "error": "Error loading profile",
+    "updating": "Updating profile...",
+    "updated": "Profile updated successfully",
+    "updateError": "Error updating profile",
+    "upgrading": "Upgrading profile...",
+    "upgraded": "Profile upgraded successfully",
+    "upgradeError": "Error upgrading profile"
+  },
+  "createProfile": "Create Profile",
+  "basicInfo": {
+    "name": {
+      "label": "Name",
+      "placeholder": "Enter your name",
+      "required": "Name is required",
+      "tooShort": "Name must be at least 2 characters",
+      "tooLong": "Name must be less than 50 characters"
+    },
+    "bio": {
+      "label": "Bio",
+      "placeholder": "Tell us about yourself"
+    },
+    "location": {
+      "label": "Location",
+      "placeholder": "Where are you based?"
+    },
+    "website": {
+      "label": "Website",
+      "placeholder": "Your website URL"
+    },
+    "social": {
+      "twitter": {
+        "label": "Twitter",
+        "placeholder": "Your Twitter handle"
+      }
+    }
+  },
+  "tier": {
+    "checking": "Checking tier status...",
+    "checked": "Tier status checked",
+    "current": "Current Tier",
+    "upgrade": "Upgrade Available",
+    "mintPro": "Mint Pro NFT",
+    "mintGroup": "Mint Group NFT",
+    "mintSuccess": "Successfully minted NFT",
+    "mintError": "Error checking tier status"
+  },
+  "routing": {
+    "createGroup": "Creating Group Profile",
+    "createPro": "Creating Pro Profile",
+    "createFree": "Creating Free Profile",
+    "upgrade": "Profile Upgrade Available",
+    "error": "Error in Profile Routing"
+  },
+  "errors": {
+    "needGroupNFT": "You need a Group NFT to create a group profile",
+    "needProNFT": "You need a Pro NFT to create a pro profile",
+    "tierMismatch": "Your current tier does not match the required tier",
+    "invalidTier": "Invalid tier selected"
+  },
+  "create": {
+    "uploading": "Uploading profile data...",
+    "metadata": "Creating metadata...",
+    "profile": "Creating profile...",
+    "success": "Profile created successfully",
+    "error": "Error creating profile"
+  },
+  "update": {
+    "uploading": "Uploading profile data...",
+    "metadata": "Updating metadata...",
+    "profile": "Updating profile...",
+    "success": "Profile updated successfully",
+    "error": "Failed to update profile"
+  },
+  "loading": "Loading profile...",
+  "loaded": "Profile loaded",
+  "error": "Failed to load profile",
+  "changelog": {
+    "entry": {
+      "adding": "Adding Entry...",
+      "added": "Entry Added Successfully",
+      "error": "Failed to Add Entry"
+    },
+    "entries": {
+      "loading": "Loading Entries...",
+      "error": "Failed to Load Entries"
+    }
+  },
+  "wallet": {
+    "connect": "Connect Wallet",
+    "disconnect": "Disconnect Wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "network": {
+      "title": "Network",
+      "base": "Base",
+      "baseSepolia": "Base Sepolia",
+      "unsupported": "Unsupported Network"
+    },
+    "types": {
+      "embedded": "Embedded Wallet",
+      "coinbase": "Coinbase Wallet",
+      "other": "External Wallet"
+    },
+    "errors": {
+      "connect": "Failed to connect wallet",
+      "disconnect": "Failed to disconnect wallet",
+      "network": "Please switch to a supported network"
+    }
+  },
+  "form": {
+    "culinaryInfo": {
+      "title": "Culinary Information",
+      "expertise": {
+        "label": "Expertise Level",
+        "placeholder": "Select your expertise level",
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "professional": "Professional"
+      },
+      "specialties": {
+        "label": "Specialties",
+        "placeholder": "Select your specialties",
+        "baking": "Baking",
+        "grilling": "Grilling",
+        "pastry": "Pastry",
+        "sauces": "Sauces",
+        "seafood": "Seafood",
+        "vegan": "Vegan",
+        "desserts": "Desserts",
+        "fermentation": "Fermentation"
+      },
+      "dietary": {
+        "label": "Dietary Preferences",
+        "placeholder": "Select dietary preferences",
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "glutenFree": "Gluten-Free",
+        "dairyFree": "Dairy-Free",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "halal": "Halal",
+        "kosher": "Kosher"
+      },
+      "cuisine": {
+        "label": "Cuisine Types",
+        "placeholder": "Select cuisine types",
+        "italian": "Italian",
+        "french": "French",
+        "japanese": "Japanese",
+        "chinese": "Chinese",
+        "indian": "Indian",
+        "mexican": "Mexican",
+        "thai": "Thai",
+        "mediterranean": "Mediterranean"
+      },
+      "techniques": {
+        "label": "Techniques",
+        "placeholder": "Select your techniques",
+        "sousVide": "Sous Vide",
+        "smoking": "Smoking",
+        "fermentation": "Fermentation",
+        "molecularGastronomy": "Molecular Gastronomy",
+        "knifeSkills": "Knife Skills",
+        "butchery": "Butchery",
+        "breadMaking": "Bread Making",
+        "pastryTechniques": "Pastry Techniques"
+      },
+      "equipment": {
+        "label": "Equipment",
+        "placeholder": "Select your equipment",
+        "sousVide": "Sous Vide Machine",
+        "smoker": "Smoker",
+        "standMixer": "Stand Mixer",
+        "foodProcessor": "Food Processor",
+        "dehydrator": "Dehydrator",
+        "immersionBlender": "Immersion Blender",
+        "pressureCooker": "Pressure Cooker",
+        "pizzaOven": "Pizza Oven"
+      }
+    },
+    "education": {
+      "title": "Education & Certifications",
+      "description": "Share your culinary education and certifications",
+      "institution": {
+        "label": "School/Institution",
+        "placeholder": "Culinary Institute of America",
+        "required": "Institution is required"
+      },
+      "degree": {
+        "label": "Degree/Certification",
+        "placeholder": "Bachelor of Culinary Arts"
+      },
+      "field": {
+        "label": "Field of Study",
+        "placeholder": "Culinary Arts"
+      },
+      "startYear": {
+        "label": "Start Year",
+        "placeholder": "2020",
+        "required": "Start year is required"
+      },
+      "endYear": {
+        "label": "End Year",
+        "placeholder": "2024"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "New York, NY"
+      },
+      "status": {
+        "label": "Status",
+        "placeholder": "Select status",
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "planned": "Planned"
+      }
+    }
+  }
+}
