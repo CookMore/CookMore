@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAccount, useConnect, useDisconnect, useChainId } from 'wagmi'
 import { usePrivy } from '@privy-io/react-auth'
-import { chainIds } from '@/lib/web3/config/chains'
+import { chainIds } from '@/app/api/web3/config/chains'
 import { toast } from 'sonner'
 
 export interface WalletHookResult {
@@ -36,7 +36,7 @@ export function useWalletState(): WalletHookResult {
 
   const handleConnect = useCallback(async () => {
     try {
-      const coinbaseConnector = connectors.find(c => c.name === 'Coinbase Wallet')
+      const coinbaseConnector = connectors.find((c) => c.name === 'Coinbase Wallet')
       if (coinbaseConnector) {
         await connect({ connector: coinbaseConnector })
         toast.success('Wallet connected successfully')

@@ -40,7 +40,7 @@ export function useAdminCheck() {
     initialCheckComplete.current = true
 
     // If we're on an admin route and not admin, redirect immediately
-    const isAdminRoute = pathname?.startsWith('/admin')
+    const isAdminRoute = pathname?.startsWith('/admin') || pathname?.includes('/tier')
     if (isAdminRoute && !adminStatus && !navigationInProgress.current) {
       console.log('useAdminCheck: Initial redirect - not admin')
       navigationInProgress.current = true
@@ -63,7 +63,7 @@ export function useAdminCheck() {
   useEffect(() => {
     if (!ready || isLoading || !initialCheckComplete.current) return
 
-    const isAdminRoute = pathname?.startsWith('/admin')
+    const isAdminRoute = pathname?.startsWith('/admin') || pathname?.includes('/tier')
     console.log('useAdminCheck: Route Protection Check', {
       isAdminRoute,
       isAdmin,

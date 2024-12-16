@@ -1,4 +1,4 @@
-import { IconChefHat, IconStar, IconBuilding } from '@/components/ui/icons'
+import { IconChefHat, IconStar, IconBuilding } from '@/app/api/icons'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export const tierInfo = {

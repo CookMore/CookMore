@@ -4,7 +4,7 @@
 import { useState } from 'react'
 
 // Custom hooks
-import { useNFTTiers } from '@/hooks/useNFTTiers'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { useTierMint } from '@/lib/web3/hooks/useTierMint'
 import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { toast } from 'sonner'

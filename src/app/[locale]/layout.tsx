@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   // Validate locale parameter
-  const locale = (await Promise.resolve(params?.locale)) || defaultLocale
+  const locale = await Promise.resolve(params?.locale || defaultLocale)
   const validLocale = locales.includes(locale) ? locale : defaultLocale
 
   // In development, be more lenient with locale validation

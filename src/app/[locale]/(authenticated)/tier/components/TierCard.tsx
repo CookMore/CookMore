@@ -1,10 +1,10 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/app/api/utils/utils'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { TierMintDapp } from '@/components/dapps/tier/TierMintDapp'
-import { IconCheck } from '@/components/ui/icons'
-import { tierInfo, tierStyles, isPaidTier } from '@/lib/tiers'
+import { TierMintDapp } from '@/app/[locale]/(authenticated)/tier/dapp/TierMintDapp'
+import { IconCheck } from '@/app/api/icons'
+import { tierInfo, isPaidTier, tierStyles } from '@/app/api/tiers/tiers'
 
 interface TierCardProps {
   tier: ProfileTier

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { cn } from '@/lib/utils'
+import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
+import { cn } from '@/app/api/utils/utils'
 
 interface BasePageLayoutProps {
   children: React.ReactNode

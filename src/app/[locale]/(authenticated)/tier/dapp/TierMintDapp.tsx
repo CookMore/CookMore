@@ -12,19 +12,19 @@ import {
   IconAlertTriangle,
   IconChevronRight,
   IconSpinner,
-} from '@/components/ui/icons'
-import { cn } from '@/lib/utils'
+} from '@/app/api/icons'
+import { cn } from '@/app/api/utils/utils'
 
 // Web3 Imports
-import { TIER_CONTRACT_ABI } from '@/lib/web3/abis/TierContracts'
-import { TIER_CONTRACT_ADDRESS } from '@/lib/web3/addresses/contracts'
-import { SUPPORTED_CHAINS } from '@/lib/web3/config/chains'
-import { useWalletState } from '@/lib/web3/features/wallet'
-import { useNFTTiers } from '@/lib/web3/features/tier'
+import { TIER_CONTRACT_ABI } from '@/app/api/web3/abis/TierContracts'
+import { TIER_CONTRACT_ADDRESS } from '@/app/api/web3/addresses/contracts'
+import { SUPPORTED_CHAINS } from '@/app/api/web3/config/chains'
+import { useWalletState } from '@/app/api/web3/hooks/wallet/useWalletState'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 
 // Types and Constants
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { tierInfo, tierStyles } from '@/lib/tiers'
+import { tierInfo, tierStyles } from '@/app/api/tiers/tiers'
 
 interface TierMintDappProps {
   onMintSuccess?: () => void

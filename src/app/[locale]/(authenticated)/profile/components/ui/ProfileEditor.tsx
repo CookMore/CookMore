@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { useNFTTiers } from '@/hooks/useNFTTiers'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { usePrivy } from '@privy-io/react-auth'
 import { Suspense, startTransition } from 'react'

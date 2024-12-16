@@ -15,13 +15,12 @@ import {
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 
 export function AuthButton() {
-  const { login, logout, isAuthenticated, ready, user, profile, getProfileTier } = useAuth()
+  const { login, logout, isAuthenticated, ready, user, profile } = useAuth()
   const router = useRouter()
 
-  const handleProfileClick = async () => {
+  const handleProfileClick = () => {
     if (!profile) {
-      const tier = await getProfileTier(user?.wallet?.address || '')
-      router.push(`${ROUTES.AUTH.PROFILE.CREATE}?tier=${tier}`)
+      router.push(ROUTES.AUTH.PROFILE.CREATE)
     } else {
       router.push(ROUTES.AUTH.PROFILE.HOME)
     }

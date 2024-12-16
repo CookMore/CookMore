@@ -13,7 +13,7 @@ export const ROUTES = {
     LOGIN: '/login',
     KITCHEN: {
       HOME: '/kitchen',
-      CLUB: '/kitchen/club',
+      CLUB: '/club',
     },
     CALENDAR: '/calendar',
     EXPLORE: '/explore',

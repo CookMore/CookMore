@@ -1,17 +1,26 @@
 'use client'
 
-import { useNFTTiers } from '@/app/api/web3/tier'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { TierCard } from './components/TierCard'
 import { IconStar } from '@/app/api/icons'
+import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
 
 export default function TierPage() {
   const { hasGroup, hasPro, isLoading, refetch } = useNFTTiers()
+  const { isAdmin } = useAdminCheck()
   const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
 
   const handleMintSuccess = () => {
     refetch()
   }
+
+  if (!isAdmin) {
+    return null
+  }
+
+  // Create an array of tier values to ensure we're using the enum values correctly
+  const tiers = [ProfileTier.FREE, ProfileTier.PRO, ProfileTier.GROUP]
 
   return (
     <div className='container mx-auto px-4 py-12'>
@@ -29,7 +38,7 @@ export default function TierPage() {
 
       {/* Tier Cards */}
       <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
-        {Object.values(ProfileTier).map((tier) => (
+        {tiers.map((tier) => (
           <TierCard
             key={tier}
             tier={tier}
