@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAccount, useContractRead } from 'wagmi'
-import { useNFTTiers } from '@/app/api/web3/tier'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { useProfileRegistry } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { PROFILE_REGISTRY_ABI } from '@/app/api/web3/abis/profile'
@@ -42,45 +42,20 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     setMounted(true)
   }, [])
 
-  // Log wallet connection status
-  useEffect(() => {
-    if (mounted) {
-      console.log('Wallet connection status:', {
-        address,
-        isConnected,
-      })
-    }
-  }, [mounted, address, isConnected])
-
-  // Log tier status
-  useEffect(() => {
-    if (mounted && !tiersLoading) {
-      console.log('NFT tier status:', {
-        currentTier,
-        tiersLoading,
-      })
-    }
-  }, [mounted, currentTier, tiersLoading])
-
   // Use wagmi's useContractRead for profile data
   const { data: profileData, isError } = useContractRead({
     address: contract?.address as `0x${string}`,
     abi: PROFILE_REGISTRY_ABI,
     functionName: 'getProfile',
     args: address ? [address] : undefined,
-    enabled: !!address && !!contract?.address,
-    onSuccess(data) {
-      console.log('Profile data fetched:', data)
-    },
-    onError(error) {
-      console.error('Error fetching profile:', error)
-    },
+    enabled: mounted && !!address && !!contract?.address,
   })
 
   // Update profile state when data changes
   useEffect(() => {
+    if (!mounted) return
+
     if (profileData) {
-      console.log('Processing profile data:', profileData)
       setHasProfile(profileData.exists)
       if (profileData.exists) {
         setProfile({
@@ -91,26 +66,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         })
       }
     } else if (isError) {
-      console.log('Profile data error or not found')
       setHasProfile(false)
       setProfile(undefined)
     }
-  }, [profileData, isError, address])
+  }, [profileData, isError, address, mounted])
 
   // Don't render anything until mounted
   if (!mounted) return null
-
-  // Implement token gating
-  const canAccess = isConnected && (currentTier >= ProfileTier.FREE || hasProfile)
-
-  if (!canAccess) {
-    console.log('Access denied:', {
-      isConnected,
-      currentTier,
-      hasProfile,
-    })
-    return <div>Please connect your wallet and ensure you have the required NFT tier.</div>
-  }
 
   return (
     <ProfileContext.Provider

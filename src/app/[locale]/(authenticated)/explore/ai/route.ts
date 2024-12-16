@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { aiService } from '@/app/api/services/ai-service'
 
 export const runtime = 'edge'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { ipfsService } from '@/lib/services/ipfs-service'
 
 export function useFinalImage() {

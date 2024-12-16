@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { useTheme } from '@/app/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/ThemeProvider'
 import { forwardRef } from 'react'
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}

@@ -342,10 +342,7 @@ export interface Profile {
 
 // Form Data Type
 export interface ProfileFormData
-  extends Omit<
-    BaseProfileMetadata,
-    'version' | 'social' | 'preferences' | 'culinaryInfo' | 'achievements'
-  > {
+  extends Omit<BaseProfileMetadata, 'version' | 'social' | 'preferences' | 'achievements'> {
   tier: ProfileTier
   education?: Array<{
     institution: string

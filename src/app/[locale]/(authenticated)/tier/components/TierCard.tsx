@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { TierMintDapp } from '@/components/dapps/tier/TierMintDapp'
 import { IconCheck } from '@/components/ui/icons'
 import { tierInfo, tierStyles, isPaidTier } from '@/lib/tiers'

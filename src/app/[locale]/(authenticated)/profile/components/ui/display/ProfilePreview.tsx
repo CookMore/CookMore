@@ -3,8 +3,8 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/button'
 import { ProfileCard } from '../ui/ProfileCard'
-import { ProfileTier } from '@/app/api/types/profile'
-import type { GroupProfileMetadata } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/lib/utils/utils'
 import {
   IconUser,

@@ -4,7 +4,7 @@ import { Control, FieldErrors } from 'react-hook-form'
 import { FormSection } from '@/app/api/form/FormSection'
 import { FormMultiSelect } from '@/app/api/form/FormMultiSelect'
 import { IconLanguage } from '@/app/api/icons'
-import type { ProProfileMetadata } from '@/app/api/types/profile'
+import type { ProProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface LanguagesSectionProps {
   control: Control<ProProfileMetadata>

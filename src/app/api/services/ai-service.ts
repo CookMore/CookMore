@@ -1,4 +1,4 @@
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { AIMessage, AIStreamResponse } from '@/app/api/types/ai'
 import OpenAI from 'openai'
 

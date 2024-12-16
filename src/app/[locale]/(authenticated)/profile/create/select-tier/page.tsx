@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/app/api/routes/routes'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export default function SelectTierPage() {
   const router = useRouter()

@@ -5,7 +5,7 @@ import { useProfileRegistry } from '@/lib/web3/hooks/useProfileRegistry'
 import { Button } from '@/components/ui/button'
 import { FormInput } from '@/components/ui/form/FormInput'
 import { toast } from 'sonner'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export function ProfileManager() {
   const [profileId, setProfileId] = useState('')

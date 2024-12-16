@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { format } from 'date-fns'
 import Image from 'next/image'
 import {

@@ -3,7 +3,7 @@
 import { useNFTTiers } from '@/app/api/web3'
 import { TierBadge } from '@/components/ui/TierBadge'
 import { TierCard } from '@/components/ui/TierCard'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 

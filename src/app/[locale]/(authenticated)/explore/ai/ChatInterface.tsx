@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { TypingIndicator } from './TypingIndicator'
 import { cn } from '@/app/api/utils'
 import type { AIMessage } from '@/app/api/types/ai'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { ROUTES } from '@/lib/routes'
 
 const TIER_WELCOME_MESSAGES = {

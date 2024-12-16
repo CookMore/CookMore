@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { FormInput } from '@/components/ui/form/FormInput'
 import { FormTextarea } from '@/components/ui/form/FormTextarea'
 import { toast } from 'sonner'
-import { type Profile } from '@/app/api/types/profile'
+import { type Profile } from '@/app/[locale]/(authenticated)/profile/profile'
 import { profileSchema } from '@/lib/validations/profile.validation'
 
 interface ProfileEditorProps {

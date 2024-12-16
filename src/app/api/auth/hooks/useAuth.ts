@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { useEffect, useCallback } from 'react'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
-import { useProfileData } from '@/app/api/providers/ProfileProvider'
 import { ROUTES } from '@/app/api/routes/routes'
 
 export function useAuth() {
@@ -13,7 +12,7 @@ export function useAuth() {
 
   useEffect(() => {
     if (ready && authenticated && !hasProfile) {
-      router.push(ROUTES.CREATE_PROFILE)
+      router.push(ROUTES.AUTH.PROFILE.CREATE)
     }
   }, [ready, authenticated, hasProfile, router])
 
@@ -28,7 +27,7 @@ export function useAuth() {
   const handleLogout = useCallback(async () => {
     try {
       await privyLogout()
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.MARKETING.HOME)
     } catch (error) {
       console.error('Logout error:', error)
     }
@@ -39,6 +38,7 @@ export function useAuth() {
     logout: handleLogout,
     isAuthenticated: authenticated,
     isLoading: !ready,
+    ready,
     user,
     hasProfile,
     profile,

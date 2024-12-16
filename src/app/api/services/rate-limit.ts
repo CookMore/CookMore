@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { TIER_LIMITS } from './ai-service'
 
 export class RateLimiter {

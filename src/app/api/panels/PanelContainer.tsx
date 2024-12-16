@@ -53,7 +53,7 @@ export function PanelContainer({ children }: PanelContainerProps) {
       <div className='w-full bg-github-canvas-default z-[45] relative'>{children}</div>
       <div
         className={cn(
-          'sticky right-0 top-14 h-[calc(100vh-4rem)] bg-github-canvas-default border-l border-github-border-default transition-all duration-300 ease-in-out z-[45]',
+          'sticky right-0 top-0 h-[calc(100vh-4rem)] bg-github-canvas-default border-l border-github-border-default transition-all duration-300 ease-in-out z-[45]',
           theme === 'neo' && [
             'neo-border border-r-0',
             'before:absolute before:inset-0 before:bg-github-canvas-default before:-z-10',

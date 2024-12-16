@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { tierInfo as tierConfiguration } from '@/lib/tiers'

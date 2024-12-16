@@ -1,4 +1,4 @@
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export const tierInfo = {
   [ProfileTier.FREE]: {

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ProfileMetadata, ProfileTier } from '@/app/api/types/profile'
+import type { ProfileMetadata, ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { ipfsService, type IpfsGateway } from '@/app/api/services/ipfs-service'
 
 class ProfileIpfsService {

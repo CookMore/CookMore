@@ -1,6 +1,6 @@
 'use client'
 
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { IconCheck, IconLoader, IconAlertCircle } from '@/components/ui/icons'
 import { format } from 'date-fns'
 

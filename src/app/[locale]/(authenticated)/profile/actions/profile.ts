@@ -11,7 +11,7 @@ import type {
   ProProfileMetadata,
   GroupProfileMetadata,
   ProfileTier,
-} from '@/app/api/types/profile'
+} from '@/app/[locale]/(authenticated)/profile/profile'
 import { revalidatePath } from 'next/cache'
 
 // Add type for contract methods

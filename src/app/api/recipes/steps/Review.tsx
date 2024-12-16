@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { RecipePreview } from '../RecipePreview'
 import { IconSpinner, IconCheck } from '@/components/ui/icons'
 import { StepComponentProps } from './index'

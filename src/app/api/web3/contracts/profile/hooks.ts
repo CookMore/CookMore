@@ -6,7 +6,7 @@ import { PROFILE_REGISTRY_CONFIG, METADATA_CONFIG } from './config'
 import { type ProfileHookResult } from './types'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export function useProfileContract(): ProfileHookResult {
   const t = useTranslations('profile')

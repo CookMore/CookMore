@@ -1,7 +1,7 @@
 'use client'
 
 import { type Address } from 'viem'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export interface ProfileRegistryContract {
   address: Address

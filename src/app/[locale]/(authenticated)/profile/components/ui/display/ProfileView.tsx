@@ -1,10 +1,10 @@
 'use client'
 
-import { useProfile } from '@/app/providers/ProfileProvider'
+import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { ProfileEditor } from './ProfileEditor'
 import { ProfileDisplay } from './ProfileDisplay'
 import { useOptimistic, useState } from 'react'
-import { type Profile } from '@/app/api/types/profile'
+import { type Profile } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface ProfileViewProps {
   address?: string

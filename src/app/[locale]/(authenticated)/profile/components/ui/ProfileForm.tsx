@@ -28,7 +28,7 @@ import type {
   FreeProfileMetadata,
   ProProfileMetadata,
   GroupProfileMetadata,
-} from '@/app/api/types/profile'
+} from '@/app/[locale]/(authenticated)/profile/profile'
 import BasicInfoSection from './BasicInfoSection'
 import EducationSection from './EducationSection'
 import CulinaryInfoSection from './CulinaryInfoSection'
@@ -45,10 +45,10 @@ import ComplianceSection from './ComplianceSection'
 import { cn } from '@/lib/utils/utils'
 import ProfilePreview from './ProfilePreview'
 import { useProfileForm, shouldShowField } from '@/hooks/useProfileForm'
-import { ProfileTier } from '@/app/api/types/profile'
-import { useTheme } from '@/app/providers/ThemeProvider'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+import { useTheme } from '@/app/api/providers/ThemeProvider'
 import type { Control, FieldErrors } from 'react-hook-form'
-import type { ProfileFormData } from '@/app/api/types/profile'
+import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useAccount } from 'wagmi'
 
 // Map icons to steps

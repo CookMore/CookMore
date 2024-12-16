@@ -2,7 +2,7 @@
 
 import { useFormStatus } from 'react-dom'
 import { useNFTTiers } from '@/hooks/useNFTTiers'
-import { useProfile } from '@/app/providers/ProfileProvider'
+import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { usePrivy } from '@privy-io/react-auth'
 import { Suspense, startTransition } from 'react'
 import { BaseNameDisplay } from './BaseNameDisplay'

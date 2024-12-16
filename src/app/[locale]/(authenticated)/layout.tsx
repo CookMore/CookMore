@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { useNFTTiers } from '@/app/api/web3/tier'
-import { LoadingScreen } from '@/app/api/loading/LoadingScreen'
+import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
 import { PanelProvider } from '@/app/api/providers/PanelProvider'
 import { PanelContainer } from '@/app/api/panels/PanelContainer'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ClientLayout } from '@/app/api/layouts/ClientLayout'
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -35,30 +34,71 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     }
   }, [ready, authenticated, profileLoading, profile, router])
 
-  // Show loading screen while initializing
+  // Show loading skeleton while initializing
   if (!ready || !authenticated) {
-    return <LoadingScreen message='Connecting to your wallet...' />
+    return (
+      <div className='flex min-h-screen items-center justify-center p-4'>
+        <div className='w-full max-w-md'>
+          <LoadingSkeleton className='space-y-6'>
+            <div className='h-8 bg-github-canvas-subtle rounded w-3/4 mx-auto' />
+            <div className='space-y-4'>
+              <div className='h-12 bg-github-canvas-subtle rounded' />
+              <div className='h-12 bg-github-canvas-subtle rounded' />
+            </div>
+          </LoadingSkeleton>
+        </div>
+      </div>
+    )
   }
 
-  // Show loading while checking profile
+  // Show loading skeleton while checking profile
   if (profileLoading) {
-    return <LoadingScreen message='Loading your profile...' />
+    return (
+      <div className='flex min-h-screen items-center justify-center p-4'>
+        <div className='w-full max-w-md'>
+          <LoadingSkeleton className='space-y-6'>
+            <div className='h-8 bg-github-canvas-subtle rounded w-1/2 mx-auto' />
+            <div className='space-y-4'>
+              <div className='h-16 bg-github-canvas-subtle rounded' />
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='h-12 bg-github-canvas-subtle rounded' />
+                <div className='h-12 bg-github-canvas-subtle rounded' />
+              </div>
+            </div>
+          </LoadingSkeleton>
+        </div>
+      </div>
+    )
   }
 
-  // Show loading while checking NFT tiers
+  // Show loading skeleton while checking NFT tiers
   if (tiersLoading) {
-    return <LoadingScreen message='Checking membership status...' />
+    return (
+      <div className='flex min-h-screen items-center justify-center p-4'>
+        <div className='w-full max-w-md'>
+          <LoadingSkeleton className='space-y-6'>
+            <div className='h-8 bg-github-canvas-subtle rounded w-2/3 mx-auto' />
+            <div className='space-y-4'>
+              <div className='h-20 bg-github-canvas-subtle rounded' />
+              <div className='grid grid-cols-3 gap-4'>
+                <div className='h-10 bg-github-canvas-subtle rounded' />
+                <div className='h-10 bg-github-canvas-subtle rounded' />
+                <div className='h-10 bg-github-canvas-subtle rounded' />
+              </div>
+            </div>
+          </LoadingSkeleton>
+        </div>
+      </div>
+    )
   }
 
   // Main layout once everything is ready
   return (
     <PanelProvider>
-      <ClientLayout>
-        <div className='flex min-h-full'>
-          <div className='flex-1'>{children}</div>
-          <PanelContainer />
-        </div>
-      </ClientLayout>
+      <div className='flex min-h-full'>
+        <div className='flex-1'>{children}</div>
+        <PanelContainer />
+      </div>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
     </PanelProvider>
   )

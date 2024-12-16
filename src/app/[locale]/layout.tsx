@@ -1,13 +1,8 @@
 import { defaultLocale, locales, getMessages } from '@/i18n'
 import { Providers } from '@/app/api/providers/providers'
 import { notFound } from 'next/navigation'
-import { TooltipProvider } from '@radix-ui/react-tooltip'
-import { Toaster } from 'sonner'
-import { ErrorBoundaryWrapper } from '@/app/api/error/ErrorBoundaryWrapper'
-import { Header } from '@/app/api/header/Header'
-import { Header as MarketingHeader } from '@/app/api/header/marketing/Header'
-import { FooterWrapper } from '@/app/api/footer/FooterWrapper'
-import { LanguageUI } from '@/app/api/language/LanguageUI'
+import { ClientLayout } from '@/app/api/layouts/ClientLayout'
+import { dehydrate, QueryClient } from '@tanstack/react-query'
 
 interface LocaleLayoutProps {
   children: React.ReactNode
@@ -20,7 +15,7 @@ export async function generateStaticParams() {
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   // Validate locale parameter
-  const locale = params?.locale || defaultLocale
+  const locale = (await Promise.resolve(params?.locale)) || defaultLocale
   const validLocale = locales.includes(locale) ? locale : defaultLocale
 
   // In development, be more lenient with locale validation
@@ -33,24 +28,15 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   // Get messages for the locale
   const messages = await getMessages(validLocale)
 
+  // Initialize QueryClient
+  const queryClient = new QueryClient()
+  const dehydratedState = dehydrate(queryClient)
+
   return (
     <html lang={validLocale}>
       <body>
-        <Providers messages={messages} locale={validLocale}>
-          <TooltipProvider>
-            <div className='flex min-h-screen flex-col'>
-              <ErrorBoundaryWrapper name='root'>
-                <Header />
-                <MarketingHeader />
-                <main className='flex-1 overflow-y-auto'>
-                  <LanguageUI />
-                  {children}
-                </main>
-                <FooterWrapper />
-              </ErrorBoundaryWrapper>
-              <Toaster />
-            </div>
-          </TooltipProvider>
+        <Providers messages={messages} locale={validLocale} dehydratedState={dehydratedState}>
+          <ClientLayout>{children}</ClientLayout>
         </Providers>
       </body>
     </html>

@@ -23,7 +23,7 @@ import { useWalletState } from '@/lib/web3/features/wallet'
 import { useNFTTiers } from '@/lib/web3/features/tier'
 
 // Types and Constants
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { tierInfo, tierStyles } from '@/lib/tiers'
 
 interface TierMintDappProps {

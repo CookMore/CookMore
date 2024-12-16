@@ -6,7 +6,7 @@ import { useState } from 'react'
 // Custom hooks
 import { useNFTTiers } from '@/hooks/useNFTTiers'
 import { useTierMint } from '@/lib/web3/hooks/useTierMint'
-import { useProfile } from '@/app/providers/ProfileProvider'
+import { useProfile } from '@/app/api/providers/ProfileProvider'
 import { toast } from 'sonner'
 
 // Components
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 // Types
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface ProfileTypeSwitcherProps {
   hasPro: boolean

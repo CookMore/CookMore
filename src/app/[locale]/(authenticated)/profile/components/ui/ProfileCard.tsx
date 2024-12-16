@@ -1,7 +1,7 @@
 'use client'
 
 import { IconUser, IconBook, IconChefHat } from '@/components/ui/icons'
-import type { GroupProfileMetadata } from '@/app/api/types/profile'
+import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/lib/utils/utils'
 import { ipfsService } from '@/lib/services/ipfs-service'
 

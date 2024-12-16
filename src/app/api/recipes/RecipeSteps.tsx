@@ -23,9 +23,10 @@ import {
   Review,
   Mint,
 } from './steps'
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { SavingIndicator } from './SavingIndicator'
 import { validateStep } from '../../../[locale]/(authenticated)/recipe/validations/validation'
+import { LoadingSkeleton } from '@/app/api/components/ui/LoadingSkeleton'
 import type { RecipeData } from '@/app/api/types/recipe'
 
 const STEPS = [
@@ -58,7 +59,7 @@ interface RecipeStepsProps {
 
 export function RecipeSteps({ currentStep, setCurrentStep }: RecipeStepsProps) {
   const [errors, setErrors] = useState<Record<string, string[]>>({})
-  const { recipeData, updateRecipe } = useRecipe()
+  const { recipeData, updateRecipe, isLoading } = useRecipe()
 
   useEffect(() => {
     console.log('RecipeSteps mounted', {
@@ -74,6 +75,26 @@ export function RecipeSteps({ currentStep, setCurrentStep }: RecipeStepsProps) {
   if (!CurrentStepComponent) {
     console.error('Step component not found:', { currentStep, STEPS })
     return <div>Error: Step not found</div>
+  }
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <LoadingSkeleton className='space-y-8'>
+          <div className='space-y-4'>
+            <div className='h-8 bg-github-canvas-subtle rounded w-1/2 mx-auto' />
+            <div className='h-2 bg-github-canvas-subtle rounded w-3/4 mx-auto' />
+          </div>
+          <div className='space-y-6'>
+            <div className='h-24 bg-github-canvas-subtle rounded' />
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='h-12 bg-github-canvas-subtle rounded' />
+              <div className='h-12 bg-github-canvas-subtle rounded' />
+            </div>
+          </div>
+        </LoadingSkeleton>
+      </PageContainer>
+    )
   }
 
   const handleNext = async () => {
@@ -149,10 +170,8 @@ interface PageContainerProps {
 
 export function PageContainer({ children }: PageContainerProps) {
   return (
-    <div className='flex justify-center w-[calc(100%-1rem)]'>
-      <div className='w-[calc(100%-5rem)] lg:w-[calc(100%-16rem)] max-w-5xl transition-all duration-300 ml-4 lg:ml-16'>
-        {children}
-      </div>
+    <div className='flex justify-center w-full px-4 py-6'>
+      <div className='w-full max-w-3xl'>{children}</div>
     </div>
   )
 }

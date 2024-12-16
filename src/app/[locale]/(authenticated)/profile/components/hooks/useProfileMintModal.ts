@@ -1,7 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface ProfileMintModalStore {
   isOpen: boolean

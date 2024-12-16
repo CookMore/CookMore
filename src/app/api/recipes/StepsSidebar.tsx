@@ -1,6 +1,6 @@
 'use client'
 
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 import { validateStep } from '../../../[locale]/(authenticated)/recipe/validations/validation'
 import { IconChevronLeft } from '@/components/ui/icons'
 import { STEPS } from './steps'

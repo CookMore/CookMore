@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
@@ -11,7 +12,6 @@ import { useNFTTiers } from '@/app/api/web3/tier'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/app/api/utils/utils'
 import { ThemeToggle } from '@/app/api/components/ui/ThemeToggle'
-import { Suspense } from 'react'
 
 function AuthenticatedHeader() {
   const { isAuthenticated, profile, ready } = useAuth()
@@ -45,14 +45,36 @@ function AuthenticatedHeader() {
   )
 }
 
+function MarketingHeader() {
+  const { isAuthenticated, profile } = useAuth()
+
+  return (
+    <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default'>
+      <div className='container flex h-16 items-center'>
+        <div className='mr-4'>
+          <Link href='/' className='flex items-center space-x-2'>
+            <span className='font-bold'>CookMore</span>
+          </Link>
+        </div>
+
+        <nav className='flex flex-1'>
+          <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
+        </nav>
+
+        <div className='flex items-center space-x-4'>
+          <ThemeToggle />
+          <AuthButton />
+        </div>
+      </div>
+    </header>
+  )
+}
+
 function HeaderContent() {
   const pathname = usePathname()
-
-  // Only show on authenticated routes
   const isAuthenticatedRoute = pathname?.includes('(authenticated)')
-  if (!isAuthenticatedRoute) return null
 
-  return <AuthenticatedHeader />
+  return isAuthenticatedRoute ? <AuthenticatedHeader /> : <MarketingHeader />
 }
 
 export function Header() {

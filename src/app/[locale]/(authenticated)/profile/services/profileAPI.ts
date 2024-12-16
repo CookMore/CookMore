@@ -5,7 +5,7 @@ import {
   type EdgeServiceConfig,
   type ServiceResponse,
 } from '@/app/api/edge/services/base'
-import type { Profile } from '@/app/api/types/profile'
+import type { Profile } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export interface ProfileApiConfig extends EdgeServiceConfig {
   apiEndpoint?: string

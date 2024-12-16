@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ProfileTier } from '@/app/api/types/profile'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useNFTTiers } from '@/lib/web3'
 import { useState } from 'react'
 import { useWalletClient } from 'wagmi'

@@ -5,7 +5,7 @@ import { BaseStep } from './BaseStep'
 import { IconClock, IconAlertCircle } from '@/components/ui/icons'
 import { useBasicInfo } from '@/app/api/hooks/useBasicInfo'
 import { StepComponentProps } from './index'
-import { useRecipe } from '@/app/providers/RecipeProvider'
+import { useRecipe } from '@/app/api/providers/RecipeProvider'
 
 interface TimeUnit {
   value: number

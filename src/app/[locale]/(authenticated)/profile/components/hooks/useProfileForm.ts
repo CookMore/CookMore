@@ -8,7 +8,7 @@ import type {
   FreeProfileMetadata,
   ProProfileMetadata,
   GroupProfileMetadata,
-} from '@/app/api/types/profile'
+} from '@/app/[locale]/(authenticated)/profile/profile'
 
 export function useProfileForm<T extends ProfileMetadata>(address: string, tier: ProfileTier) {
   const { profile, updateProfile, isLoading, isUpdating } = useProfile(address)

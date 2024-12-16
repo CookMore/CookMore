@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import { useContract } from '../../../../../api/web3/hooks/contracts/useContract'
 import { METADATA_ABI } from '@/app/api/web3/abis'
 import { ethers } from 'ethers'
-import type { ProfileMetadata } from '@/app/api/types/profile'
+import type { ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 
 export function useMetadataContract() {
   const { contract: metadataContract } = useContract('METADATA', METADATA_ABI)

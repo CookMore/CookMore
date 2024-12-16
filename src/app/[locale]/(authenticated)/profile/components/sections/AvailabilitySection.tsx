@@ -9,7 +9,7 @@ import { FormSwitch } from '@/app/api/form/FormSwitch'
 import { IconCalendar } from '@/app/api/icons'
 
 // Type imports
-import type { ProProfileMetadata } from '@/app/api/types/profile'
+import type { ProProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface AvailabilitySectionProps {
   control: Control<ProProfileMetadata>

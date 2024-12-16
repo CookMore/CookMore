@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ProfileTier, type GroupProfileMetadata } from '@/app/api/types/profile'
+import { ProfileTier, type GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useProfileRegistry } from '@/app/api/web3/features/profile/hooks/useProfileRegistry'
 
 export function useProfileComplete() {
