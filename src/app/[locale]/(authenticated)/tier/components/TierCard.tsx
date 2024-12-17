@@ -2,10 +2,11 @@
 
 import { cn } from '@/app/api/utils/utils'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { TierMintDapp } from '@/app/[locale]/(authenticated)/tier/components/TierMintDapp'
+import { TierActionButton } from './TierActionButton'
 import { IconCheck } from '@/app/api/icons'
 import { tierInfo, tierStyles } from '@/app/api/tiers/tiers'
 import { inter } from '@/app/api/fonts'
+import { useEffect, useState } from 'react'
 
 interface TierCardProps {
   tier: ProfileTier
@@ -14,9 +15,18 @@ interface TierCardProps {
 }
 
 export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
+  const [mounted, setMounted] = useState(false)
   const info = tierInfo[tier]
   const style = tierStyles[tier]
   const Icon = style.icon
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null // Or a loading skeleton
+  }
 
   const isCurrentTier = currentTier === tier
 
@@ -110,10 +120,14 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
         )}
       </div>
 
-      {/* Minting Section - Always show for paid tiers */}
+      {/* Minting Section */}
       {tier !== ProfileTier.FREE && (
         <div className='border-t border-github-border-default bg-github-canvas-default p-6'>
-          <TierMintDapp targetTier={tier} currentTier={currentTier} onMintSuccess={onMintSuccess} />
+          <TierActionButton
+            currentTier={currentTier}
+            targetTier={tier}
+            onMintSuccess={onMintSuccess}
+          />
         </div>
       )}
     </div>

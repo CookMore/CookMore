@@ -9,7 +9,7 @@ import { CreateProfileForm } from '../components/ui/forms/CreateProfileForm'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { steps } from '../steps'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useNFTTiers } from '@/app/api/web3/tier'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 
 export default function CreateProfilePage() {

@@ -5,4 +5,4 @@ export * from '../../../[locale]/(authenticated)/profile/services/profileAPI'
 
 // Re-export service instances
 export { kitchenEdgeService } from './kitchen'
-export { profileEdgeService } from '../../../[locale]/(authenticated)/profile/services/profileAPI'
+export { ProfileApiService } from '../../../[locale]/(authenticated)/profile/services/profileAPI'

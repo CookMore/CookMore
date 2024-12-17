@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { profileEdgeService } from '@/lib/services/profile/edge'
+import { profileEdgeService } from '@/app/api/edge'
 
 export async function GET(request: NextRequest) {
   try {
