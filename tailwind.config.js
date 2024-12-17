@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import scrollbar from 'tailwind-scrollbar'
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
 export default {
   content: [
@@ -10,7 +11,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', ...fontFamily.sans],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {

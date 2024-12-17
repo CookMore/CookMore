@@ -203,76 +203,13 @@ export const TIER_CONTRACT_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
-] as const
-
-export type TierContractABI = typeof TIER_CONTRACT_ABI
-
-export const TIER_NFT_ABI = [
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '_usdc',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: '_proPrice',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: '_groupPrice',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
   {
     inputs: [],
-    name: 'mintPro',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'mintGroup',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
-    name: 'upgradeToGroup',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'isGroupTier',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    name: 'groupPrice',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
-]
+] as const
+
+export type TierContractABI = typeof TIER_CONTRACT_ABI
