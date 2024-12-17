@@ -11,8 +11,8 @@ import { TierBadge } from '@/app/[locale]/(authenticated)/tier/components/TierBa
 import { useNFTTiers } from '@/app/api/web3/tier'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/app/api/utils/utils'
-import { ThemeToggle } from '@/app/api/components/ui/ThemeToggle'
 import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
+import { MobileMenu } from './MobileMenu'
 
 function AuthenticatedHeader() {
   const { isAuthenticated, profile, ready } = useAuth()
@@ -20,44 +20,65 @@ function AuthenticatedHeader() {
   const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
   const pathname = usePathname()
 
-  console.log('Auth Debug:', { isAuthenticated, hasProfile: !!profile, ready, pathname })
-
   if (!ready) {
     return <LoadingSkeleton className='h-16' />
   }
 
-  // If not authenticated but on an auth route, show loading
   if (!isAuthenticated && pathname?.includes('(authenticated)')) {
     return <LoadingSkeleton className='h-16' />
   }
 
   return (
-    <header className='sticky top-0 z-50 border-b border-github-border-default bg-github-canvas-default'>
-      <nav className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
-        <div className='flex items-center space-x-8'>
-          <Link
-            href={
-              isAuthenticated
-                ? profile
-                  ? ROUTES.AUTH.KITCHEN.HOME
-                  : ROUTES.AUTH.PROFILE.CREATE
-                : ROUTES.MARKETING.HOME
-            }
-            className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted'
-          >
-            CookMore
-          </Link>
-          <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
-        </div>
-
-        <div className='flex items-center space-x-4'>
-          {isAuthenticated && profile && (
-            <Link href={ROUTES.AUTH.TIER}>
-              <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
+    <header className='sticky top-0 z-50 border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
+      <nav className='mx-auto h-16 max-w-[1400px] px-4 sm:px-6 lg:px-8'>
+        <div className='flex h-full items-center justify-between'>
+          {/* Logo Section */}
+          <div className='flex-shrink-0'>
+            <Link
+              href={
+                isAuthenticated
+                  ? profile
+                    ? ROUTES.AUTH.KITCHEN.HOME
+                    : ROUTES.AUTH.PROFILE.CREATE
+                  : ROUTES.MARKETING.HOME
+              }
+              className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
+            >
+              CookMore
             </Link>
-          )}
-          <ThemeToggle />
-          <AuthButton />
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
+            <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
+          </div>
+
+          {/* Right Section */}
+          <div className='flex items-center space-x-4'>
+            {/* Tier Badge */}
+            {isAuthenticated && profile && (
+              <Link href={ROUTES.AUTH.TIER} className='hidden sm:block'>
+                <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
+              </Link>
+            )}
+
+            {/* Auth Button - Desktop */}
+            <div className='hidden lg:block'>
+              <AuthButton />
+            </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
+              {isAuthenticated && profile && (
+                <Link href={ROUTES.AUTH.TIER} className='block sm:hidden'>
+                  <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
+                </Link>
+              )}
+              <div className='lg:hidden'>
+                <AuthButton />
+              </div>
+            </MobileMenu>
+          </div>
         </div>
       </nav>
     </header>
@@ -72,27 +93,43 @@ function MarketingHeader() {
     return <LoadingSkeleton className='h-16' />
   }
 
-  // If authenticated but on a marketing route, redirect will happen
   if (isAuthenticated && !pathname?.includes('(marketing)')) {
     return <LoadingSkeleton className='h-16' />
   }
 
   return (
-    <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default'>
-      <div className='container flex h-16 items-center'>
-        <div className='mr-4'>
-          <Link href={ROUTES.MARKETING.HOME} className='flex items-center space-x-2'>
-            <span className='font-bold'>CookMore</span>
-          </Link>
-        </div>
+    <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
+      <div className='mx-auto h-16 max-w-[1400px] px-4 sm:px-6 lg:px-8'>
+        <div className='flex h-full items-center justify-between'>
+          {/* Logo */}
+          <div className='flex-shrink-0'>
+            <Link
+              href={ROUTES.MARKETING.HOME}
+              className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
+            >
+              CookMore
+            </Link>
+          </div>
 
-        <nav className='flex flex-1'>
-          <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
-        </nav>
+          {/* Desktop Navigation */}
+          <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
+            <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
+          </div>
 
-        <div className='flex items-center space-x-4'>
-          <ThemeToggle />
-          <AuthButton />
+          {/* Right Section */}
+          <div className='flex items-center space-x-4'>
+            {/* Auth Button - Desktop */}
+            <div className='hidden lg:block'>
+              <AuthButton />
+            </div>
+
+            {/* Mobile Menu */}
+            <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
+              <div className='lg:hidden'>
+                <AuthButton />
+              </div>
+            </MobileMenu>
+          </div>
         </div>
       </div>
     </header>
@@ -103,12 +140,10 @@ function HeaderContent() {
   const pathname = usePathname()
   const { isAuthenticated, ready } = useAuth()
 
-  // Show loading skeleton while auth is not ready
   if (!ready) {
     return <LoadingSkeleton className='h-16' />
   }
 
-  // Show authenticated header if user is authenticated or on an auth route
   const shouldShowAuthHeader = isAuthenticated || pathname?.includes('(authenticated)')
   return shouldShowAuthHeader ? <AuthenticatedHeader /> : <MarketingHeader />
 }

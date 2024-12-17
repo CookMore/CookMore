@@ -95,8 +95,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   // Main layout once everything is ready
   return (
     <PanelProvider>
-      <div className='flex min-h-full'>
-        <div className='flex-1'>{children}</div>
+      <div className='min-h-screen'>
+        {children}
         <PanelContainer />
       </div>
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}

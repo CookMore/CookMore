@@ -23,21 +23,23 @@ export default function TierPage() {
   const tiers = [ProfileTier.FREE, ProfileTier.PRO, ProfileTier.GROUP]
 
   return (
-    <div className='container mx-auto px-4 py-12'>
+    <div className='container mx-auto px-4 py-8 sm:py-12'>
       {/* Header */}
-      <div className='mb-12 text-center'>
+      <div className='mb-8 sm:mb-12 text-center'>
         <div className='mb-4 flex items-center justify-center gap-2 text-github-accent-fg'>
           <IconStar className='h-6 w-6' />
-          <h1 className='text-4xl font-bold text-github-fg-default'>Membership Tiers</h1>
+          <h1 className='text-3xl sm:text-4xl font-bold text-github-fg-default'>
+            Membership Tiers
+          </h1>
         </div>
-        <p className='mx-auto max-w-2xl text-github-fg-muted'>
+        <p className='mx-auto max-w-2xl text-sm sm:text-base text-github-fg-muted'>
           Choose the perfect tier for your culinary journey. Each tier comes with unique features
           and benefits to help you grow as a chef.
         </p>
       </div>
 
       {/* Tier Cards */}
-      <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
+      <div className='flex flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:justify-center lg:items-stretch'>
         {tiers.map((tier) => (
           <TierCard
             key={tier}

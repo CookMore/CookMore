@@ -3,14 +3,7 @@
 import { cn } from '@/app/api/utils/utils'
 import { IconChevronLeft, IconLock } from '@/app/api/icons'
 import { type Step } from '@/app/[locale]/(authenticated)/profile/steps'
-import {
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-} from 'react'
+import { type Dispatch, type SetStateAction, useEffect, useState, useCallback } from 'react'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
@@ -71,14 +64,6 @@ export function ProfileSidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isExpanded && (
-        <div
-          className='fixed inset-0 bg-black/20 z-20 lg:hidden'
-          onClick={() => setIsExpanded(false)}
-        />
-      )}
-
       {/* Toggle button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -111,20 +96,106 @@ export function ProfileSidebar({
           'border-r border-github-border-default',
           'transition-all duration-300 ease-in-out',
           'flex flex-col',
+          'z-20',
           // Width handling
-          isExpanded ? 'w-[280px]' : 'w-0',
+          isExpanded ? 'w-[280px]' : 'w-12',
           // Content visibility
           !isExpanded && 'overflow-hidden'
         )}
       >
-        {/* Sidebar content */}
-        <div className='flex-1 p-6 min-h-0 overflow-y-auto'>
-          <h2 className='text-xl font-semibold mb-8 text-github-fg-default'>Profile Creation</h2>
+        {isExpanded ? (
+          /* Expanded View */
+          <div className='flex-1 p-6 min-h-0 overflow-y-auto'>
+            <h2 className='text-xl font-semibold mb-8 text-github-fg-default'>Profile Creation</h2>
 
-          {/* Steps list */}
-          <div className='space-y-3'>
+            {/* Steps list */}
+            <div className='space-y-3'>
+              {steps.map((step, index) => {
+                const StepIcon = step.icon
+                const isComplete = index < currentStep
+                const isCurrent = currentStep === index
+                const isAccessible = canAccessStep(step)
+                const isLocked = !isAccessible
+
+                return (
+                  <div
+                    key={step.id}
+                    className={cn(
+                      'relative group rounded-lg transition-all',
+                      'hover:bg-github-canvas-subtle',
+                      isCurrent && 'bg-github-canvas-subtle'
+                    )}
+                  >
+                    <button
+                      onClick={() => isAccessible && setCurrentStep(index)}
+                      disabled={isLocked}
+                      className={cn(
+                        'w-full p-4 text-sm rounded-lg transition-all',
+                        'flex items-center gap-4',
+                        'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis',
+                        'transform transition-transform duration-200 ease-in-out',
+                        isCurrent && [
+                          'text-github-fg-default font-medium',
+                          'ring-2 ring-github-accent-emphasis',
+                        ],
+                        !isCurrent && !isComplete && 'text-github-fg-muted',
+                        isComplete && 'text-github-fg-default',
+                        isLocked && [
+                          'opacity-75 cursor-not-allowed',
+                          'hover:bg-transparent focus:ring-0',
+                        ],
+                        // Enhanced hover states
+                        !isLocked && [
+                          'hover:-translate-y-[1px]',
+                          'active:translate-y-[1px]',
+                          'hover:shadow-sm',
+                        ]
+                      )}
+                      tabIndex={isLocked ? -1 : 0}
+                    >
+                      <div
+                        className={cn(
+                          'w-8 h-8 rounded-full flex items-center justify-center text-sm',
+                          'border-2 transition-colors',
+                          isCurrent &&
+                            'border-github-accent-emphasis bg-github-accent-subtle text-github-accent-emphasis',
+                          !isCurrent && !isComplete && 'border-github-border-default',
+                          isComplete &&
+                            'bg-github-success-emphasis border-github-success-emphasis text-white'
+                        )}
+                      >
+                        {isComplete ? (
+                          <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                            <path
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
+                            />
+                          </svg>
+                        ) : (
+                          index + 1
+                        )}
+                      </div>
+                      {StepIcon && <StepIcon className='w-5 h-5' />}
+                      <span className='flex-1 text-left font-medium'>{step.label}</span>
+                      {isLocked && (
+                        <div className='flex items-center gap-2 text-github-fg-muted'>
+                          <IconLock className='w-4 h-4' />
+                          <span className='text-xs font-medium'>
+                            {step.tier === ProfileTier.GROUP ? 'Group' : 'Pro'}
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Retracted View */
+          <div className='flex flex-col items-center py-4 space-y-4'>
             {steps.map((step, index) => {
-              const StepIcon = step.icon
               const isComplete = index < currentStep
               const isCurrent = currentStep === index
               const isAccessible = canAccessStep(step)
@@ -136,89 +207,40 @@ export function ProfileSidebar({
                   onClick={() => isAccessible && setCurrentStep(index)}
                   disabled={isLocked}
                   className={cn(
-                    'w-full p-4 text-sm rounded-lg transition-all relative group',
-                    'flex items-center gap-4',
+                    'w-8 h-8 rounded-lg flex items-center justify-center',
+                    'transition-all duration-200 ease-in-out',
                     'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis',
-                    'hover:bg-github-canvas-subtle active:bg-github-canvas-subtle/80',
-                    'transform transition-transform duration-200 ease-in-out',
-                    'hover:-translate-y-[1px] active:translate-y-[1px]',
+                    !isLocked && [
+                      'hover:scale-110 active:scale-95',
+                      'hover:bg-github-canvas-subtle',
+                      'hover:shadow-sm',
+                    ],
                     isCurrent && [
-                      'bg-github-canvas-subtle text-github-fg-default font-medium',
+                      'bg-github-accent-subtle text-github-accent-emphasis',
                       'ring-2 ring-github-accent-emphasis',
                     ],
                     !isCurrent && !isComplete && 'text-github-fg-muted',
-                    isComplete && 'text-github-fg-default',
-                    isLocked && [
-                      'opacity-75 cursor-not-allowed hover:bg-transparent focus:ring-0 hover:transform-none',
-                      'hover:bg-github-canvas-subtle/10', // Subtle hover effect for locked items
-                    ]
+                    isComplete && 'bg-github-success-emphasis text-white',
+                    isLocked && 'opacity-50 cursor-not-allowed'
                   )}
-                  tabIndex={isLocked ? -1 : 0}
+                  title={step.label}
                 >
-                  <div
-                    className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center text-sm',
-                      'border-2 transition-colors',
-                      isCurrent &&
-                        'border-github-accent-emphasis bg-github-accent-subtle text-github-accent-emphasis',
-                      !isCurrent && !isComplete && 'border-github-border-default',
-                      isComplete &&
-                        'bg-github-success-emphasis border-github-success-emphasis text-white'
-                    )}
-                  >
-                    {isComplete ? (
-                      <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-                        <path
-                          fillRule='evenodd'
-                          d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                          clipRule='evenodd'
-                        />
-                      </svg>
-                    ) : (
-                      index + 1
-                    )}
-                  </div>
-                  {step.icon && <StepIcon className='w-5 h-5' />}
-                  <span className='flex-1 text-left font-medium'>{step.label}</span>
-                  {isLocked && (
-                    <div className='flex items-center gap-2 text-github-fg-muted'>
-                      <IconLock className='w-4 h-4' />
-                      <span className='text-xs font-medium'>
-                        {step.tier === ProfileTier.GROUP ? 'Group' : 'Pro'}
-                      </span>
-                    </div>
+                  {isComplete ? (
+                    <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                      <path
+                        fillRule='evenodd'
+                        d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                        clipRule='evenodd'
+                      />
+                    </svg>
+                  ) : (
+                    <span className='text-sm font-medium'>{index + 1}</span>
                   )}
                 </button>
               )
             })}
           </div>
-
-          {/* Tier Indicator */}
-          <div className='mt-8 pt-6 border-t border-github-border-default'>
-            <div className='text-sm font-medium text-github-fg-default mb-3'>Current Tier</div>
-            <div
-              className={cn(
-                'px-4 py-3 rounded-lg text-sm',
-                'border-2 border-github-border-default',
-                'flex items-center justify-between',
-                tier === ProfileTier.GROUP
-                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
-                  : tier === ProfileTier.PRO
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
-                    : 'bg-gray-50 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300'
-              )}
-            >
-              <span className='font-medium'>
-                {tier === ProfileTier.GROUP ? 'Group' : tier === ProfileTier.PRO ? 'Pro' : 'Free'}
-              </span>
-              {tier !== ProfileTier.FREE && (
-                <span className='text-xs bg-white/10 px-2 py-1 rounded-full font-medium'>
-                  NFT Active
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+        )}
       </aside>
     </>
   )

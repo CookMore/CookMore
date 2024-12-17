@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ROUTES } from '@/app/api/routes/routes'
+import { cn } from '@/app/api/utils/utils'
 import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
-import { Tooltip } from '@/app/api/tooltip/tooltip'
 
 interface NavigationLinksProps {
   authenticated: boolean
@@ -11,67 +12,59 @@ interface NavigationLinksProps {
 }
 
 export function NavigationLinks({ authenticated, hasProfile }: NavigationLinksProps) {
-  const { isAdmin, isLoading } = useAdminCheck()
+  const pathname = usePathname()
+  const { isAdmin } = useAdminCheck()
 
-  const AuthenticatedLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
-    if (!hasProfile && !isAdmin) {
-      return (
-        <Tooltip content='Complete your profile to access this feature'>
-          <span className='cursor-not-allowed text-github-fg-muted opacity-50'>{children}</span>
-        </Tooltip>
-      )
-    }
+  console.log('NavigationLinks Debug:', { authenticated, hasProfile, pathname, isAdmin })
 
-    return (
-      <Link href={href} className='text-github-fg-muted hover:text-github-fg-default'>
-        {children}
-      </Link>
-    )
-  }
+  const links = authenticated
+    ? [
+        { href: ROUTES.AUTH.KITCHEN.HOME, label: 'Kitchen' },
+        { href: ROUTES.AUTH.KITCHEN.CLUB, label: 'Club' },
+        { href: ROUTES.AUTH.CALENDAR, label: 'Calendar' },
+        { href: ROUTES.AUTH.EXPLORE, label: 'Explore' },
+        { href: ROUTES.AUTH.TIER, label: 'Tier' },
+        ...(isAdmin
+          ? [
+              {
+                href: ROUTES.AUTH.ADMIN,
+                label: 'Admin',
+                className: 'text-red-500 hover:text-red-600',
+              },
+            ]
+          : []),
+      ]
+    : [
+        { href: ROUTES.MARKETING.FEATURES, label: 'Features' },
+        { href: ROUTES.MARKETING.DISCOVER, label: 'Discover' },
+        { href: ROUTES.MARKETING.PRICING, label: 'Pricing' },
+        { href: ROUTES.MARKETING.CLUB, label: 'Club' },
+      ]
 
   return (
-    <div className='flex items-center space-x-6'>
-      {authenticated ? (
-        <>
-          <AuthenticatedLink href={ROUTES.AUTH.KITCHEN.HOME}>Kitchen</AuthenticatedLink>
-          <AuthenticatedLink href={ROUTES.AUTH.KITCHEN.CLUB}>Club</AuthenticatedLink>
-          <AuthenticatedLink href={ROUTES.AUTH.CALENDAR}>Calendar</AuthenticatedLink>
-          <AuthenticatedLink href={ROUTES.AUTH.EXPLORE}>Explore</AuthenticatedLink>
-          <AuthenticatedLink href={ROUTES.AUTH.TIER}>Tier</AuthenticatedLink>
-          {!isLoading && isAdmin && (
-            <Link href={ROUTES.AUTH.ADMIN} className='text-red-500 hover:text-red-600'>
-              Admin
-            </Link>
-          )}
-        </>
-      ) : (
-        <>
+    <div className='flex lg:items-center lg:justify-center lg:space-x-1'>
+      {links.map(({ href, label, className }) => {
+        const isActive = pathname === href
+        return (
           <Link
-            href={ROUTES.MARKETING.FEATURES}
-            className='text-github-fg-muted hover:text-github-fg-default'
+            key={href}
+            href={href}
+            className={cn(
+              'relative px-3 py-2 text-sm font-medium transition-colors',
+              'hover:text-github-fg-default',
+              'lg:rounded-md lg:px-4',
+              'lg:hover:bg-github-canvas-subtle',
+              isActive
+                ? 'text-github-fg-default after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-github-accent-emphasis lg:after:hidden lg:bg-github-canvas-subtle'
+                : 'text-github-fg-muted',
+              'flex w-full items-center lg:w-auto',
+              className
+            )}
           >
-            Features
+            {label}
           </Link>
-          <Link
-            href={ROUTES.MARKETING.DISCOVER}
-            className='text-github-fg-muted hover:text-github-fg-default'
-          >
-            Discover
-          </Link>
-          <Link
-            href={ROUTES.MARKETING.PRICING}
-            className='text-github-fg-muted hover:text-github-fg-default'
-          >
-            Pricing
-          </Link>
-          <Link
-            href={ROUTES.MARKETING.CLUB}
-            className='text-github-fg-muted hover:text-github-fg-default'
-          >
-            Club
-          </Link>
-        </>
-      )}
+        )
+      })}
     </div>
   )
 }

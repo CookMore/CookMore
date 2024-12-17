@@ -23,7 +23,7 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg border transition-all',
+        'relative overflow-hidden rounded-lg border transition-all w-full sm:w-[340px] lg:w-[380px]',
         style.borderColor,
         style.bgColor,
         isCurrentTier && 'ring-2 ring-github-accent-emphasis ring-offset-2',
@@ -31,7 +31,7 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
       )}
     >
       {/* Card Header */}
-      <div className='p-6'>
+      <div className='p-6 sm:p-8'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
             <div
