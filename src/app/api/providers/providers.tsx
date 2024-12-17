@@ -34,28 +34,28 @@ export function Providers({
     <QueryProvider>
       <I18nProvider messages={messages} locale={locale}>
         <WagmiProvider>
-          <PrivyProvider
-            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
-            config={{
-              loginMethods: ['email', 'wallet'],
-              supportedChains: [baseChain, baseSepoliaChain],
-              walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
-              appearance: {
-                theme: 'dark',
-                accentColor: '#7C3AED',
-              },
-            }}
-          >
-            <CombinedEdgeProvider address={address} recipeId={recipeId} userId={userId}>
-              <HydrationBoundary state={dehydratedState}>
-                <ProfileProvider>
+          <HydrationBoundary state={dehydratedState}>
+            <PrivyProvider
+              appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+              config={{
+                loginMethods: ['email', 'wallet'],
+                supportedChains: [baseChain, baseSepoliaChain],
+                walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
+                appearance: {
+                  theme: 'dark',
+                  accentColor: '#7C3AED',
+                },
+              }}
+            >
+              <ProfileProvider>
+                <CombinedEdgeProvider address={address} recipeId={recipeId} userId={userId}>
                   <MotionProvider>
                     <ThemeProvider>{children}</ThemeProvider>
                   </MotionProvider>
-                </ProfileProvider>
-              </HydrationBoundary>
-            </CombinedEdgeProvider>
-          </PrivyProvider>
+                </CombinedEdgeProvider>
+              </ProfileProvider>
+            </PrivyProvider>
+          </HydrationBoundary>
         </WagmiProvider>
       </I18nProvider>
     </QueryProvider>
