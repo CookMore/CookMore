@@ -26,7 +26,7 @@ export function BasePageLayout({ children, className }: BasePageLayoutProps) {
 
   return (
     <div className={cn('min-h-screen bg-github-canvas-default', className)}>
-      <div className='w-full mx-auto max-w-7xl'>{children}</div>
+      <div className='w-full'>{children}</div>
     </div>
   )
 }

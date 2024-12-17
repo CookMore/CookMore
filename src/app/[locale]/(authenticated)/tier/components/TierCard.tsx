@@ -23,7 +23,8 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg border transition-all w-full sm:w-[340px] lg:w-[380px]',
+        'relative overflow-hidden rounded-lg border transition-all',
+        'w-full lg:min-w-[380px]',
         style.borderColor,
         style.bgColor,
         isCurrentTier && 'ring-2 ring-github-accent-emphasis ring-offset-2'

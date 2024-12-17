@@ -29,58 +29,60 @@ function AuthenticatedHeader() {
   }
 
   return (
-    <header className='sticky top-0 z-50 border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
-      <nav className='mx-auto h-16 max-w-[1400px] px-4 sm:px-6 lg:px-8'>
-        <div className='flex h-full items-center justify-between'>
-          {/* Logo Section */}
-          <div className='flex-shrink-0'>
-            <Link
-              href={
-                isAuthenticated
-                  ? profile
-                    ? ROUTES.AUTH.KITCHEN.HOME
-                    : ROUTES.AUTH.PROFILE.CREATE
-                  : ROUTES.MARKETING.HOME
-              }
-              className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
-            >
-              CookMore
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
-            <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
-          </div>
-
-          {/* Right Section */}
-          <div className='flex items-center space-x-4'>
-            {/* Tier Badge */}
-            {isAuthenticated && profile && (
-              <Link href={ROUTES.AUTH.TIER} className='hidden sm:block'>
-                <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
+    <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
+      <div className='w-full'>
+        <div className='mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='h-16 flex items-center justify-between max-w-[1400px] mx-auto'>
+            {/* Logo Section */}
+            <div className='flex-shrink-0'>
+              <Link
+                href={
+                  isAuthenticated
+                    ? profile
+                      ? ROUTES.AUTH.KITCHEN.HOME
+                      : ROUTES.AUTH.PROFILE.CREATE
+                    : ROUTES.MARKETING.HOME
+                }
+                className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
+              >
+                CookMore
               </Link>
-            )}
-
-            {/* Auth Button - Desktop */}
-            <div className='hidden lg:block'>
-              <AuthButton />
             </div>
 
-            {/* Mobile Menu */}
-            <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
+            {/* Desktop Navigation */}
+            <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
+              <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
+            </div>
+
+            {/* Right Section */}
+            <div className='flex items-center space-x-4'>
+              {/* Tier Badge */}
               {isAuthenticated && profile && (
-                <Link href={ROUTES.AUTH.TIER} className='block sm:hidden'>
+                <Link href={ROUTES.AUTH.TIER} className='hidden sm:block'>
                   <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
                 </Link>
               )}
-              <div className='lg:hidden'>
+
+              {/* Auth Button - Desktop */}
+              <div className='hidden lg:block'>
                 <AuthButton />
               </div>
-            </MobileMenu>
+
+              {/* Mobile Menu */}
+              <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
+                {isAuthenticated && profile && (
+                  <Link href={ROUTES.AUTH.TIER} className='block sm:hidden'>
+                    <TierBadge tier={currentTier} size='sm' hasProfile={!!profile} />
+                  </Link>
+                )}
+                <div className='lg:hidden'>
+                  <AuthButton />
+                </div>
+              </MobileMenu>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   )
 }
@@ -99,36 +101,38 @@ function MarketingHeader() {
 
   return (
     <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
-      <div className='mx-auto h-16 max-w-[1400px] px-4 sm:px-6 lg:px-8'>
-        <div className='flex h-full items-center justify-between'>
-          {/* Logo */}
-          <div className='flex-shrink-0'>
-            <Link
-              href={ROUTES.MARKETING.HOME}
-              className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
-            >
-              CookMore
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
-            <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
-          </div>
-
-          {/* Right Section */}
-          <div className='flex items-center space-x-4'>
-            {/* Auth Button - Desktop */}
-            <div className='hidden lg:block'>
-              <AuthButton />
+      <div className='w-full'>
+        <div className='mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='h-16 flex items-center justify-between max-w-[1400px] mx-auto'>
+            {/* Logo */}
+            <div className='flex-shrink-0'>
+              <Link
+                href={ROUTES.MARKETING.HOME}
+                className='text-xl font-bold text-github-fg-default hover:text-github-fg-muted transition-colors'
+              >
+                CookMore
+              </Link>
             </div>
 
-            {/* Mobile Menu */}
-            <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
-              <div className='lg:hidden'>
+            {/* Desktop Navigation */}
+            <div className='hidden lg:flex lg:flex-1 lg:justify-center lg:px-8'>
+              <NavigationLinks authenticated={isAuthenticated} hasProfile={!!profile} />
+            </div>
+
+            {/* Right Section */}
+            <div className='flex items-center space-x-4'>
+              {/* Auth Button - Desktop */}
+              <div className='hidden lg:block'>
                 <AuthButton />
               </div>
-            </MobileMenu>
+
+              {/* Mobile Menu */}
+              <MobileMenu authenticated={isAuthenticated} hasProfile={!!profile}>
+                <div className='lg:hidden'>
+                  <AuthButton />
+                </div>
+              </MobileMenu>
+            </div>
           </div>
         </div>
       </div>

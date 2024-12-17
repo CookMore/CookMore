@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { useWalletClient, useChainId, usePublicClient } from 'wagmi'
 import { toast } from 'sonner'
