@@ -22,7 +22,13 @@
     "create": "Create",
     "submit": "Submit",
     "confirm": "Confirm",
-    "decline": "No, thanks"
+    "decline": "No, thanks",
+    "marketing": {
+      "title": "Version Control for Your Recipes",
+      "subtitle": "Fork, branch, and merge your culinary creations. Track changes, collaborate with others, and build upon existing recipes.",
+      "explore": "Explore Recipes",
+      "get_started": "Get Started"
+    }
   },
   "ipfs": {
     "upload": {
