@@ -11,6 +11,7 @@ const LITE_IMAGE_URL =
   'https://ipfs.io/ipfs/bafkreieeswhm4qgx2x3i7hw2jbmnrt7zkgogdk676kk25tkbr5wisyv5za'
 const PRO_IMAGE_URL = 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
 const GROUP_IMAGE_URL = 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
+const OG_IMAGE_URL = 'https://ipfs.io/ipfs/QmXYZ...' // Replace with actual OG badge IPFS URL
 
 interface TierBadgeProps {
   tier: ProfileTier
@@ -27,6 +28,8 @@ const getTierDisplayName = (tier: ProfileTier) => {
       return 'Pro'
     case ProfileTier.GROUP:
       return 'Group'
+    case ProfileTier.OG:
+      return 'OG'
     default:
       return tier
   }
@@ -67,10 +70,12 @@ export function TierBadge({
       <p className='font-medium mb-1'>{displayName} Tier</p>
       <p className='text-sm text-github-fg-muted'>
         {tier === ProfileTier.FREE
-          ? 'Upgrade to Pro or Group tier to unlock premium features.'
+          ? 'Upgrade to Pro, Group, or OG tier to unlock premium features.'
           : tier === ProfileTier.GROUP
             ? 'Group features are available for this profile.'
-            : 'Pro features are available for this profile.'}
+            : tier === ProfileTier.OG
+              ? 'OG features are available for this profile. Limited edition membership.'
+              : 'Pro features are available for this profile.'}
         {!hasProfile && ' Complete your profile to access tier settings.'}
       </p>
     </div>
@@ -89,7 +94,9 @@ export function TierBadge({
                 ? LITE_IMAGE_URL
                 : tier === ProfileTier.PRO
                   ? PRO_IMAGE_URL
-                  : GROUP_IMAGE_URL
+                  : tier === ProfileTier.GROUP
+                    ? GROUP_IMAGE_URL
+                    : OG_IMAGE_URL
             }
             alt={`${displayName} NFT`}
             width={dim}

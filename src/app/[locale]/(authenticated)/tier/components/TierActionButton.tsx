@@ -1,63 +1,73 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { IconArrowUpRight, IconGift } from '@/app/api/icons'
+import { Button } from '@/app/api/components/ui/Button'
 import { cn } from '@/app/api/utils/utils'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { TierActionButtonProps } from '../types/tier-actions'
-import { Button } from '@/app/api/components/ui/button'
-import { IconGift, IconArrowUpRight } from '@tabler/icons-react'
+import { useTierMint } from '../hooks/useTierMint'
 import { GiftTierModal } from './GiftTierModal'
 import { usePrivy } from '@privy-io/react-auth'
-import { useContractWrite, useWaitForTransactionReceipt } from 'wagmi'
-import { TIER_CONTRACT_ABI, TIER_CONTRACT_ADDRESS } from '@/app/api/web3/abis/TierContracts'
+import { usePublicClient } from 'wagmi'
+
+interface TierActionButtonProps {
+  currentTier: ProfileTier | null
+  targetTier: ProfileTier
+  onMintSuccess?: () => void
+  showGift?: boolean
+  className?: string
+}
 
 export function TierActionButton({
   currentTier,
   targetTier,
   onMintSuccess,
+  showGift = true,
   className,
 }: TierActionButtonProps) {
   const [mounted, setMounted] = useState(false)
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false)
   const { authenticated } = usePrivy()
+  const publicClient = usePublicClient()
+  const { mintTier, adminMintTier, isLoading: mintLoading } = useTierMint(onMintSuccess)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const { write: mintTier, data: mintData } = useContractWrite({
-    address: TIER_CONTRACT_ADDRESS,
-    abi: TIER_CONTRACT_ABI,
-    functionName: targetTier === ProfileTier.GROUP ? 'mintGroup' : 'mintPro',
-  })
-
-  const { write: upgradeTier, data: upgradeData } = useContractWrite({
-    address: TIER_CONTRACT_ADDRESS,
-    abi: TIER_CONTRACT_ABI,
-    functionName: 'mintGroup', // When upgrading, always to Group
-  })
-
-  const { isLoading: isMinting } = useWaitForTransactionReceipt({
-    hash: mintData?.hash,
-    onSuccess: () => onMintSuccess?.(),
-  })
-
-  const { isLoading: isUpgrading } = useWaitForTransactionReceipt({
-    hash: upgradeData?.hash,
-    onSuccess: () => onMintSuccess?.(),
-  })
-
   const handleAction = async () => {
-    if (currentTier === ProfileTier.PRO && targetTier === ProfileTier.GROUP) {
-      await upgradeTier?.()
-    } else {
-      await mintTier?.()
+    try {
+      if (currentTier === ProfileTier.PRO && targetTier === ProfileTier.GROUP) {
+        // For upgrade, we use the Group mint function
+        await mintTier('Group')
+      } else {
+        await mintTier(
+          targetTier === ProfileTier.GROUP ? 'Group' : targetTier === ProfileTier.PRO ? 'Pro' : 'OG'
+        )
+      }
+    } catch (error) {
+      console.error('Action error:', error)
+      throw error
     }
   }
 
-  if (!mounted || !authenticated) {
-    return null
+  const handleGift = async (recipient: string) => {
+    try {
+      console.log('Gifting tier:', {
+        recipient,
+        targetTier,
+      })
+      await adminMintTier(
+        recipient,
+        targetTier === ProfileTier.GROUP ? 'Group' : targetTier === ProfileTier.PRO ? 'Pro' : 'OG'
+      )
+    } catch (error) {
+      console.error('Gift error:', error)
+      throw error
+    }
   }
+
+  if (!mounted || !authenticated) return null
 
   if (targetTier === ProfileTier.FREE) {
     return (
@@ -69,30 +79,41 @@ export function TierActionButton({
 
   const isCurrentTier = currentTier === targetTier
   const isUpgrade = currentTier === ProfileTier.PRO && targetTier === ProfileTier.GROUP
-  const isLoading = isMinting || isUpgrading
+
+  const buttonText = mintLoading
+    ? 'Processing...'
+    : isCurrentTier
+      ? 'Current Tier'
+      : isUpgrade
+        ? 'Upgrade to Group ($75)'
+        : `Mint ${targetTier === ProfileTier.GROUP ? 'Group ($100)' : targetTier === ProfileTier.PRO ? 'Pro ($25)' : 'OG ($150)'}`
 
   return (
     <div className={cn('space-y-4', className)}>
-      <Button onClick={handleAction} disabled={isCurrentTier || isLoading} className='w-full gap-2'>
+      <Button
+        onClick={handleAction}
+        disabled={isCurrentTier || mintLoading}
+        className='w-full gap-2'
+      >
         <IconArrowUpRight className='h-4 w-4' />
-        {isLoading
-          ? 'Processing...'
-          : isCurrentTier
-            ? 'Current Tier'
-            : isUpgrade
-              ? 'Upgrade to Group'
-              : `Mint ${targetTier} NFT`}
+        {buttonText}
       </Button>
 
-      {!isCurrentTier && (
+      {showGift && (
         <Button
           variant='outline'
           onClick={() => setIsGiftModalOpen(true)}
           className='w-full gap-2'
-          disabled={isLoading}
+          disabled={mintLoading}
         >
           <IconGift className='h-4 w-4' />
-          Gift {targetTier} NFT
+          Gift{' '}
+          {targetTier === ProfileTier.GROUP
+            ? 'Group'
+            : targetTier === ProfileTier.PRO
+              ? 'Pro'
+              : 'OG'}{' '}
+          NFT
         </Button>
       )}
 
@@ -101,6 +122,7 @@ export function TierActionButton({
         onClose={() => setIsGiftModalOpen(false)}
         targetTier={targetTier}
         onGiftSuccess={onMintSuccess}
+        onGift={handleGift}
       />
     </div>
   )

@@ -6,6 +6,8 @@ export const ROUTES = {
     DISCOVER: '/discover',
     PRICING: '/pricing',
     CLUB: '/club',
+    EXPLORE: '/discover',
+    GET_STARTED: '/pricing',
   },
 
   // Authenticated routes

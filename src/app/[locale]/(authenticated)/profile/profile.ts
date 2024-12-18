@@ -17,6 +17,7 @@ export enum ProfileTier {
   FREE = 0,
   PRO = 1,
   GROUP = 2,
+  OG = 3,
 }
 
 // Base types used across tiers

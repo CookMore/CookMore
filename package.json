@@ -21,6 +21,7 @@
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.2.4",
     "@formatjs/intl-localematcher": "0.5.4",
+    "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.9.1",
     "@openzeppelin/contracts": "^5.1.0",
     "@primer/octicons-react": "^19.12.0",

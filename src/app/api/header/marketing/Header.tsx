@@ -1,21 +1,14 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { ROUTES } from '@/app/api/routes/routes'
-import { cn } from '@/app/api/utils'
-import { MarketingAuthButton } from './MarketingAuthButton'
 import { NavigationLinks } from '@/app/api/navigation/NavigationLinks'
+import { MarketingAuthButton } from './MarketingAuthButton'
 
 function MarketingHeaderContent() {
-  const pathname = usePathname()
   const { authenticated: isAuthenticated } = usePrivy()
-
-  // Only show on marketing routes or root
-  const isMarketingRoute = pathname === '/' || pathname?.includes('(marketing)')
-  if (!isMarketingRoute) return null
 
   return (
     <header className='sticky top-0 z-50 w-full border-b border-github-border-default bg-github-canvas-default backdrop-blur supports-[backdrop-filter]:bg-github-canvas-default/80'>
@@ -49,9 +42,5 @@ function MarketingHeaderContent() {
 }
 
 export function Header() {
-  return (
-    <Suspense fallback={null}>
-      <MarketingHeaderContent />
-    </Suspense>
-  )
+  return <MarketingHeaderContent />
 }

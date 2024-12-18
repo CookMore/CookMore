@@ -5,7 +5,7 @@ import { usePrivy } from '@privy-io/react-auth'
 import { BasePanel } from './BasePanel'
 import { useAccount, useConnect, useDisconnect, useChainId } from 'wagmi'
 import { useRouter } from 'next/navigation'
-import { CHAIN_IDS } from '@/app/api/web3/config'
+import { CHAIN_IDS } from '@/app/api/blockchain/config'
 import { toast } from 'sonner'
 
 export function ConnectedPanel() {

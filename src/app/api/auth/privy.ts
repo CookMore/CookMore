@@ -12,8 +12,8 @@ const privyClient = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET)
 
 export async function getPrivyUser() {
   try {
-    const headersList = headers()
-    const authHeader = headersList.get('authorization')
+    const headersList = await headers()
+    const authHeader = await headersList.get('authorization')
 
     if (!authHeader?.startsWith('Bearer ')) {
       return null

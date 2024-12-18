@@ -1,9 +1,35 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useContractRead, useContractReads } from 'wagmi'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { profileService } from '@/app/[locale]/(authenticated)/profile/services/profile.service'
+import { tierABI } from '@/app/api/blockchain/abis/tier'
+import { TIER_CONTRACT_ADDRESS } from '@/app/api/tiers/tiers'
+import { getContract } from 'viem'
+
+// Define the minimal ERC721 functions we need
+const minimalERC721ABI = [
+  {
+    inputs: [{ name: 'owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'index', type: 'uint256' },
+    ],
+    name: 'tokenOfOwnerByIndex',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const
+
+// Combine ABIs for the tier contract
+const combinedABI = [...tierABI, ...minimalERC721ABI] as const
 
 export function useNFTTiers() {
   const { address, isConnected } = useAccount()
@@ -11,64 +37,106 @@ export function useNFTTiers() {
   const [tierState, setTierState] = useState({
     hasGroup: false,
     hasPro: false,
+    hasOG: false,
     currentTier: ProfileTier.FREE,
     isLoading: true,
   })
 
+  // Check if contract address is set
+  const isContractConfigured =
+    TIER_CONTRACT_ADDRESS !== '0x1234567890123456789012345678901234567890'
+
+  // Use wagmi's useContractReads for batch reading
+  const { data: contractData, refetch: refetchContract } = useContractReads({
+    contracts: [
+      {
+        address: TIER_CONTRACT_ADDRESS,
+        abi: combinedABI,
+        functionName: 'balanceOf',
+        args: [address as `0x${string}`],
+      },
+      {
+        address: TIER_CONTRACT_ADDRESS,
+        abi: combinedABI,
+        functionName: 'tokenOfOwnerByIndex',
+        args: [address as `0x${string}`, 0n],
+      },
+    ],
+    enabled: mounted && isConnected && !!address && isContractConfigured,
+  })
+
+  // Get tier type for token ID
+  const { data: tierType, refetch: refetchTier } = useContractRead({
+    address: TIER_CONTRACT_ADDRESS,
+    abi: combinedABI,
+    functionName: 'tokenTier',
+    args: contractData?.[1].result ? [contractData[1].result] : undefined,
+    enabled:
+      mounted && isConnected && !!address && isContractConfigured && !!contractData?.[1].result,
+  })
+
+  // Effect to update tier state based on contract data
+  useEffect(() => {
+    if (!mounted || !isConnected || !address || !isContractConfigured) {
+      setTierState((prev) => ({ ...prev, isLoading: false }))
+      return
+    }
+
+    const balance = contractData?.[0].result
+    const type = tierType as string | undefined
+
+    if (balance && balance > 0n && type) {
+      setTierState({
+        hasGroup: type === 'Group',
+        hasPro: type === 'Pro',
+        hasOG: type === 'OG',
+        currentTier:
+          type === 'Group'
+            ? ProfileTier.GROUP
+            : type === 'Pro'
+              ? ProfileTier.PRO
+              : type === 'OG'
+                ? ProfileTier.OG
+                : ProfileTier.FREE,
+        isLoading: false,
+      })
+    } else {
+      setTierState({
+        hasGroup: false,
+        hasPro: false,
+        hasOG: false,
+        currentTier: ProfileTier.FREE,
+        isLoading: false,
+      })
+    }
+  }, [mounted, address, isConnected, contractData, tierType, isContractConfigured])
+
+  // Handle client-side mounting
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    let isMounted = true
+  const refetch = async () => {
+    if (!mounted || !isConnected || !address || !isContractConfigured) return
+    setTierState((prev) => ({ ...prev, isLoading: true }))
 
-    async function fetchTierStatus() {
-      if (!mounted || !isConnected || !address) {
-        return
-      }
-
-      try {
-        setTierState((prev) => ({ ...prev, isLoading: true }))
-        const response = await profileService.getProfile(address)
-
-        if (isMounted && response.success) {
-          setTierState({
-            hasGroup: response.tierStatus.hasGroup,
-            hasPro: response.tierStatus.hasPro,
-            currentTier: response.tierStatus.currentTier,
-            isLoading: false,
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching tier status:', error)
-        if (isMounted) {
-          setTierState({
-            hasGroup: false,
-            hasPro: false,
-            currentTier: ProfileTier.FREE,
-            isLoading: false,
-          })
-        }
-      }
-    }
-
-    fetchTierStatus()
-
-    return () => {
-      isMounted = false
-    }
-  }, [mounted, address, isConnected])
-
-  // Log state for debugging
-  useEffect(() => {
-    if (mounted) {
-      console.log('NFT Tiers State:', {
-        address,
-        isConnected,
-        ...tierState,
+    try {
+      await Promise.all([refetchContract(), refetchTier()])
+    } catch (error) {
+      console.error('Error refetching tier status:', error)
+      setTierState({
+        hasGroup: false,
+        hasPro: false,
+        hasOG: false,
+        currentTier: ProfileTier.FREE,
+        isLoading: false,
       })
     }
-  }, [mounted, address, isConnected, tierState])
+  }
 
-  return tierState
+  return {
+    ...tierState,
+    refetch,
+    isContractConfigured,
+  }
 }

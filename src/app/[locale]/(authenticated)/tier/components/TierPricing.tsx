@@ -9,6 +9,25 @@ export function TierPricing({ currentTier, targetTier, className }: TierPricingD
   const getPrice = () => {
     if (targetTier === ProfileTier.FREE) return '$0'
     if (targetTier === ProfileTier.PRO) return '$25 USDC'
+    if (targetTier === ProfileTier.OG) {
+      if (currentTier === ProfileTier.GROUP) {
+        return (
+          <div className='flex flex-col'>
+            <span className='text-3xl font-bold text-github-fg-default'>$50 USDC</span>
+            <span className='text-sm text-github-success-fg'>$100 discount applied</span>
+          </div>
+        )
+      }
+      if (currentTier === ProfileTier.PRO) {
+        return (
+          <div className='flex flex-col'>
+            <span className='text-3xl font-bold text-github-fg-default'>$125 USDC</span>
+            <span className='text-sm text-github-success-fg'>$25 discount applied</span>
+          </div>
+        )
+      }
+      return '$150 USDC'
+    }
 
     // Group tier pricing
     if (currentTier === ProfileTier.PRO) {

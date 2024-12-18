@@ -1,17 +1,13 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { BaseEdgeProvider, useEdgeContext } from './BaseEdgeProvider'
-import { profileEdgeService } from '@/app/[locale]/(authenticated)/profile/services/profile.service'
-import type { Profile } from '@/app/[locale]/(authenticated)/profile/profile'
-import type { ServiceResponse } from '@/app/api/services/types'
+import type { Profile, ProfileResponse } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface ProfileEdgeContextValue {
-  profile: ServiceResponse<Profile> | null
+  profile: ProfileResponse | null
   isLoading: boolean
   error: Error | null
   refreshProfile: () => Promise<void>
-  clearProfileCache: () => Promise<void>
 }
 
 const ProfileEdgeContext = React.createContext<ProfileEdgeContextValue | null>(null)
@@ -23,10 +19,9 @@ export function ProfileEdgeProvider({
   children: React.ReactNode
   address: string
 }) {
-  const [profile, setProfile] = React.useState<ServiceResponse<Profile> | null>(null)
+  const [profile, setProfile] = React.useState<ProfileResponse | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<Error | null>(null)
-  const { options } = useEdgeContext()
 
   const refreshProfile = useCallback(async () => {
     if (!address) return
@@ -35,20 +30,15 @@ export function ProfileEdgeProvider({
     setError(null)
 
     try {
-      const data = await profileEdgeService.getProfile(address, options)
+      const response = await fetch(`/api/profile/${address}`)
+      const data = await response.json()
       setProfile(data)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch profile'))
     } finally {
       setIsLoading(false)
     }
-  }, [address, options])
-
-  const clearProfileCache = useCallback(async () => {
-    if (!address) return
-    await profileEdgeService.invalidateProfile(address)
-    await refreshProfile()
-  }, [address, refreshProfile])
+  }, [address])
 
   // Initial fetch
   React.useEffect(() => {
@@ -62,7 +52,6 @@ export function ProfileEdgeProvider({
         isLoading,
         error,
         refreshProfile,
-        clearProfileCache,
       }}
     >
       {children}
@@ -76,21 +65,4 @@ export function useProfileEdge() {
     throw new Error('useProfileEdge must be used within a ProfileEdgeProvider')
   }
   return context
-}
-
-// Composite provider that includes both Base and Profile providers
-export function ProfileEdgeProviderWithBase({
-  children,
-  address,
-  initialOptions = {},
-}: {
-  children: React.ReactNode
-  address: string
-  initialOptions?: Parameters<typeof BaseEdgeProvider>[0]['initialOptions']
-}) {
-  return (
-    <BaseEdgeProvider initialOptions={initialOptions}>
-      <ProfileEdgeProvider address={address}>{children}</ProfileEdgeProvider>
-    </BaseEdgeProvider>
-  )
 }

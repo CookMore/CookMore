@@ -2,7 +2,7 @@
 
 import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
 import { ProfileSidebar } from './components/ui/ProfileSidebar'
-import { useProfileSystem } from './components/hooks'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile'
 import { useState } from 'react'
 
 interface ProfileLayoutProps {
@@ -10,8 +10,14 @@ interface ProfileLayoutProps {
 }
 
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
-  const { steps, currentStep, setCurrentStep, tier } = useProfileSystem()
+  const { currentTier: tier } = useProfile()
+  const [currentStep, setCurrentStep] = useState(0)
   const [isExpanded, setIsExpanded] = useState(true)
+
+  const steps = [
+    { title: 'Profile', href: '/profile' },
+    { title: 'Settings', href: '/profile/settings' },
+  ]
 
   return (
     <DualSidebarLayout

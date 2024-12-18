@@ -1,11 +1,12 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { useAccount, useContractRead } from 'wagmi'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { useProfileRegistry } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { PROFILE_REGISTRY_ABI } from '@/app/api/web3/abis/profile'
+import { profileABI } from '@/app/api/blockchain/abis/profile'
+import { TIER_CONTRACT_ABI } from '../contracts/abis'
 
 interface ProfileContextType {
   address?: string
@@ -45,7 +46,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   // Use wagmi's useContractRead for profile data
   const { data: profileData, isError } = useContractRead({
     address: contract?.address as `0x${string}`,
-    abi: PROFILE_REGISTRY_ABI,
+    abi: profileABI,
     functionName: 'getProfile',
     args: address ? [address] : undefined,
     enabled: mounted && !!address && !!contract?.address,

@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link } from '@/app/api/navigation/Link'
+import { usePathname } from '@/i18n'
 import { ROUTES } from '@/app/api/routes/routes'
 import { cn } from '@/app/api/utils/utils'
 import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'

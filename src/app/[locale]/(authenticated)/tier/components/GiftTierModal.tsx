@@ -7,14 +7,22 @@ import { Button } from '@/app/api/components/ui/button'
 import { Input } from '@/app/api/components/ui/input'
 import { IconGift } from '@/app/api/icons'
 
-export function GiftTierModal({ isOpen, onClose, targetTier, onGiftSuccess }: GiftTierModalProps) {
+export function GiftTierModal({
+  isOpen,
+  onClose,
+  targetTier,
+  onGiftSuccess,
+  onGift,
+}: GiftTierModalProps) {
   const [recipientAddress, setRecipientAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleGift = async () => {
+    if (!recipientAddress) return
+
     try {
       setIsLoading(true)
-      // Gift logic here
+      await onGift?.(recipientAddress)
       onGiftSuccess?.()
       onClose()
     } catch (error) {
@@ -76,7 +84,7 @@ export function GiftTierModal({ isOpen, onClose, targetTier, onGiftSuccess }: Gi
                     className='gap-2'
                   >
                     <IconGift className='h-4 w-4' />
-                    Gift NFT
+                    {isLoading ? 'Processing...' : 'Gift NFT'}
                   </Button>
                 </div>
               </Dialog.Panel>

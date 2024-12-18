@@ -1,7 +1,0 @@
-'use client'
-export * from './config/chains'
-export * from './config/wagmi'
-export * from './utils/addresses'
-export * from './contracts/profile'
-export * from '../../[locale]/(authenticated)/profile'
-export { useProfile } from './hooks/profile'

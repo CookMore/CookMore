@@ -3,12 +3,13 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { BasePageLayout } from '@/app/api/layouts/BasePageLayout'
-import { FullPageLayout } from '@/app/api//layouts/FullPage'
+import { FullPageLayout } from '@/app/api/layouts/FullPage'
 import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
-import { useProfile } from '@/app/api/providers/ProfileProvider'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
 import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
+import { ProfileProvider } from '@/app/[locale]/(authenticated)/profile/providers/ProfileProvider'
 
-export default function TierLayout({ children }: { children: React.ReactNode }) {
+function TierLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { isAdmin, isLoading: adminLoading } = useAdminCheck()
   const { profile, isLoading: profileLoading } = useProfile()
@@ -42,5 +43,13 @@ export default function TierLayout({ children }: { children: React.ReactNode }) 
     <BasePageLayout>
       <FullPageLayout fullWidth>{children}</FullPageLayout>
     </BasePageLayout>
+  )
+}
+
+export default function TierLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ProfileProvider>
+      <TierLayoutContent>{children}</TierLayoutContent>
+    </ProfileProvider>
   )
 }

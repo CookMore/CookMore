@@ -10,7 +10,9 @@ const inter = Inter({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={inter.variable}>
-      <body>{children}</body>
+      <body>
+        <div className='flex min-h-screen flex-col'>{children}</div>
+      </body>
     </html>
   )
 }

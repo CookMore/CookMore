@@ -12,8 +12,8 @@ import { useState, useEffect } from 'react'
 
 function LoadingTiers() {
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-8 xl:gap-12 place-items-stretch'>
-      {[...Array(3)].map((_, i) => (
+    <div className='grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-8 xl:gap-12 place-items-stretch'>
+      {[...Array(4)].map((_, i) => (
         <div key={i} className='flex justify-center'>
           <div className='animate-pulse w-full lg:min-w-[380px] h-[32.5rem] bg-github-canvas-subtle rounded-lg' />
         </div>
@@ -24,9 +24,15 @@ function LoadingTiers() {
 
 export default function TierPage() {
   const [mounted, setMounted] = useState(false)
-  const { hasGroup, hasPro, isLoading, refetch } = useNFTTiers()
+  const { hasGroup, hasPro, hasOG, isLoading, refetch } = useNFTTiers()
   const { isAdmin } = useAdminCheck()
-  const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
+  const currentTier = hasOG
+    ? ProfileTier.OG
+    : hasGroup
+      ? ProfileTier.GROUP
+      : hasPro
+        ? ProfileTier.PRO
+        : ProfileTier.FREE
 
   useEffect(() => {
     setMounted(true)
@@ -52,7 +58,7 @@ export default function TierPage() {
     )
   }
 
-  const tiers = [ProfileTier.FREE, ProfileTier.PRO, ProfileTier.GROUP]
+  const tiers = [ProfileTier.FREE, ProfileTier.PRO, ProfileTier.GROUP, ProfileTier.OG]
 
   return (
     <BasePageLayout>
@@ -84,7 +90,7 @@ export default function TierPage() {
 
           {/* Tier Cards */}
           <div className='px-4 sm:px-6 lg:px-8'>
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-8 xl:gap-12 place-items-stretch'>
+            <div className='grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-8 xl:gap-12 place-items-stretch'>
               {tiers.map((tier) => (
                 <motion.div
                   key={tier}

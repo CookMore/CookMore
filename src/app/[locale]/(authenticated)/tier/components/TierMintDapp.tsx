@@ -19,8 +19,8 @@ import { cn } from '@/app/api/utils/utils'
 // Web3 Imports
 import { TIER_CONTRACT_ABI } from '@/app/api/web3/abis/TierContracts'
 import { TIER_CONTRACT_ADDRESS } from '@/app/api/web3/addresses/contracts'
-import { SUPPORTED_CHAINS } from '@/app/api/web3/config/chains'
-import { useWalletState } from '@/app/api/web3/hooks/wallet/useWalletState'
+import { SUPPORTED_CHAINS } from '@/app/api/blockchain/config/chains'
+import { useWalletState } from '@/app/api/blockchain/wallet/useWalletState'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { useTierMint, TierType } from '@/app/[locale]/(authenticated)/tier/hooks/useTierMint'
 
@@ -52,14 +52,43 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
   const [isGifting, setIsGifting] = useState(false)
   const [giftAddress, setGiftAddress] = useState('')
   const [mintError, setMintError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const { address } = useWalletState()
   const chainId = useChainId()
+  const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
   const { hasGroup, hasPro, isLoading: tiersLoading } = useNFTTiers()
   const { isLoading, mintTier, contract } = useTierMint(onMintSuccess)
+
+  // Use useEffect for client-side mounting
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Use useEffect to verify contract deployment
+  useEffect(() => {
+    async function verifyContract() {
+      if (mounted && publicClient && TIER_CONTRACT_ADDRESS) {
+        try {
+          const code = await publicClient.getBytecode({
+            address: TIER_CONTRACT_ADDRESS,
+          })
+          if (!code) {
+            console.warn('Tier contract not deployed at', TIER_CONTRACT_ADDRESS)
+          }
+        } catch (error) {
+          console.error('Error verifying contract:', error)
+        }
+      }
+    }
+    verifyContract()
+  }, [mounted, publicClient])
 
   // Network check
   const isCorrectChain =
     chainId === SUPPORTED_CHAINS.BASE_MAINNET || chainId === SUPPORTED_CHAINS.BASE_SEPOLIA
+
+  if (!mounted) return null
 
   if (!isCorrectChain) {
     return (
@@ -69,7 +98,8 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
           <div className='flex-1'>
             <h3 className='text-sm font-medium text-github-danger-fg'>Wrong Network</h3>
             <p className='mt-1 text-sm text-github-danger-fg/70'>
-              Please switch to Base Mainnet or Base Sepolia network
+              Please switch to {getNetworkName(SUPPORTED_CHAINS.BASE_MAINNET)} or{' '}
+              {getNetworkName(SUPPORTED_CHAINS.BASE_SEPOLIA)}
             </p>
           </div>
         </div>
@@ -77,7 +107,7 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
     )
   }
 
-  if (!address) {
+  if (!address || !walletClient) {
     return (
       <div className='rounded-lg border border-github-border-default bg-github-canvas-subtle p-4'>
         <div className='flex items-center gap-3'>
@@ -116,9 +146,12 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
       }
 
       const tierType: TierType = tier === ProfileTier.PRO ? 'Pro' : 'Group'
+      const info = tierInfo[tier]
       await contract.write.giftTier([recipientAddress, tierType === 'Group'])
 
-      toast.success(`Successfully gifted ${getTierDisplayName(tier)} NFT to ${recipientAddress}`)
+      toast.success(
+        `Successfully gifted ${getTierDisplayName(tier)} NFT (${info.description}) to ${recipientAddress}`
+      )
       setIsGifting(false)
       setGiftAddress('')
       onMintSuccess?.()
@@ -134,6 +167,10 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
     try {
       if (!address || !contract) {
         throw new Error('Wallet not connected')
+      }
+
+      if (currentTier !== ProfileTier.PRO) {
+        throw new Error('Must own Pro NFT to upgrade')
       }
 
       // Get the token ID of the Pro NFT to upgrade
@@ -156,6 +193,7 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
 
   const renderMintButton = (tier: ProfileTier) => {
     const style = tierStyles[tier]
+    const info = tierInfo[tier]
     const displayName = getTierDisplayName(tier)
     const showLock = !hasPro && tier === ProfileTier.GROUP
     const alreadyOwned =
@@ -176,9 +214,12 @@ export function TierMintDapp({ onMintSuccess, currentTier, targetTier }: TierMin
       <div className='space-y-2'>
         <div className={cn('rounded-lg border p-4', 'bg-github-canvas-subtle', style.borderColor)}>
           <div className='flex items-center justify-between mb-3'>
-            <h3 className={cn('text-lg font-semibold', inter.className, style.color)}>
-              {displayName} NFT
-            </h3>
+            <div>
+              <h3 className={cn('text-lg font-semibold', inter.className, style.color)}>
+                {displayName} NFT
+              </h3>
+              <p className='text-sm text-github-fg-muted'>{info.description}</p>
+            </div>
             {alreadyOwned && (
               <span className='text-sm text-github-success-fg bg-github-success-subtle px-2 py-1 rounded'>
                 Owned

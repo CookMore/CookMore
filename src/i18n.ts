@@ -1,5 +1,7 @@
 import { getRequestConfig } from 'next-intl/server'
 import { createSharedPathnamesNavigation } from 'next-intl/navigation'
+
+// Import messages
 import enCommon from '../public/messages/en/common.json'
 import enProfile from '../public/messages/en/profile.json'
 import esCommon from '../public/messages/es/common.json'
@@ -12,9 +14,13 @@ import jaCommon from '../public/messages/ja/common.json'
 import koCommon from '../public/messages/ko/common.json'
 import zhCommon from '../public/messages/zh/common.json'
 
+// Locale configuration
 export const defaultLocale = 'en'
-export const locales = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh']
+export const locales = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'] as const
+export type Locale = (typeof locales)[number]
+export const localePrefix = 'as-needed'
 
+// Language labels
 export const languages = {
   en: 'English',
   es: 'Español',
@@ -26,12 +32,9 @@ export const languages = {
   zh: '中文',
   ja: '日本語',
   ko: '한국어',
-  ar: 'العربية',
-  hi: 'हिन्दी',
 } as const
 
-export const localePrefix = 'as-needed'
-
+// Messages configuration
 const messages = {
   en: {
     ...enCommon,
@@ -52,6 +55,7 @@ export async function getMessages(locale: string) {
   return messages[locale as keyof typeof messages] || messages.en
 }
 
+// Next-intl configuration
 export default getRequestConfig(async ({ locale }) => ({
   messages: messages[locale as keyof typeof messages] || messages.en,
   timeZone: 'UTC',
@@ -67,6 +71,7 @@ export default getRequestConfig(async ({ locale }) => ({
   },
 }))
 
+// Navigation utilities
 export const { Link, redirect, usePathname, useRouter } = createSharedPathnamesNavigation({
   locales,
 })

@@ -1055,3 +1055,16 @@ export function IconGraduationCap(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function IconCrown(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth={2}
+        d='M12 4l3 6 5-4-2 10H6L4 6l5 4 3-6z'
+      />
+    </svg>
+  )
+}

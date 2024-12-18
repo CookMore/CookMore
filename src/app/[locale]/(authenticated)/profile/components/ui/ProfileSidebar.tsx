@@ -7,7 +7,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState, useCallback } 
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
-import { useProfileSystem } from '@/app/[locale]/(authenticated)/profile/components/hooks'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile'
 
 interface ProfileSidebarProps {
   steps: Step[]
@@ -27,7 +27,7 @@ export function ProfileSidebar({
   tier,
 }: ProfileSidebarProps) {
   const { hasGroup, hasPro, isLoading: nftLoading } = useNFTTiers()
-  const { isLoading: profileLoading } = useProfileSystem()
+  const { isLoading: profileLoading } = useProfile()
   const [mounted, setMounted] = useState(false)
 
   const isLoading = nftLoading || profileLoading

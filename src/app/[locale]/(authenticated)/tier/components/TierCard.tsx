@@ -2,11 +2,12 @@
 
 import { cn } from '@/app/api/utils/utils'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { TierActionButton } from './TierActionButton'
+import { TierActionButtonWrapper } from './TierActionButtonWrapper'
 import { IconCheck } from '@/app/api/icons'
 import { tierInfo, tierStyles } from '@/app/api/tiers/tiers'
 import { inter } from '@/app/api/fonts'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 interface TierCardProps {
   tier: ProfileTier
@@ -18,7 +19,6 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
   const [mounted, setMounted] = useState(false)
   const info = tierInfo[tier]
   const style = tierStyles[tier]
-  const Icon = style.icon
 
   useEffect(() => {
     setMounted(true)
@@ -29,9 +29,13 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
   }
 
   const isCurrentTier = currentTier === tier
+  const upgradeText =
+    tier === ProfileTier.GROUP && currentTier === ProfileTier.PRO
+      ? 'Upgrade from Pro - $75 (Pro purchase credited)'
+      : null
 
   return (
-    <div
+    <motion.div
       className={cn(
         'relative overflow-hidden rounded-lg border transition-all',
         'w-full lg:min-w-[380px]',
@@ -47,7 +51,7 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
             <div
               className={cn('flex h-10 w-10 items-center justify-center rounded-lg', style.iconBg)}
             >
-              <Icon className={cn('h-6 w-6', style.color)} />
+              <style.icon className={cn('h-6 w-6', style.color)} />
             </div>
             <div>
               <h3 className={cn('text-lg font-semibold', style.color, inter.className)}>
@@ -118,18 +122,21 @@ export function TierCard({ tier, currentTier, onMintSuccess }: TierCardProps) {
             </ul>
           </div>
         )}
+
+        {upgradeText && <p className='text-sm text-github-fg-muted mt-2'>{upgradeText}</p>}
       </div>
 
       {/* Minting Section */}
       {tier !== ProfileTier.FREE && (
         <div className='border-t border-github-border-default bg-github-canvas-default p-6'>
-          <TierActionButton
+          <TierActionButtonWrapper
             currentTier={currentTier}
             targetTier={tier}
             onMintSuccess={onMintSuccess}
+            showGift={true}
           />
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

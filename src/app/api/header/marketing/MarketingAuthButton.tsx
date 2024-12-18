@@ -1,49 +1,93 @@
 'use client'
 
-import { usePrivy } from '@privy-io/react-auth'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { Button } from '@/app/api/components/ui/button'
-import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
+import { Fragment } from 'react'
+import Link from 'next/link'
+import { Menu, Transition } from '@headlessui/react'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { ROUTES } from '@/app/api/routes/routes'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/app/api/header/dropdown-menu'
+import { DefaultAvatar } from '@/app/api/avatar/DefaultAvatar'
+import { cn } from '@/app/api/utils/utils'
+import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
+import type {
+  FreeProfileMetadata,
+  ProProfileMetadata,
+  GroupProfileMetadata,
+} from '@/app/[locale]/(authenticated)/profile/profile'
+
+type ProfileMetadata = FreeProfileMetadata | ProProfileMetadata | GroupProfileMetadata
 
 export function MarketingAuthButton() {
-  const { login, logout, authenticated, ready, user } = usePrivy()
-  const router = useRouter()
+  const { isAuthenticated, isLoading, user, hasProfile, profile, login, logout } = useAuth()
 
-  // Redirect authenticated users to profile creation or kitchen
-  useEffect(() => {
-    if (authenticated && ready) {
-      router.push(ROUTES.AUTH.PROFILE.CREATE)
-    }
-  }, [authenticated, ready, router])
+  if (isLoading) {
+    return <LoadingSkeleton className='h-9 w-24' />
+  }
 
-  if (!ready) {
+  if (!isAuthenticated) {
     return (
-      <Button disabled>
-        <LoadingSpinner className='w-4 h-4' />
-      </Button>
+      <button
+        onClick={login}
+        className='inline-flex items-center justify-center rounded-md bg-github-btn-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-github-btn-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-github-btn-primary'
+      >
+        Get Started
+      </button>
     )
   }
 
-  if (authenticated) {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant='ghost'>{user?.email || 'Account'}</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={logout}>Sign Out</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    )
-  }
+  const profileData = profile as ProfileMetadata
 
-  return <Button onClick={login}>Sign In</Button>
+  return (
+    <Menu as='div' className='relative'>
+      <Menu.Button className='flex items-center gap-2'>
+        {profileData?.avatar ? (
+          <img
+            src={profileData.avatar}
+            alt={profileData.name || 'Profile'}
+            className='h-8 w-8 rounded-full'
+          />
+        ) : (
+          <DefaultAvatar address={user?.wallet?.address} size={32} />
+        )}
+      </Menu.Button>
+
+      <Transition
+        as={Fragment}
+        enter='transition ease-out duration-100'
+        enterFrom='transform opacity-0 scale-95'
+        enterTo='transform opacity-100 scale-100'
+        leave='transition ease-in duration-75'
+        leaveFrom='transform opacity-100 scale-100'
+        leaveTo='transform opacity-0 scale-95'
+      >
+        <Menu.Items className='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-github-canvas-overlay py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+          <Menu.Item>
+            {({ active }) => (
+              <Link
+                href={hasProfile ? ROUTES.AUTH.PROFILE.HOME : ROUTES.AUTH.PROFILE.CREATE}
+                className={cn(
+                  active ? 'bg-github-canvas-subtle' : '',
+                  'block px-4 py-2 text-sm text-github-fg-default'
+                )}
+              >
+                {hasProfile ? 'Profile' : 'Create Profile'}
+              </Link>
+            )}
+          </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                onClick={logout}
+                className={cn(
+                  active ? 'bg-github-canvas-subtle' : '',
+                  'block w-full px-4 py-2 text-left text-sm text-github-fg-default'
+                )}
+              >
+                Sign Out
+              </button>
+            )}
+          </Menu.Item>
+        </Menu.Items>
+      </Transition>
+    </Menu>
+  )
 }

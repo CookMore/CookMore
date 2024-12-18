@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useEffect, useCallback, useMemo } from 'react'
-import { useFormContext, Control, FieldErrors } from 'react-hook-form'
+import React, { useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
-import { ProfileTier, type ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { toast } from 'sonner'
 import { FormSkeleton } from '@/app/api/form/FormSkeleton'
 import {
@@ -18,7 +17,8 @@ import {
 } from '../../sections'
 import { getStepsForTier } from '../../../steps'
 import { useTheme } from '@/app/api/providers/ThemeProvider'
-import { useProfile } from '@/app/api/providers/ProfileProvider'
+import { useProfile } from '../../hooks'
+import type { ProfileFormData, ProfileTier } from '../../../profile'
 
 interface CreateProfileFormProps {
   tier: ProfileTier
@@ -34,19 +34,39 @@ interface SectionProps {
 export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps) {
   const t = useTranslations('profile')
   const { theme } = useTheme()
-  const { createProfile, currentTier, tiersLoading } = useProfile()
+  const { createProfile, validateMetadata, isLoading, hasPro, hasGroup } = useProfile()
   const {
     control,
     formState: { errors },
     handleSubmit,
+    watch,
   } = useFormContext<ProfileFormData>()
 
   const steps = getStepsForTier(tier)
+  const formData = watch()
+
+  // Verify tier access
+  useEffect(() => {
+    if (!isLoading) {
+      if (tier === ProfileTier.GROUP && !hasGroup) {
+        toast.error(t('errors.needGroupNFT'))
+      } else if (tier === ProfileTier.PRO && !hasPro) {
+        toast.error(t('errors.needProNFT'))
+      }
+    }
+  }, [tier, hasPro, hasGroup, isLoading, t])
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
+      // Validate metadata before submission
+      const isValid = await validateMetadata(data)
+      if (!isValid) {
+        toast.error(t('create.validationError'))
+        return
+      }
+
       toast.loading(t('create.submitting'))
-      const hash = await createProfile(data, tier)
+      const hash = await createProfile(data)
       toast.success(t('create.success'))
       return hash
     } catch (error) {
@@ -56,8 +76,7 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
     }
   }
 
-  // Use useCallback for step rendering to prevent unnecessary re-renders
-  const renderStep = useCallback(() => {
+  const renderStep = () => {
     const step = steps[currentStep]
     if (!step) return null
 
@@ -85,23 +104,17 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
       default:
         return null
     }
-  }, [currentStep, control, errors, theme])
+  }
 
-  // Verify tier access only once when component mounts or tier changes
-  useEffect(() => {
-    if (!tiersLoading) {
-      if (tier === ProfileTier.GROUP && currentTier !== ProfileTier.GROUP) {
-        toast.error(t('errors.needGroupNFT'))
-      } else if (tier === ProfileTier.PRO && currentTier === ProfileTier.FREE) {
-        toast.error(t('errors.needProNFT'))
-      }
-    }
-  }, [tier, currentTier, tiersLoading, t])
+  if (isLoading) {
+    return <FormSkeleton />
+  }
 
-  // Memoize form classes
-  const formClasses = useMemo(
-    () =>
-      `space-y-8 ${
+  return (
+    <form
+      id='create-profile-form'
+      onSubmit={handleSubmit(onSubmit)}
+      className={`space-y-8 ${
         theme === 'neo'
           ? 'neo-container'
           : theme === 'wooden'
@@ -111,16 +124,8 @@ export function CreateProfileForm({ tier, currentStep }: CreateProfileFormProps)
               : theme === 'copper'
                 ? 'copper-container shine-effect'
                 : 'bg-github-canvas-default'
-      }`,
-    [theme]
-  )
-
-  if (tiersLoading) {
-    return <FormSkeleton />
-  }
-
-  return (
-    <form id='create-profile-form' onSubmit={handleSubmit(onSubmit)} className={formClasses}>
+      }`}
+    >
       {renderStep()}
     </form>
   )
