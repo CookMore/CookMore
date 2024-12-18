@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { IconArrowUpRight, IconGift } from '@/app/api/icons'
-import { Button } from '@/app/api/components/ui/Button'
+import { IconArrowUpRight, IconGift } from '@/app/api/icons/index'
+import { Button } from '@/app/api/components/ui/button'
 import { cn } from '@/app/api/utils/utils'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useTierMint } from '../hooks/useTierMint'

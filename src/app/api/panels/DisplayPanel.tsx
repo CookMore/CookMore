@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { BasePanel } from './BasePanel'
 import { ThemeToggle } from '@/app/api/components/ui/ThemeToggle'
 import { Toggle } from '@/app/api/components/ui/Toggle'
-import { useTheme } from '@/app/api/providers/ThemeProvider'
-import { useMotion } from '@/app/api/providers/MotionProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
+import { useMotion } from '@/app/api/providers/core/MotionProvider'
 import {
   IconMotion,
   IconZoomIn,

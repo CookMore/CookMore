@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from '@/app/api/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { cn } from '@/app/api/utils/utils'
 
 export function Footer() {

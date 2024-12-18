@@ -36,9 +36,9 @@ async function checkRoleAccess(address: string): Promise<{
     })
 
     const [isAdmin, canManageProfiles, canManageMetadata] = await Promise.all([
-      accessControlContract.hasRole(ROLES.ADMIN, address),
-      accessControlContract.hasRole(ROLES.PROFILE_MANAGER, address),
-      accessControlContract.hasRole(ROLES.METADATA_MANAGER, address),
+      accessControlContract.read('hasRole', [ROLES.ADMIN, address]),
+      accessControlContract.read('hasRole', [ROLES.PROFILE_MANAGER, address]),
+      accessControlContract.read('hasRole', [ROLES.METADATA_MANAGER, address]),
     ])
 
     return {

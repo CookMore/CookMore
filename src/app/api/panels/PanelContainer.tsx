@@ -1,13 +1,13 @@
 'use client'
 
-import { usePanel } from '@/app/api/providers/PanelProvider'
+import { usePanel } from '@/app/api/providers/features/PanelProvider'
 import { IconUser, IconSettings, IconWallet, IconCalendar, IconBell } from '@/app/api/icons'
 import { ProfilePanel } from './ProfilePanel'
 import { DisplayPanel } from './DisplayPanel'
 import { ConnectedPanel } from './ConnectedPanel'
 import { CalendarPanel } from './CalendarPanel'
 import { NotificationsPanel } from './NotificationsPanel'
-import { useTheme } from '@/app/api/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { cn } from '@/app/api/utils/utils'
 import { useState, useEffect } from 'react'
 

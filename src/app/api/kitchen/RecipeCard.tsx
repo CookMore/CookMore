@@ -1,7 +1,7 @@
 'use client'
 
-import { Icons } from '@/components/icons'
-import { cn } from '@/lib/utils'
+import { Icons } from '@/app/api/icons/icons'
+import { cn } from '@/app/api/utils/utils'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Recipe } from '@/app/api/types/recipe'

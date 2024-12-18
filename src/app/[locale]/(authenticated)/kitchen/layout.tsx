@@ -1,8 +1,8 @@
 'use client'
 
-import { BasePageLayout } from '@/components/layouts/BasePageLayout'
+import { BasePageLayout } from '@/app/api/layouts/BasePageLayout'
 import { KitchenLayoutClient } from './KitchenLayoutClient'
-import { KitchenProvider } from './KitchenProvider'
+import { KitchenProvider } from '@/app/api/providers/features/KitchenProvider'
 
 export default function KitchenLayout({ children }: { children: React.ReactNode }) {
   return (

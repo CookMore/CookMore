@@ -1,10 +1,9 @@
-import { SingleSidebarLayout } from '@/components/layouts/SingleSidebarLayout'
-import KitchenContent from '@/app/(authenticated)/kitchen/KitchenContent'
+import KitchenContent from './KitchenContent'
 
 export default function KitchenPage() {
   return (
-    <SingleSidebarLayout>
+    <div>
       <KitchenContent />
-    </SingleSidebarLayout>
+    </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useTheme } from '@/app/api/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { Icons } from '@/app/api/icons/icons'
 import { Button } from '@/app/api/components/ui/button'
 import {

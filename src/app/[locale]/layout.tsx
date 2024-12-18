@@ -4,6 +4,10 @@ import { defaultLocale, locales } from '@/i18n'
 import { unstable_setRequestLocale } from 'next-intl/server'
 import { getMessages } from '@/i18n'
 import { Toaster } from 'sonner'
+import { ThemeProvider } from '@/app/api/providers/core/ThemeProvider'
+import { PrivyProvider } from '@/app/api/providers/core/PrivyProvider'
+import { WagmiProvider } from '@/app/api/providers/core/WagmiProvider'
+import { MotionProvider } from '@/app/api/providers/core/MotionProvider'
 
 interface LocaleLayoutProps {
   children: ReactNode
@@ -25,7 +29,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     <html lang={validLocale}>
       <body className='bg-github-canvas-default'>
         <Providers messages={messages} locale={validLocale}>
-          <div className='min-h-screen flex flex-col'>{children}</div>
+          {children}
           <Toaster />
         </Providers>
       </body>

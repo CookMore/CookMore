@@ -1,11 +1,14 @@
 'use client'
 
-import { ThemeProvider } from './ThemeProvider'
-import { WagmiConfig } from 'wagmi'
-import { wagmiConfig } from '../blockchain/config/wagmi'
+import { ThemeProvider } from './core/ThemeProvider'
+import { PrivyProvider } from './core/PrivyProvider'
+import { WagmiProvider } from './core/WagmiProvider'
+import { MotionProvider } from './core/MotionProvider'
+import { KitchenProvider } from './features/KitchenProvider'
+import { ProfileProvider } from './features/ProfileProvider'
+import { RecipeProvider } from './features/RecipeProvider'
 import { QueryClientProvider, QueryClient, HydrationBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { PrivyProvider } from '@privy-io/react-auth'
 import { I18nProvider } from './edge/i18n-provider'
 
 const queryClient = new QueryClient({
@@ -41,9 +44,11 @@ export function Providers({
               },
             }}
           >
-            <WagmiConfig config={wagmiConfig}>
-              <ThemeProvider>{children}</ThemeProvider>
-            </WagmiConfig>
+            <WagmiProvider>
+              <MotionProvider>
+                <ThemeProvider>{children}</ThemeProvider>
+              </MotionProvider>
+            </WagmiProvider>
           </PrivyProvider>
         </I18nProvider>
       </HydrationBoundary>

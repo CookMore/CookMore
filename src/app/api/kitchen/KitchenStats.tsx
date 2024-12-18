@@ -1,10 +1,10 @@
 'use client'
 
-import { Icons } from '@/components/icons'
-import { useKitchen } from '@/app/(authenticated)/kitchen/KitchenProvider'
+import { Icons } from '@/app/api/icons/icons'
+import { useKitchen } from '@/app/api/providers/features/KitchenProvider'
 import { LucideIcon } from 'lucide-react'
 
-export function KitchenStats() {
+export default function KitchenStats() {
   const { recipes, isLoading } = useKitchen()
 
   if (isLoading) {

@@ -1,9 +1,9 @@
 'use client'
 
-import { Icons } from '@/components/icons'
-import { cn } from '@/lib/utils'
+import { Icons } from '@/app/api/icons/icons'
+import { cn } from '@/app/api/utils/utils'
 import { RecipeCard } from './RecipeCard'
-import { useKitchen } from '@/app/(authenticated)/kitchen/KitchenProvider'
+import { useKitchen } from '@/app/api/providers/features/KitchenProvider'
 import { Recipe } from '@/app/api/types/recipe'
 
 interface RecipeCollectionProps {
@@ -11,7 +11,7 @@ interface RecipeCollectionProps {
   type: 'recent' | 'draft' | 'popular'
 }
 
-export function RecipeCollection({ title, type }: RecipeCollectionProps) {
+export default function RecipeCollection({ title, type }: RecipeCollectionProps) {
   const { recipes, isLoading } = useKitchen()
 
   // Filter and sort recipes based on type
