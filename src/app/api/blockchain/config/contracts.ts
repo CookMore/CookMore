@@ -1,25 +1,28 @@
-import { Address } from 'viem'
-import { RecipeABI } from '../abis/metadata'
-import { ProfileRegistryABI } from '../abis/profile'
-import { TierABI } from '../abis/tier'
+import { Address, isAddress } from 'viem'
+import { recipeABI } from '../abis/recipe'
+import { profileABI } from '../abis/profile'
+import { tierABI } from '../abis/tier'
 
 // Contract addresses for different environments
 const MAINNET_CONTRACTS = {
   PROFILE: process.env.NEXT_PUBLIC_PROFILE_CONTRACT_ADDRESS,
   TIER: process.env.NEXT_PUBLIC_TIER_CONTRACT_ADDRESS,
   USDC: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+  ACCESS_CONTROL: process.env.NEXT_PUBLIC_ACCESS_CONTROL_ADDRESS,
 } as const
 
 const TESTNET_CONTRACTS = {
   PROFILE: process.env.NEXT_PUBLIC_TESTNET_PROFILE_REGISTRY,
   TIER: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
   USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897' as Address,
+  ACCESS_CONTROL: process.env.NEXT_PUBLIC_TESTNET_ACCESS_CONTROL,
 } as const
 
 const LOCAL_CONTRACTS = {
   PROFILE: process.env.NEXT_PUBLIC_PROFILE_CONTRACT_ADDRESS,
   TIER: process.env.NEXT_PUBLIC_TIER_CONTRACT_ADDRESS,
   USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897' as Address,
+  ACCESS_CONTROL: process.env.NEXT_PUBLIC_ACCESS_CONTROL_ADDRESS,
 } as const
 
 // Select contracts based on environment
@@ -42,18 +45,33 @@ Object.entries(CONTRACTS).forEach(([name, address]) => {
   }
 })
 
+export const validateContractAddress = (address: string | undefined): string => {
+  if (!address || !isAddress(address)) {
+    throw new Error(`Invalid contract address: ${address}`)
+  }
+  return address
+}
+
+export const getContractConfig = (address: string, abi: any) => {
+  const validAddress = validateContractAddress(address)
+  return {
+    address: validAddress,
+    abi,
+  }
+}
+
 export const contracts = {
   recipe: {
     address: process.env.NEXT_PUBLIC_TESTNET_METADATA,
-    abi: RecipeABI,
+    abi: recipeABI,
   },
 
   profile: {
     address: CONTRACTS.PROFILE,
-    abi: ProfileRegistryABI,
+    abi: profileABI,
   },
   tier: {
     address: CONTRACTS.TIER,
-    abi: TierABI,
+    abi: tierABI,
   },
 }

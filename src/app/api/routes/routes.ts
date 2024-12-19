@@ -12,7 +12,6 @@ export const ROUTES = {
 
   // Authenticated routes
   AUTH: {
-    LOGIN: '/login',
     KITCHEN: {
       HOME: '/kitchen',
       CLUB: '/kitchen/club',
@@ -24,13 +23,6 @@ export const ROUTES = {
       HOME: '/profile',
       CREATE: '/profile/create',
       EDIT: '/profile/edit',
-      STEPS: {
-        SELECT_TIER: '/profile/create/select-tier',
-        BASIC: '/profile/create/basic',
-        PRO: '/profile/create/pro',
-        GROUP: '/profile/create/group',
-        MINT: '/profile/create/mint',
-      },
     },
     ADMIN: '/admin',
   },

@@ -2,61 +2,46 @@
 
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { FormSection } from '@/components/ui/form/FormSection'
-import { LoadingSkeleton } from '@/components/ui/skeletons/LoadingSkeleton'
-import { PageHeader } from '@/components/ui/PageHeader'
+import { FormSection } from '@/app/api/form/FormSection'
+import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
+import { PageHeader } from '@/app/api/header/PageHeader'
 
-// Lazy load components
-const RoleManager = dynamic(
-  () =>
-    import('@/app/(authenticated)/admin/components/RoleManager').then((mod) => ({
-      default: mod.RoleManager,
-    })),
-  {
-    loading: () => <LoadingSkeleton className='h-48' />,
-    ssr: false,
-  }
-)
+// Lazy load components with consistent loading states
+const AdminComponents = {
+  RoleManager: dynamic(
+    () => import('./components/RoleManager').then((mod) => ({ default: mod.RoleManager })),
+    { loading: () => <LoadingSkeleton className='h-48' />, ssr: false }
+  ),
+  ProfileManager: dynamic(
+    () => import('./components/ProfileManager').then((mod) => ({ default: mod.ProfileManager })),
+    { loading: () => <LoadingSkeleton className='h-48' />, ssr: false }
+  ),
+  NFTManager: dynamic(
+    () => import('./components/NFTManager').then((mod) => ({ default: mod.NFTManager })),
+    { loading: () => <LoadingSkeleton className='h-48' />, ssr: false }
+  ),
+  SystemStatus: dynamic(
+    () => import('./components/SystemStatus').then((mod) => ({ default: mod.SystemStatus })),
+    { loading: () => <LoadingSkeleton className='h-48' />, ssr: false }
+  ),
+  DeletedProfiles: dynamic(
+    () => import('./components/DeletedProfiles').then((mod) => ({ default: mod.DeletedProfiles })),
+    { loading: () => <LoadingSkeleton className='h-48' />, ssr: false }
+  ),
+}
 
-const ProfileManager = dynamic(
-  () =>
-    import('@/app/(authenticated)/admin/components/ProfileManager').then((mod) => ({
-      default: mod.ProfileManager,
-    })),
-  {
-    loading: () => <LoadingSkeleton className='h-48' />,
-    ssr: false,
-  }
-)
-
-const NFTManager = dynamic(
-  () =>
-    import('@/app/(authenticated)/admin/components/NFTManager').then((mod) => ({
-      default: mod.NFTManager,
-    })),
-  {
-    loading: () => <LoadingSkeleton className='h-48' />,
-    ssr: false,
-  }
-)
-
-const SystemStatus = dynamic(
-  () =>
-    import('@/app/(authenticated)/admin/components/SystemStatus').then((mod) => ({
-      default: mod.SystemStatus,
-    })),
-  {
-    loading: () => <LoadingSkeleton className='h-48' />,
-    ssr: false,
-  }
-)
-
-const DeletedProfiles = dynamic(
-  () => import('./components/DeletedProfiles').then((mod) => ({ default: mod.DeletedProfiles })),
-  {
-    loading: () => <LoadingSkeleton className='h-48' />,
-    ssr: false,
-  }
+const AdminSection = ({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description: string
+  children: React.ReactNode
+}) => (
+  <FormSection title={title} description={description}>
+    <Suspense fallback={<LoadingSkeleton className='h-48' />}>{children}</Suspense>
+  </FormSection>
 )
 
 export default function AdminDashboard() {
@@ -64,49 +49,34 @@ export default function AdminDashboard() {
     <div>
       <PageHeader title='Admin Dashboard' />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-        {/* System Status */}
-        <FormSection title='System Status' description='Monitor contract states and system health'>
-          <Suspense fallback={<LoadingSkeleton className='h-48' />}>
-            <SystemStatus />
-          </Suspense>
-        </FormSection>
+        <AdminSection title='System Status' description='Monitor contract states and system health'>
+          <AdminComponents.SystemStatus />
+        </AdminSection>
 
-        {/* Role Management */}
-        <FormSection
+        <AdminSection
           title='Role Management'
           description='Manage Feature Manager roles and permissions'
         >
-          <Suspense fallback={<LoadingSkeleton className='h-48' />}>
-            <RoleManager />
-          </Suspense>
-        </FormSection>
+          <AdminComponents.RoleManager />
+        </AdminSection>
 
-        {/* Profile Management */}
-        <FormSection
+        <AdminSection
           title='Profile Management'
           description='Manage user profiles and handle administrative actions'
         >
-          <Suspense fallback={<LoadingSkeleton className='h-48' />}>
-            <ProfileManager />
-          </Suspense>
-        </FormSection>
+          <AdminComponents.ProfileManager />
+        </AdminSection>
 
-        {/* NFT Management */}
-        <FormSection
+        <AdminSection
           title='NFT Management'
           description='Update NFT artwork and manage token settings'
         >
-          <Suspense fallback={<LoadingSkeleton className='h-48' />}>
-            <NFTManager />
-          </Suspense>
-        </FormSection>
+          <AdminComponents.NFTManager />
+        </AdminSection>
 
-        {/* Deleted Profiles */}
-        <FormSection title='Deleted Profiles' description='View history of deleted profiles'>
-          <Suspense fallback={<LoadingSkeleton className='h-48' />}>
-            <DeletedProfiles />
-          </Suspense>
-        </FormSection>
+        <AdminSection title='Deleted Profiles' description='View history of deleted profiles'>
+          <AdminComponents.DeletedProfiles />
+        </AdminSection>
       </div>
     </div>
   )

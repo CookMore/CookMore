@@ -25,6 +25,7 @@ export interface UseProfileResult {
   tiersLoading: boolean
   hasPro: boolean
   hasGroup: boolean
+  hasOG: boolean
 
   // Utility functions
   refreshProfile: () => Promise<void>
@@ -41,7 +42,7 @@ export function useProfile(address?: string): UseProfileResult {
     clearProfileCache,
   } = useProfileEdge()
 
-  const hasProfile = !!edgeProfile?.data
+  const hasProfile = !!edgeProfile
 
   // Profile operations using client service
   const createProfile = async (metadata: ProfileMetadata) => {
@@ -84,6 +85,7 @@ export function useProfile(address?: string): UseProfileResult {
     tiersLoading: edgeLoading,
     hasPro: edgeProfile?.tierStatus?.hasPro || false,
     hasGroup: edgeProfile?.tierStatus?.hasGroup || false,
+    hasOG: edgeProfile?.tierStatus?.hasOG || false,
     refreshProfile: refreshEdgeProfile,
     validateMetadata,
     clearCache,

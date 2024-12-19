@@ -1,17 +1,11 @@
 'use server'
 
 import { getServerContract } from '@/app/api/blockchain/server/getContracts'
-import { profileABI, tierABI, accessABI } from '@/app/api/blockchain/abis'
+import { profileABI, tierABI } from '@/app/api/blockchain/abis'
 import { cache } from 'react'
 import type { Profile, ProfileTier, TierStatus } from '../../profile'
 import { getContractAddress } from '@/app/api/blockchain/utils/addresses'
-
-// Role constants
-const ROLES = {
-  ADMIN: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  METADATA_MANAGER: '0x109d2839f0e9c0989a65f47c368d7b5e99e4d7ccf6f4e87443bad305e3c76f8e',
-  PROFILE_MANAGER: '0x2d46c56e9f7e96c2c1cfc78c45b65c1e93bb34de2c4ba58e7bc3896fd245e1d6',
-} as const
+import { checkRoleAccess } from '../../utils/role-utils'
 
 export interface ProfileResponse {
   success: boolean
@@ -21,39 +15,6 @@ export interface ProfileResponse {
   isAdmin?: boolean
   canManageProfiles?: boolean
   canManageMetadata?: boolean
-}
-
-// Helper function to check role access
-async function checkRoleAccess(address: string): Promise<{
-  isAdmin: boolean
-  canManageProfiles: boolean
-  canManageMetadata: boolean
-}> {
-  try {
-    const accessControlContract = await getServerContract({
-      address: getContractAddress('ACCESS_CONTROL'),
-      abi: accessABI,
-    })
-
-    const [isAdmin, canManageProfiles, canManageMetadata] = await Promise.all([
-      accessControlContract.read('hasRole', [ROLES.ADMIN, address]),
-      accessControlContract.read('hasRole', [ROLES.PROFILE_MANAGER, address]),
-      accessControlContract.read('hasRole', [ROLES.METADATA_MANAGER, address]),
-    ])
-
-    return {
-      isAdmin,
-      canManageProfiles,
-      canManageMetadata,
-    }
-  } catch (error) {
-    console.error('Error checking role access:', error)
-    return {
-      isAdmin: false,
-      canManageProfiles: false,
-      canManageMetadata: false,
-    }
-  }
 }
 
 // Helper function to get tier status

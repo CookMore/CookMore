@@ -19,6 +19,7 @@ export interface FormInputProps<T extends FieldValues> {
   helperText?: string
   type?: string
   theme?: string
+  disabled?: boolean
 }
 
 export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, FormInputProps<any>>(
@@ -37,6 +38,7 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
       helperText,
       type = 'text',
       theme,
+      disabled,
       ...props
     },
     ref

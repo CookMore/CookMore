@@ -1068,3 +1068,16 @@ export function IconCrown(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function IconArrowUpRight(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth={2}
+        d='M7 17L17 7M17 7H7M17 7V17'
+      />
+    </svg>
+  )
+}

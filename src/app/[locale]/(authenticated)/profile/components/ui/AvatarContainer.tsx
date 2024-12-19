@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { IconCamera } from '@/components/ui/icons'
-import { DefaultAvatar } from '@/components/ui/DefaultAvatar'
-import { ImageUploadPopover } from '@/components/ui/ImageUploadPopover'
-import { cn } from '@/lib/utils'
+import { IconCamera } from '@/app/api/icons'
+import { DefaultAvatar } from '@/app/api/avatar/DefaultAvatar'
+import { ImageUploadPopover } from '@/app/api/components/ui/ImageUploadPopover'
+import { cn } from '@/app/api/utils/utils'
 
 interface AvatarContainerProps {
   imageUrl?: string | null

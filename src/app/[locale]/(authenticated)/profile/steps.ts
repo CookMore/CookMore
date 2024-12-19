@@ -8,6 +8,8 @@ import {
   IconBuilding,
   IconStore,
   IconUsers,
+  IconCrown,
+  IconTrophy,
 } from '@/app/api/icons'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
@@ -88,6 +90,29 @@ export const steps: Step[] = [
     icon: IconUsers,
     tier: ProfileTier.GROUP,
   },
+
+  // OG Tier Steps
+  {
+    id: 'og-preferences',
+    label: 'OG Preferences',
+    description: 'Your exclusive OG member preferences',
+    icon: IconCrown,
+    tier: ProfileTier.OG,
+  },
+  {
+    id: 'og-showcase',
+    label: 'OG Showcase',
+    description: 'Showcase your exclusive recipes and achievements',
+    icon: IconTrophy,
+    tier: ProfileTier.OG,
+  },
+  {
+    id: 'og-network',
+    label: 'OG Network',
+    description: 'Connect with other OG members',
+    icon: IconUsers,
+    tier: ProfileTier.OG,
+  },
 ]
 
 // Helper function to get steps for a specific tier
@@ -95,10 +120,13 @@ export function getStepsForTier(tier: ProfileTier): Step[] {
   // Filter steps based on tier
   return steps.filter((step) => {
     if (tier === ProfileTier.GROUP) {
-      return true // Show all steps
+      return true // Show all steps except OG
     }
     if (tier === ProfileTier.PRO) {
-      return step.tier !== ProfileTier.GROUP
+      return step.tier !== ProfileTier.GROUP && step.tier !== ProfileTier.OG
+    }
+    if (tier === ProfileTier.OG) {
+      return step.tier !== ProfileTier.GROUP // Show all steps except GROUP
     }
     return step.tier === ProfileTier.FREE
   })

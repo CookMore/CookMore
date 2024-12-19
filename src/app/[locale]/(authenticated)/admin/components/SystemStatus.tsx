@@ -1,64 +1,154 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CONTRACT_ADDRESSES } from '@/lib/web3/addresses'
+import { useState, useEffect, Suspense } from 'react'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
+import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
+import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
+import { getContracts } from '@/app/api/blockchain/server/getContracts'
+import { createPublicClient, http } from 'viem'
+import { baseSepolia, base } from 'viem/chains'
 
 interface ContractStatus {
   name: string
   address: string
-  status: 'active' | 'inactive' | 'unknown'
+  status: 'active' | 'paused' | 'unknown'
+}
+
+function SystemStatusSkeleton() {
+  return (
+    <div className='space-y-4'>
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className='flex justify-between items-center p-3 bg-github-canvas-subtle rounded-md animate-pulse'
+        >
+          <div className='space-y-2'>
+            <div className='h-5 w-32 bg-github-fg-muted/20 rounded' />
+            <div className='h-4 w-64 bg-github-fg-muted/20 rounded' />
+          </div>
+          <div className='h-6 w-16 bg-github-fg-muted/20 rounded-full' />
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function SystemStatus() {
+  const { profile } = useProfile()
   const [contracts, setContracts] = useState<ContractStatus[]>([])
   const [loading, setLoading] = useState(true)
+  const [hasAccess, setHasAccess] = useState(false)
+
+  useEffect(() => {
+    if (profile?.owner) {
+      hasRequiredRole(profile.owner, ROLES.ADMIN).then(setHasAccess)
+    }
+  }, [profile?.owner])
 
   useEffect(() => {
     const checkContracts = async () => {
-      const contractList = Object.entries(CONTRACT_ADDRESSES).map(([name, address]) => ({
-        name,
-        address,
-        status: 'active' as const, // For now, assume all contracts are active
-      }))
-      setContracts(contractList)
-      setLoading(false)
+      try {
+        const { profileContract, tierContract, accessControlContract } = await getContracts()
+        const chain = process.env.NEXT_PUBLIC_NETWORK === 'mainnet' ? base : baseSepolia
+        const publicClient = createPublicClient({
+          chain,
+          transport: http(),
+        })
+
+        const contractList = [
+          {
+            name: 'Profile Registry',
+            contract: profileContract,
+            hasPause: true,
+          },
+          {
+            name: 'Tier NFT',
+            contract: tierContract,
+            hasPause: true,
+          },
+          {
+            name: 'Access Control',
+            contract: accessControlContract,
+            hasPause: false,
+          },
+        ]
+
+        const statuses = await Promise.all(
+          contractList.map(async ({ name, contract, hasPause }) => {
+            try {
+              let status: ContractStatus['status'] = 'active'
+
+              if (hasPause) {
+                const isPaused = await publicClient.readContract({
+                  address: contract.address,
+                  abi: contract.abi,
+                  functionName: 'paused',
+                })
+                status = isPaused ? 'paused' : 'active'
+              }
+
+              return {
+                name,
+                address: contract.address,
+                status: status as 'active' | 'paused' | 'unknown',
+              }
+            } catch (error) {
+              console.error(`Error checking ${name} status:`, error)
+              return {
+                name,
+                address: contract.address,
+                status: 'unknown' as const,
+              }
+            }
+          })
+        )
+
+        setContracts(statuses)
+      } catch (error) {
+        console.error('Error checking contract statuses:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    checkContracts()
-  }, [])
+    if (hasAccess) {
+      checkContracts()
+    }
+  }, [hasAccess])
 
-  if (loading) {
-    return (
-      <div className='text-center py-4'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-github-accent-emphasis mx-auto'></div>
-      </div>
-    )
+  // Role check
+  if (!hasAccess) {
+    return null
   }
 
   return (
-    <div className='space-y-4'>
-      <div className='grid gap-3'>
-        {contracts.map((contract) => (
-          <div
-            key={`${contract.name}-${contract.address}`}
-            className='flex justify-between items-center p-3 bg-github-canvas-subtle rounded-md'
-          >
-            <div>
-              <div className='font-medium'>{contract.name}</div>
-              <div className='text-xs text-github-fg-muted'>{contract.address}</div>
-            </div>
+    <Suspense fallback={<SystemStatusSkeleton />}>
+      <div className='space-y-4'>
+        <div className='grid gap-3'>
+          {contracts.map((contract) => (
             <div
-              className={`px-2 py-1 rounded-full text-xs ${
-                contract.status === 'active'
-                  ? 'bg-github-success-emphasis/10 text-github-success-fg'
-                  : 'bg-github-danger-emphasis/10 text-github-danger-fg'
-              }`}
+              key={`${contract.name}-${contract.address}`}
+              className='flex justify-between items-center p-3 bg-github-canvas-subtle rounded-md'
             >
-              {contract.status}
+              <div>
+                <div className='font-medium'>{contract.name}</div>
+                <div className='text-xs text-github-fg-muted'>{contract.address}</div>
+              </div>
+              <div
+                className={`px-2 py-1 rounded-full text-xs ${
+                  contract.status === 'active'
+                    ? 'bg-github-success-emphasis/10 text-github-success-fg'
+                    : contract.status === 'paused'
+                      ? 'bg-github-warning-emphasis/10 text-github-warning-fg'
+                      : 'bg-github-danger-emphasis/10 text-github-danger-fg'
+                }`}
+              >
+                {contract.status}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </Suspense>
   )
 }

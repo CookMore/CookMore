@@ -3,6 +3,7 @@ import { publicClient } from '../config/client'
 import { profileABI } from '../abis/profile'
 import { tierABI } from '../abis/tier'
 import { usdcABI } from '../abis/usdc'
+import { accessABI } from '../abis/access'
 import { CONTRACTS } from '../config/contracts'
 
 const contractInstances: Record<string, ReturnType<typeof getContract>> = {}
@@ -62,5 +63,11 @@ export async function getContracts() {
     key: 'usdc',
   })
 
-  return { profileContract, tierContract, usdcContract }
+  const accessControlContract = await getServerContract({
+    address: CONTRACTS.ACCESS_CONTROL as Address,
+    abi: accessABI,
+    key: 'access',
+  })
+
+  return { profileContract, tierContract, usdcContract, accessControlContract }
 }

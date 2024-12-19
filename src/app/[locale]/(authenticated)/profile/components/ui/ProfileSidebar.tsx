@@ -7,7 +7,8 @@ import { type Dispatch, type SetStateAction, useEffect, useState, useCallback } 
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
+import { useTranslations } from 'next-intl'
 
 interface ProfileSidebarProps {
   steps: Step[]
@@ -26,7 +27,8 @@ export function ProfileSidebar({
   setIsExpanded,
   tier,
 }: ProfileSidebarProps) {
-  const { hasGroup, hasPro, isLoading: nftLoading } = useNFTTiers()
+  const t = useTranslations('profile')
+  const { hasGroup, hasPro, hasOG, isLoading: nftLoading } = useNFTTiers()
   const { isLoading: profileLoading } = useProfile()
   const [mounted, setMounted] = useState(false)
 
@@ -36,212 +38,104 @@ export function ProfileSidebar({
     setMounted(true)
   }, [])
 
-  // Show all steps but handle access control through UI
   const canAccessStep = useCallback(
     (step: Step) => {
-      switch (tier) {
-        case ProfileTier.GROUP:
+      if (!mounted || isLoading) return false
+
+      switch (step.tier) {
+        case ProfileTier.FREE:
           return true
         case ProfileTier.PRO:
-          return step.tier === ProfileTier.FREE || step.tier === ProfileTier.PRO
-        case ProfileTier.FREE:
+          return hasPro || hasGroup || hasOG
+        case ProfileTier.GROUP:
+          return hasGroup
+        case ProfileTier.OG:
+          return hasOG
         default:
-          return step.tier === ProfileTier.FREE
+          return false
       }
     },
-    [tier]
+    [mounted, isLoading, hasPro, hasGroup, hasOG]
   )
 
-  // Don't render until mounted and loaded
-  if (!mounted || isLoading) {
-    return <LoadingSpinner />
+  const handleStepClick = (index: number) => {
+    if (canAccessStep(steps[index])) {
+      setCurrentStep(index)
+    }
   }
 
-  // Don't render if steps is not available
-  if (!steps) {
-    return null
-  }
+  if (!mounted) return null
 
   return (
-    <>
-      {/* Toggle button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={cn(
-          'fixed z-50',
-          'p-2 rounded-full',
-          'bg-github-canvas-default',
-          'border border-github-border-default',
-          'shadow-sm',
-          'text-github-fg-muted hover:text-github-fg-default',
-          'transition-all duration-300 ease-in-out',
-          'hover:scale-110',
-          'focus:outline-none focus:ring-2',
-          'focus:ring-github-accent-emphasis',
-          // Positioning
-          isExpanded
-            ? 'left-[260px]' // When expanded
-            : 'left-4', // When collapsed
-          'top-20' // Below header
-        )}
-      >
-        <IconChevronLeft className={cn('w-5 h-5', !isExpanded && 'rotate-180')} />
-      </button>
+    <div
+      className={cn(
+        'flex h-full flex-col border-r border-github-border-default bg-github-canvas-default transition-all duration-200',
+        isExpanded ? 'w-64' : 'w-16'
+      )}
+    >
+      <div className='flex items-center justify-between border-b border-github-border-default p-4'>
+        <h2
+          className={cn(
+            'text-sm font-medium text-github-fg-default transition-opacity',
+            !isExpanded && 'opacity-0'
+          )}
+        >
+          {t('navigation')}
+        </h2>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className='rounded-lg p-2 text-github-fg-muted hover:bg-github-canvas-subtle'
+        >
+          <IconChevronLeft
+            className={cn('h-4 w-4 transition-transform', !isExpanded && 'rotate-180')}
+          />
+        </button>
+      </div>
 
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'h-full',
-          'bg-github-canvas-default',
-          'border-r border-github-border-default',
-          'transition-all duration-300 ease-in-out',
-          'flex flex-col',
-          'z-20',
-          // Width handling
-          isExpanded ? 'w-[280px]' : 'w-12',
-          // Content visibility
-          !isExpanded && 'overflow-hidden'
-        )}
-      >
-        {isExpanded ? (
-          /* Expanded View */
-          <div className='flex-1 p-6 min-h-0 overflow-y-auto'>
-            <h2 className='text-xl font-semibold mb-8 text-github-fg-default'>Profile Creation</h2>
+      <nav className='flex-1 space-y-1 p-2'>
+        {steps.map((step, index) => {
+          const isAccessible = canAccessStep(step)
+          const isActive = currentStep === index
 
-            {/* Steps list */}
-            <div className='space-y-3'>
-              {steps.map((step, index) => {
-                const StepIcon = step.icon
-                const isComplete = index < currentStep
-                const isCurrent = currentStep === index
-                const isAccessible = canAccessStep(step)
-                const isLocked = !isAccessible
-
-                return (
-                  <div
-                    key={step.id}
-                    className={cn(
-                      'relative group rounded-lg transition-all',
-                      'hover:bg-github-canvas-subtle',
-                      isCurrent && 'bg-github-canvas-subtle'
-                    )}
-                  >
-                    <button
-                      onClick={() => isAccessible && setCurrentStep(index)}
-                      disabled={isLocked}
-                      className={cn(
-                        'w-full p-4 text-sm rounded-lg transition-all',
-                        'flex items-center gap-4',
-                        'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis',
-                        'transform transition-transform duration-200 ease-in-out',
-                        isCurrent && [
-                          'text-github-fg-default font-medium',
-                          'ring-2 ring-github-accent-emphasis',
-                        ],
-                        !isCurrent && !isComplete && 'text-github-fg-muted',
-                        isComplete && 'text-github-fg-default',
-                        isLocked && [
-                          'opacity-75 cursor-not-allowed',
-                          'hover:bg-transparent focus:ring-0',
-                        ],
-                        // Enhanced hover states
-                        !isLocked && [
-                          'hover:-translate-y-[1px]',
-                          'active:translate-y-[1px]',
-                          'hover:shadow-sm',
-                        ]
-                      )}
-                      tabIndex={isLocked ? -1 : 0}
-                    >
-                      <div
-                        className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center text-sm',
-                          'border-2 transition-colors',
-                          isCurrent &&
-                            'border-github-accent-emphasis bg-github-accent-subtle text-github-accent-emphasis',
-                          !isCurrent && !isComplete && 'border-github-border-default',
-                          isComplete &&
-                            'bg-github-success-emphasis border-github-success-emphasis text-white'
-                        )}
-                      >
-                        {isComplete ? (
-                          <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-                            <path
-                              fillRule='evenodd'
-                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                              clipRule='evenodd'
-                            />
-                          </svg>
-                        ) : (
-                          index + 1
-                        )}
-                      </div>
-                      {StepIcon && <StepIcon className='w-5 h-5' />}
-                      <span className='flex-1 text-left font-medium'>{step.label}</span>
-                      {isLocked && (
-                        <div className='flex items-center gap-2 text-github-fg-muted'>
-                          <IconLock className='w-4 h-4' />
-                          <span className='text-xs font-medium'>
-                            {step.tier === ProfileTier.GROUP ? 'Group' : 'Pro'}
-                          </span>
-                        </div>
-                      )}
-                    </button>
+          return (
+            <button
+              key={step.id}
+              onClick={() => handleStepClick(index)}
+              disabled={!isAccessible}
+              className={cn(
+                'flex w-full items-center space-x-3 rounded-lg p-3 text-left transition-colors',
+                isActive
+                  ? 'bg-github-canvas-subtle text-github-fg-default'
+                  : 'text-github-fg-muted hover:bg-github-canvas-subtle',
+                !isAccessible && 'cursor-not-allowed opacity-50'
+              )}
+            >
+              <div className='relative flex-shrink-0'>
+                <step.icon className='h-5 w-5' />
+                {!isAccessible && (
+                  <div className='absolute -right-1 -top-1 rounded-full bg-github-canvas-default p-0.5'>
+                    <IconLock className='h-3 w-3 text-github-fg-muted' />
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        ) : (
-          /* Retracted View */
-          <div className='flex flex-col items-center py-4 space-y-4'>
-            {steps.map((step, index) => {
-              const isComplete = index < currentStep
-              const isCurrent = currentStep === index
-              const isAccessible = canAccessStep(step)
-              const isLocked = !isAccessible
+                )}
+              </div>
+              {isExpanded && (
+                <div className='min-w-0 flex-1'>
+                  <div className='text-sm font-medium'>{step.label}</div>
+                  {step.description && (
+                    <div className='mt-1 text-xs text-github-fg-muted'>{step.description}</div>
+                  )}
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </nav>
 
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => isAccessible && setCurrentStep(index)}
-                  disabled={isLocked}
-                  className={cn(
-                    'w-8 h-8 rounded-lg flex items-center justify-center',
-                    'transition-all duration-200 ease-in-out',
-                    'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis',
-                    !isLocked && [
-                      'hover:scale-110 active:scale-95',
-                      'hover:bg-github-canvas-subtle',
-                      'hover:shadow-sm',
-                    ],
-                    isCurrent && [
-                      'bg-github-accent-subtle text-github-accent-emphasis',
-                      'ring-2 ring-github-accent-emphasis',
-                    ],
-                    !isCurrent && !isComplete && 'text-github-fg-muted',
-                    isComplete && 'bg-github-success-emphasis text-white',
-                    isLocked && 'opacity-50 cursor-not-allowed'
-                  )}
-                  title={step.label}
-                >
-                  {isComplete ? (
-                    <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-                      <path
-                        fillRule='evenodd'
-                        d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
-                        clipRule='evenodd'
-                      />
-                    </svg>
-                  ) : (
-                    <span className='text-sm font-medium'>{index + 1}</span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </aside>
-    </>
+      {isLoading && (
+        <div className='absolute inset-0 flex items-center justify-center bg-github-canvas-default/50'>
+          <LoadingSpinner />
+        </div>
+      )}
+    </div>
   )
 }

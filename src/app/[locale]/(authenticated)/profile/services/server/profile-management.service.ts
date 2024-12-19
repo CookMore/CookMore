@@ -1,40 +1,18 @@
 'use server'
 
 import { getServerContract } from '@/app/api/blockchain/server/getContracts'
-import { profileABI, accessABI } from '@/app/api/blockchain/abis'
+import { profileABI } from '@/app/api/blockchain/abis'
 import { getContractAddress } from '@/app/api/blockchain/utils/addresses'
-import type { Profile, ProfileMetadata } from '../../profile'
+import type { ProfileMetadata } from '../../profile'
 import { revalidatePath } from 'next/cache'
 import { getProfileSchema } from '../../validations/schemas'
-
-// Role constants
-const ROLES = {
-  ADMIN: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  PROFILE_MANAGER: '0x2d46c56e9f7e96c2c1cfc78c45b65c1e93bb34de2c4ba58e7bc3896fd245e1d6',
-} as const
+import { ROLES } from '../../constants/roles'
+import { hasRequiredRole } from '../../utils/role-utils'
 
 interface ProfileManagementResponse {
   success: boolean
   error?: string
   data?: any
-}
-
-// Helper function to check if user has required role
-async function hasRequiredRole(address: string, role: string): Promise<boolean> {
-  try {
-    const accessControlContract = await getServerContract({
-      address: getContractAddress('ACCESS_CONTROL'),
-      abi: accessControlABI,
-    })
-    const [isAdmin, hasRole] = await Promise.all([
-      accessControlContract.hasRole(ROLES.ADMIN, address),
-      accessControlContract.hasRole(role, address),
-    ])
-    return isAdmin || hasRole
-  } catch (error) {
-    console.error('Error checking role:', error)
-    return false
-  }
 }
 
 // Helper function to validate metadata

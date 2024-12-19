@@ -6,6 +6,7 @@ import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { tierABI } from '@/app/api/blockchain/abis/tier'
 import { TIER_CONTRACT_ADDRESS } from '@/app/api/tiers/tiers'
 import { getContract } from 'viem'
+import { serializeBigInt } from '@/app/api/blockchain/utils'
 
 // Define the minimal ERC721 functions we need
 const minimalERC721ABI = [

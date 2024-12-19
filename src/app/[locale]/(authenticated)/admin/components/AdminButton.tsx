@@ -1,78 +1,51 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { Button } from '../../../../api/components/ui/Button'
-import { IconSettings } from '../icons'
-import { useAdminCheck } from '@/hooks/useAdminCheck'
-import { useCallback, useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { Button } from '@/app/api/components/ui/button'
+import { IconSettings } from '@/app/api/icons'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
+import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
+import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
+import { useState, useEffect } from 'react'
 
 export function AdminButton() {
   const router = useRouter()
   const pathname = usePathname()
-  const { isAdmin, isLoading } = useAdminCheck()
+  const { profile } = useProfile()
+  const [hasAccess, setHasAccess] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
-  const [shouldRender, setShouldRender] = useState(false)
 
-  // Defer button rendering until we're sure about admin status
   useEffect(() => {
-    if (!isLoading && isAdmin) {
-      setShouldRender(true)
-    } else {
-      setShouldRender(false)
+    if (profile?.owner) {
+      hasRequiredRole(profile.owner, ROLES.ADMIN).then(setHasAccess)
     }
-  }, [isLoading, isAdmin])
+  }, [profile?.owner])
 
-  const handleAdminClick = useCallback(
-    async (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      console.log('AdminButton: Click attempt', {
-        isAdmin,
-        isLoading,
-        pathname,
-        isNavigating,
-        shouldRender,
-      })
-
-      if (isLoading || !isAdmin || isNavigating || !shouldRender) {
-        console.log('AdminButton: Click blocked', {
-          isLoading,
-          isAdmin,
-          isNavigating,
-          shouldRender,
-        })
-        return
-      }
-
-      // If we're already on an admin page, don't navigate
-      if (pathname?.startsWith('/admin')) {
-        console.log('AdminButton: Already on admin page')
-        return
-      }
-
-      try {
-        setIsNavigating(true)
-        console.log('AdminButton: Starting navigation to admin')
-        await router.push('/admin')
-      } catch (error) {
-        console.error('AdminButton: Navigation failed', error)
-      } finally {
-        // Reset navigation state after a delay
-        setTimeout(() => setIsNavigating(false), 1000)
-      }
-    },
-    [isAdmin, isLoading, pathname, router, isNavigating, shouldRender]
-  )
-
-  // Don't render until we're sure about admin status
-  if (!shouldRender) {
-    console.log('AdminButton: Not showing', { isLoading, isAdmin, shouldRender })
+  // Don't render if no access
+  if (!hasAccess) {
     return null
   }
 
-  console.log('AdminButton: Rendering', { isAdmin, pathname, isNavigating, shouldRender })
+  // If we're already on an admin page, don't show the button
+  if (pathname?.startsWith('/admin')) {
+    return null
+  }
+
+  const handleAdminClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (isNavigating) return
+
+    try {
+      setIsNavigating(true)
+      await router.push('/admin')
+    } finally {
+      // Reset navigation state after a delay
+      setTimeout(() => setIsNavigating(false), 1000)
+    }
+  }
+
   return (
     <Button
       variant='outline'
