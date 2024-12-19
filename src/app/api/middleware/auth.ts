@@ -14,7 +14,7 @@ export async function withAuth(request: NextRequest, options: AuthOptions = {}) 
     const token = await cookieStore.get('AUTH_TOKEN')?.value
     const hasProfile = (await cookieStore.get('HAS_PROFILE'))?.value === 'true'
     const path = request.nextUrl.pathname
-    const { currentLocale = 'en' } = options
+    const { currentLocale = 'en', requireProfile = true } = options
 
     // Strip locale from path if present
     const pathWithoutLocale = path.replace(/^\/[a-z]{2}(?=\/|$)/, '')
@@ -26,12 +26,15 @@ export async function withAuth(request: NextRequest, options: AuthOptions = {}) 
 
     // Special handling for profile creation
     if (pathWithoutLocale.startsWith('/profile/create')) {
-      if (token) return NextResponse.next()
-      return NextResponse.redirect(new URL('/', request.url))
+      if (!token) {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+      // Allow access to profile creation even without a profile
+      return NextResponse.next()
     }
 
     // For authenticated routes that require a profile
-    if (token && !hasProfile && options.requireProfile) {
+    if (token && !hasProfile && requireProfile) {
       if (!pathWithoutLocale.startsWith('/profile/create')) {
         return NextResponse.redirect(new URL('/profile/create', request.url))
       }

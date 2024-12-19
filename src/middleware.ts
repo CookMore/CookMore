@@ -40,6 +40,21 @@ export default async function middleware(request: NextRequest) {
     // Handle internationalization first
     const intlResponse = await intlMiddleware(request)
 
+    // Special handling for profile creation
+    if (pathname.includes('/profile/create')) {
+      const authResponse = await withAuth(request, { currentLocale, requireProfile: false })
+
+      // If auth redirects, preserve the locale
+      const redirectLocation = authResponse.headers.get('Location')
+      if (redirectLocation) {
+        const redirectUrl = new URL(redirectLocation, request.url)
+        redirectUrl.pathname = `/${currentLocale}${redirectUrl.pathname}`
+        return addSecurityHeaders(NextResponse.redirect(redirectUrl))
+      }
+
+      return addSecurityHeaders(authResponse)
+    }
+
     // Handle auth for authenticated routes
     if (pathname.includes('/(authenticated)') || pathname.startsWith('/profile')) {
       const authResponse = await withAuth(request, { currentLocale })
