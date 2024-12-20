@@ -8,21 +8,17 @@ import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profil
 import { cn } from '@/lib/utils/utils'
 import {
   IconUser,
-  IconBook,
   IconChefHat,
-  IconGlobe,
+  IconLink,
   IconBriefcase,
   IconCertificate,
-  IconCalendar,
-  IconStore,
+  IconClock,
   IconBuilding,
-  IconGear,
+  IconStore,
   IconUsers,
-  IconTruck,
-  IconShield,
-  IconCheck,
-  IconAlertCircle,
-} from '@/components/ui/icons'
+  IconCrown,
+  IconTrophy,
+} from '@/app/api/icons'
 
 interface ProfilePreviewProps {
   isOpen: boolean

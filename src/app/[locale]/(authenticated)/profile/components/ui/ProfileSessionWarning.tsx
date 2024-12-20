@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { IconChevronDown, IconX, IconInfo } from '@/components/ui/icons'
+import { IconChevronDown, IconX, IconInfo } from '@/app/api/icons'
 
 export const ProfileSessionWarning: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true)

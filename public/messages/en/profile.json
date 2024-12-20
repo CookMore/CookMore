@@ -1,6 +1,7 @@
 {
   "title": "Profile",
   "createProfile": "Create Profile",
+  "navigation": "Navigation",
   "steps": {
     "basic-info": {
       "title": "Basic Information",

@@ -2,7 +2,7 @@
 
 import { Control, useController } from 'react-hook-form'
 import { FormSection } from '@/components/ui/form/FormSection'
-import { IconImage } from '@/components/ui/icons'
+import { IconImage } from '@/app/api/icons'
 import { AvatarContainer } from '../ui/AvatarContainer'
 import type { FreeProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useState } from 'react'

@@ -1,6 +1,6 @@
 'use client'
 
-import { profileEdgeService } from '../server/profile.service'
+import { createProfile, updateProfile, deleteProfile } from '../server/profile.service'
 import { profileCacheService } from '../offline/profile-cache.service'
 import type { ProfileMetadata } from '../../profile'
 
@@ -8,7 +8,7 @@ class ProfileClientService {
   async createProfile(metadata: ProfileMetadata) {
     try {
       // Try to create profile online
-      const result = await profileEdgeService.createProfile(metadata)
+      const result = await createProfile(metadata)
 
       // Cache the result
       if (result.success) {
@@ -26,7 +26,7 @@ class ProfileClientService {
   async updateProfile(metadata: ProfileMetadata) {
     try {
       // Try to update profile online
-      const result = await profileEdgeService.updateProfile(metadata)
+      const result = await updateProfile(metadata)
 
       // Cache the result
       if (result.success) {
@@ -44,7 +44,7 @@ class ProfileClientService {
   async deleteProfile() {
     try {
       // Try to delete profile online
-      const result = await profileEdgeService.deleteProfile()
+      const result = await deleteProfile()
 
       // Clear cache if successful
       if (result.success) {
@@ -59,4 +59,5 @@ class ProfileClientService {
     }
   }
 }
+
 export const profileClientService = new ProfileClientService()

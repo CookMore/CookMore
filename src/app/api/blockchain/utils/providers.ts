@@ -5,17 +5,15 @@ import {
   Contract,
   type Provider as EthersProvider,
   type Signer as EthersSigner,
+  type InterfaceAbi,
 } from 'ethers'
 import { createPublicClient, http, type PublicClient, type WalletClient } from 'viem'
 import { type Provider } from '@wagmi/core'
-import { getChainConfig } from '../../blockchain/config/chains'
-
-// Get the active chain configuration
-const chainConfig = getChainConfig()
+import { ACTIVE_CHAIN } from '../config/chains'
 
 // Ethers.js provider
 export const getEthersProvider = () => {
-  const rpcUrl = chainConfig.chain.rpcUrls.default.http[0]
+  const rpcUrl = ACTIVE_CHAIN.rpcUrls.default.http[0]
   return new JsonRpcProvider(rpcUrl)
 }
 
@@ -29,7 +27,7 @@ export const getEthersSigner = async (provider?: EthersProvider) => {
 // Viem public client
 export const getViemPublicClient = (): PublicClient => {
   return createPublicClient({
-    chain: chainConfig.chain,
+    chain: ACTIVE_CHAIN,
     transport: http(),
   })
 }
@@ -57,9 +55,9 @@ export const wagmiProviderToEthers = (provider: Provider) => {
 }
 
 // Helper to get contract instance
-export const getContract = (
+export const getContract = <TAbi extends InterfaceAbi>(
   address: string,
-  abi: any[],
+  abi: TAbi,
   signerOrProvider?: EthersSigner | EthersProvider | WalletClient | PublicClient
 ) => {
   if (!signerOrProvider) {

@@ -117,23 +117,47 @@ export const steps: Step[] = [
 
 // Helper function to get steps for a specific tier
 export function getStepsForTier(tier: ProfileTier): Step[] {
-  // Filter steps based on tier
-  return steps.filter((step) => {
-    if (tier === ProfileTier.GROUP) {
-      return true // Show all steps except OG
-    }
-    if (tier === ProfileTier.PRO) {
-      return step.tier !== ProfileTier.GROUP && step.tier !== ProfileTier.OG
-    }
-    if (tier === ProfileTier.OG) {
-      return step.tier !== ProfileTier.GROUP // Show all steps except GROUP
-    }
-    return step.tier === ProfileTier.FREE
+  console.log('getStepsForTier called with:', {
+    tier: ProfileTier[tier],
+    tierValue: tier,
   })
-}
 
-console.log('[Steps] Getting steps for tier:', {
-  FREE: getStepsForTier(ProfileTier.FREE),
-  PRO: getStepsForTier(ProfileTier.PRO),
-  GROUP: getStepsForTier(ProfileTier.GROUP),
-})
+  if (tier === undefined || tier === null) {
+    console.warn('getStepsForTier called with invalid tier:', tier)
+    return []
+  }
+
+  // Filter steps based on the tier requirements
+  const filteredSteps = steps.filter((step) => {
+    switch (tier) {
+      case ProfileTier.OG:
+        // OG gets access to all steps (Free + Pro + Group + OG)
+        return true
+
+      case ProfileTier.GROUP:
+        // Group gets access to Free + Pro + Group steps
+        return (
+          step.tier === ProfileTier.FREE ||
+          step.tier === ProfileTier.PRO ||
+          step.tier === ProfileTier.GROUP
+        )
+
+      case ProfileTier.PRO:
+        // Pro gets access to Free + Pro steps
+        return step.tier === ProfileTier.FREE || step.tier === ProfileTier.PRO
+
+      case ProfileTier.FREE:
+      default:
+        // Free only gets Free steps
+        return step.tier === ProfileTier.FREE
+    }
+  })
+
+  console.log('Filtered steps result:', {
+    tier: ProfileTier[tier],
+    totalSteps: filteredSteps.length,
+    steps: filteredSteps.map((s) => ({ id: s.id, tier: ProfileTier[s.tier] })),
+  })
+
+  return filteredSteps
+}

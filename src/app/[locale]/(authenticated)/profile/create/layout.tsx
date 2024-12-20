@@ -6,8 +6,9 @@ interface ProfileCreateLayoutProps {
 }
 
 export default async function ProfileCreateLayout({ children, params }: ProfileCreateLayoutProps) {
-  // Set the locale
-  await unstable_setRequestLocale(params.locale)
+  // Validate and set the locale
+  const { locale } = await Promise.resolve(params)
+  unstable_setRequestLocale(locale)
 
   return (
     <div className='min-h-screen bg-github-canvas-default'>

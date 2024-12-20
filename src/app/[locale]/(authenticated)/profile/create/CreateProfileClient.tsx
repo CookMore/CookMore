@@ -1,17 +1,18 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { toast } from 'sonner'
 import { ROUTES } from '@/app/api/routes/routes'
 import { useProfileComplete } from './actions'
 import { ProfileTier } from '../profile'
-import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
 import { getStepsForTier } from '../steps'
+import { CreateProfileSkeleton } from '../components/ui/CreateProfileSkeleton'
 import {
   BasicInfoSection,
   CulinaryInfoSection,
@@ -31,55 +32,109 @@ import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { getTierValidation } from '../validations/profile'
 import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { usePrivy } from '@privy-io/react-auth'
+import { ProfileSessionWarning } from '../components/ui/ProfileSessionWarning'
+import { ProfileSidebar } from '../components/ui/ProfileSidebar'
 
-export function CreateProfileClient() {
-  console.log('Rendering CreateProfileClient')
+// Section mapping object with proper type
+const SECTION_COMPONENTS: Record<string, React.ComponentType<any>> = {
+  'basic-info': BasicInfoSection,
+  'culinary-info': CulinaryInfoSection,
+  'social-links': SocialLinksSection,
+  experience: ExperienceSection,
+  certifications: CertificationsSection,
+  availability: AvailabilitySection,
+  'organization-info': OrganizationInfoSection,
+  'business-operations': BusinessOperationsSection,
+  team: TeamSection,
+  compliance: ComplianceSection,
+  'og-preferences': OGPreferencesSection,
+  'og-showcase': OGShowcaseSection,
+  'og-network': OGNetworkSection,
+} as const
+
+interface ProfileCompleteResult {
+  success: boolean
+  error?: string
+  hash?: string
+}
+
+interface CreateProfileClientProps {
+  initialTier: ProfileTier
+  tierFlags: {
+    hasOG: boolean
+    hasGroup: boolean
+    hasPro: boolean
+  }
+}
+
+export function CreateProfileClient({ initialTier, tierFlags }: CreateProfileClientProps) {
+  console.log('Rendering CreateProfileClient with tier:', ProfileTier[initialTier])
   const { user } = usePrivy()
   const { theme } = useTheme()
   const t = useTranslations()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const { hasGroup, hasPro, hasOG, isLoading: tiersLoading } = useNFTTiers()
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const { hasOG, hasGroup, hasPro } = tierFlags
 
   const { handleProfileComplete } = useProfileComplete()
 
-  // Determine user's tier based on NFT holdings
-  const currentTier = hasOG
-    ? ProfileTier.OG
-    : hasGroup
-      ? ProfileTier.GROUP
-      : hasPro
-        ? ProfileTier.PRO
-        : ProfileTier.FREE
-
-  useEffect(() => {
-    console.log('CreateProfileClient mounted', {
-      userAddress: user?.wallet?.address,
-      currentTier,
+  // Get steps based on tier - only update when tier changes
+  const availableSteps = useMemo(() => {
+    console.log('Calculating available steps:', {
+      currentTier: ProfileTier[initialTier],
       hasOG,
       hasGroup,
       hasPro,
     })
-  }, [user, currentTier, hasOG, hasGroup, hasPro])
 
-  // Get steps based on tier
-  const availableSteps = getStepsForTier(currentTier)
+    // Get steps for current tier
+    const steps = getStepsForTier(initialTier)
+    console.log(
+      'Got steps:',
+      steps.map((s) => ({ id: s.id, tier: ProfileTier[s.tier] }))
+    )
+    return steps
+  }, [initialTier, hasOG, hasGroup, hasPro])
 
   // Get validation schema based on tier
-  const validationSchema = getTierValidation(currentTier)
+  const validationSchema = useMemo(() => {
+    return getTierValidation(initialTier)
+  }, [initialTier])
 
+  // Ensure we have a valid current step
+  useEffect(() => {
+    console.log('Checking current step validity:', {
+      currentStep,
+      availableStepsCount: availableSteps.length,
+    })
+
+    if (currentStep >= availableSteps.length) {
+      console.log('Current step out of bounds, resetting to 0')
+      setCurrentStep(0)
+    }
+  }, [currentStep, availableSteps.length])
+
+  // Initialize form with all possible fields
   const methods = useForm<ProfileFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: zodResolver(validationSchema || z.object({})),
     mode: 'onChange',
     defaultValues: {
       name: '',
       bio: '',
       avatar: '',
+      location: '',
+      website: '',
+      social: {
+        twitter: '',
+        instagram: '',
+        linkedin: '',
+      },
       culinaryInfo: {
         expertise: 'beginner',
         specialties: [],
-        certifications: [],
       },
       ...(hasPro && {
         experience: {
@@ -146,11 +201,48 @@ export function CreateProfileClient() {
     formState: { errors, isValid },
   } = methods
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Show loading state only during initial load
+  if (!mounted) {
+    console.log('Showing skeleton - waiting for hydration')
+    return <CreateProfileSkeleton />
+  }
+
+  // Don't show loading if we already have steps
+  if (availableSteps.length === 0) {
+    console.log('Showing skeleton - no steps available', {
+      currentTier: ProfileTier[initialTier],
+      stepsCount: availableSteps.length,
+    })
+    return <CreateProfileSkeleton />
+  }
+
+  const currentStepData = availableSteps[currentStep] || availableSteps[0]
+  console.log('Current step:', {
+    stepId: currentStepData.id,
+    stepTier: ProfileTier[currentStepData.tier],
+  })
+
+  const handleNextStep = () => {
+    if (currentStep < availableSteps.length - 1) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const handlePreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
   const onSubmit = async (data: ProfileFormData) => {
     try {
       setIsSubmitting(true)
 
-      const result = await handleProfileComplete(data, currentTier)
+      const result = (await handleProfileComplete(data, initialTier)) as ProfileCompleteResult
 
       if (result.success) {
         toast.success(t('profileCreated'), {
@@ -170,121 +262,88 @@ export function CreateProfileClient() {
     }
   }
 
-  const handleStepChange = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < availableSteps.length) {
-      setCurrentStep(stepIndex)
+  const renderSection = () => {
+    console.log('Rendering section:', {
+      currentStepId: currentStepData?.id,
+      currentStepTier: currentStepData ? ProfileTier[currentStepData.tier] : 'unknown',
+      userTier: ProfileTier[initialTier],
+      availableStepsCount: availableSteps.length,
+      hasOG,
+      hasGroup,
+      hasPro,
+    })
+
+    const Section = SECTION_COMPONENTS[currentStepData?.id]
+    if (!Section) {
+      console.warn('No section component found for step:', currentStepData?.id)
+      return null
     }
-  }
 
-  if (tiersLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-[60vh]'>
-        <div className='text-github-fg-muted'>{t('loading')}</div>
-      </div>
-    )
-  }
+    // Check if user has access to this section based on tier
+    const canAccess = (() => {
+      switch (currentStepData.tier) {
+        case ProfileTier.FREE:
+          return true // Free tier is accessible to everyone
 
-  const currentStepData = availableSteps[currentStep]
+        case ProfileTier.PRO:
+          return hasPro || hasGroup || hasOG // Pro steps require Pro token or higher
+
+        case ProfileTier.GROUP:
+          return hasGroup || hasOG // Group steps require Group token or higher
+
+        case ProfileTier.OG:
+          return hasOG // OG steps require OG token
+
+        default:
+          return false
+      }
+    })()
+
+    console.log('Section access check:', {
+      stepId: currentStepData.id,
+      stepTier: ProfileTier[currentStepData.tier],
+      userTier: ProfileTier[initialTier],
+      canAccess,
+      hasOG,
+      hasGroup,
+      hasPro,
+    })
+
+    if (!canAccess) {
+      console.warn('User does not have access to section:', currentStepData.id)
+      return null
+    }
+
+    return <Section control={control} errors={errors} theme={theme} tier={initialTier} />
+  }
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <h1 className='text-2xl font-bold mb-6'>
-        {t('profile.createProfile')} - {t(`profile.tier.${ProfileTier[currentTier].toLowerCase()}`)}
-      </h1>
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DualSidebarLayout
-            leftSidebar={
-              <div className='space-y-4'>
-                {availableSteps.map((step, index) => (
-                  <button
-                    key={step.id}
-                    type='button'
-                    onClick={() => handleStepChange(index)}
-                    className={`flex items-center space-x-3 w-full p-3 rounded-lg transition-colors ${
-                      currentStep === index
-                        ? 'bg-github-canvas-subtle text-github-fg-default'
-                        : 'text-github-fg-muted hover:bg-github-canvas-subtle'
-                    }`}
-                  >
-                    <step.icon className='w-5 h-5' />
-                    <div className='text-left'>
-                      <div className='font-medium'>{step.label}</div>
-                      {step.description && (
-                        <div className='text-sm text-github-fg-muted'>{step.description}</div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            }
-          >
-            <div className='min-h-[60vh] space-y-6'>
-              {/* Basic sections available to all tiers */}
-              {currentStepData.id === 'basic-info' && (
-                <BasicInfoSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {currentStepData.id === 'culinary-info' && (
-                <CulinaryInfoSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {currentStepData.id === 'social-links' && (
-                <SocialLinksSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {/* Pro tier sections */}
-              {hasPro && currentStepData.id === 'experience' && (
-                <ExperienceSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasPro && currentStepData.id === 'certifications' && (
-                <CertificationsSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasPro && currentStepData.id === 'availability' && (
-                <AvailabilitySection control={control} errors={errors} theme={theme} />
-              )}
-
-              {/* Group tier sections */}
-              {hasGroup && currentStepData.id === 'organization-info' && (
-                <OrganizationInfoSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasGroup && currentStepData.id === 'business-operations' && (
-                <BusinessOperationsSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasGroup && currentStepData.id === 'team' && (
-                <TeamSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasGroup && currentStepData.id === 'compliance' && (
-                <ComplianceSection
-                  control={control}
-                  errors={errors}
-                  theme={theme}
-                  tier={currentTier}
-                />
-              )}
-
-              {/* OG tier sections */}
-              {hasOG && currentStepData.id === 'og-preferences' && (
-                <OGPreferencesSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasOG && currentStepData.id === 'og-showcase' && (
-                <OGShowcaseSection control={control} errors={errors} theme={theme} />
-              )}
-
-              {hasOG && currentStepData.id === 'og-network' && (
-                <OGNetworkSection control={control} errors={errors} theme={theme} />
-              )}
-
+      <DualSidebarLayout
+        leftSidebar={
+          <ProfileSidebar
+            steps={availableSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            tier={initialTier}
+          />
+        }
+      >
+        <div className='space-y-6'>
+          <ProfileSessionWarning />
+          <h1 className='text-2xl font-bold mb-6 text-center'>
+            {t('profile.createProfile')} -{' '}
+            {t(`profile.tier.${ProfileTier[initialTier].toLowerCase()}`)}
+          </h1>
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {renderSection()}
               <div className='flex justify-between pt-6'>
                 <button
                   type='button'
-                  onClick={() => handleStepChange(currentStep - 1)}
+                  onClick={handlePreviousStep}
                   disabled={currentStep === 0}
                   className='px-4 py-2 text-sm font-medium rounded-md border border-github-border-default hover:bg-github-canvas-subtle disabled:opacity-50'
                 >
@@ -302,17 +361,17 @@ export function CreateProfileClient() {
                 ) : (
                   <button
                     type='button'
-                    onClick={() => handleStepChange(currentStep + 1)}
+                    onClick={handleNextStep}
                     className='px-4 py-2 text-sm font-medium rounded-md bg-github-accent-emphasis text-white hover:bg-github-accent-emphasis/90'
                   >
                     {t('profile.form.navigation.next')}
                   </button>
                 )}
               </div>
-            </div>
-          </DualSidebarLayout>
-        </form>
-      </FormProvider>
+            </form>
+          </FormProvider>
+        </div>
+      </DualSidebarLayout>
     </div>
   )
 }

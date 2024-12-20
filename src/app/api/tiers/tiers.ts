@@ -174,7 +174,11 @@ export const getIconComponent = (iconType: 'chef' | 'star' | 'building' | 'crown
 }
 
 // Contract addresses
-export const TIER_CONTRACT_ADDRESS = '0x947b40801581E896C29dD73f9C7f5dd710877b64' as const
+export const TIER_CONTRACT_ADDRESS = (
+  process.env.NEXT_PUBLIC_NETWORK_ENV === 'mainnet'
+    ? process.env.NEXT_PUBLIC_MAINNET_TIER_CONTRACT
+    : process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT
+) as `0x${string}`
 
 // Helper to get tier info with styling
 export const getTierInfo = (tier: ProfileTier) => {
@@ -261,8 +265,11 @@ export async function getTierStatus(address: string) {
       }
     }
 
-    // Get all Transfer events to this address
-    const logs = await publicClient.getLogs({
+    // Track token ownership
+    const ownedTokens = new Map<bigint, string>() // tokenId -> tierType
+
+    // Get all Transfer events TO this address
+    const incomingLogs = await publicClient.getLogs({
       address: contract.address,
       event: {
         type: 'event',
@@ -279,15 +286,31 @@ export async function getTierStatus(address: string) {
       fromBlock: 'earliest',
     })
 
-    console.log('Found transfer events:', logs.length)
+    // Get all Transfer events FROM this address
+    const outgoingLogs = await publicClient.getLogs({
+      address: contract.address,
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { indexed: true, name: 'from', type: 'address' },
+          { indexed: true, name: 'to', type: 'address' },
+          { indexed: true, name: 'tokenId', type: 'uint256' },
+        ],
+      },
+      args: {
+        from: address as `0x${string}`,
+      },
+      fromBlock: 'earliest',
+    })
 
-    let hasGroup = false
-    let hasPro = false
-    let hasOG = false
-    let currentTier = ProfileTier.FREE
+    console.log('Found transfer events:', {
+      incoming: incomingLogs.length,
+      outgoing: outgoingLogs.length,
+    })
 
-    // Check each token's tier
-    for (const log of logs) {
+    // Process incoming transfers
+    for (const log of incomingLogs) {
       const tokenId = log.args.tokenId
       try {
         const tierType = await publicClient.readContract({
@@ -295,26 +318,40 @@ export async function getTierStatus(address: string) {
           functionName: 'tokenTier',
           args: [tokenId],
         })
-
-        console.log(`Token ${tokenId} tier:`, tierType)
-
-        // Update tier flags based on the token tier
-        if (tierType === 'Group') {
-          hasGroup = true
-          if (currentTier < ProfileTier.GROUP) {
-            currentTier = ProfileTier.GROUP
-          }
-        } else if (tierType === 'Pro') {
-          hasPro = true
-          if (currentTier < ProfileTier.PRO) {
-            currentTier = ProfileTier.PRO
-          }
-        } else if (tierType === 'OG') {
-          hasOG = true
-          currentTier = ProfileTier.OG
-        }
+        ownedTokens.set(tokenId, tierType)
+        console.log(`Token ${tokenId} received, tier:`, tierType)
       } catch (error) {
-        console.error(`Error reading tier for token ${tokenId}:`, error)
+        console.error(`Error reading tier for incoming token ${tokenId}:`, error)
+      }
+    }
+
+    // Process outgoing transfers
+    for (const log of outgoingLogs) {
+      const tokenId = log.args.tokenId
+      ownedTokens.delete(tokenId)
+      console.log(`Token ${tokenId} sent out`)
+    }
+
+    // Calculate current tier status based on remaining tokens
+    let hasGroup = false
+    let hasPro = false
+    let hasOG = false
+    let currentTier = ProfileTier.FREE
+
+    for (const [tokenId, tierType] of ownedTokens) {
+      if (tierType === 'Group') {
+        hasGroup = true
+        if (currentTier < ProfileTier.GROUP) {
+          currentTier = ProfileTier.GROUP
+        }
+      } else if (tierType === 'Pro') {
+        hasPro = true
+        if (currentTier < ProfileTier.PRO) {
+          currentTier = ProfileTier.PRO
+        }
+      } else if (tierType === 'OG') {
+        hasOG = true
+        currentTier = ProfileTier.OG
       }
     }
 
@@ -323,6 +360,7 @@ export async function getTierStatus(address: string) {
       hasGroup,
       hasPro,
       currentTier,
+      ownedTokenCount: ownedTokens.size,
     })
 
     return {

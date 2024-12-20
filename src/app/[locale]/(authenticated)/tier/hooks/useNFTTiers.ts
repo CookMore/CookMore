@@ -43,12 +43,16 @@ export function useNFTTiers() {
     isLoading: true,
   })
 
-  // Check if contract address is set
-  const isContractConfigured =
-    TIER_CONTRACT_ADDRESS !== '0x1234567890123456789012345678901234567890'
+  // Check if contract address is set and valid
+  const isContractConfigured = TIER_CONTRACT_ADDRESS && TIER_CONTRACT_ADDRESS.startsWith('0x')
+
+  console.log('Contract configuration:', {
+    TIER_CONTRACT_ADDRESS,
+    isContractConfigured,
+  })
 
   // Use wagmi's useContractReads for batch reading
-  const { data: contractData, refetch: refetchContract } = useContractReads({
+  const { data: balanceData } = useContractReads({
     contracts: [
       {
         address: TIER_CONTRACT_ADDRESS,
@@ -56,52 +60,111 @@ export function useNFTTiers() {
         functionName: 'balanceOf',
         args: [address as `0x${string}`],
       },
-      {
+    ],
+    watch: true,
+    select: (data) => data,
+  } as const)
+
+  const balance = balanceData?.[0].result
+
+  // Get all token indices for the user
+  const tokenIndices = balance ? Array.from({ length: Number(balance) }, (_, i) => BigInt(i)) : []
+
+  // Get all tokens for the user
+  const { data: tokenData } = useContractReads({
+    contracts: tokenIndices.map((index) => ({
+      address: TIER_CONTRACT_ADDRESS,
+      abi: combinedABI,
+      functionName: 'tokenOfOwnerByIndex',
+      args: [address as `0x${string}`, index],
+    })),
+    watch: true,
+    select: (data) => data,
+  } as const)
+
+  // Get tier types for all tokens
+  const { data: tierData } = useContractReads({
+    contracts:
+      tokenData?.map((token) => ({
         address: TIER_CONTRACT_ADDRESS,
         abi: combinedABI,
-        functionName: 'tokenOfOwnerByIndex',
-        args: [address as `0x${string}`, 0n],
-      },
-    ],
-    enabled: mounted && isConnected && !!address && isContractConfigured,
-  })
-
-  // Get tier type for token ID
-  const { data: tierType, refetch: refetchTier } = useContractRead({
-    address: TIER_CONTRACT_ADDRESS,
-    abi: combinedABI,
-    functionName: 'tokenTier',
-    args: contractData?.[1].result ? [contractData[1].result] : undefined,
-    enabled:
-      mounted && isConnected && !!address && isContractConfigured && !!contractData?.[1].result,
-  })
+        functionName: 'tokenTier',
+        args: [token.result],
+      })) ?? [],
+    watch: true,
+    select: (data) => data,
+  } as const)
 
   // Effect to update tier state based on contract data
   useEffect(() => {
+    console.log('📊 NFT Contract Data:', {
+      balance: balance ? Number(balance) : null,
+      tokenCount: tokenData?.length ?? 0,
+      tierTypes: tierData?.map((t) => t.result),
+      isLoading: tierState.isLoading,
+      isContractConfigured,
+      TIER_CONTRACT_ADDRESS,
+    })
+
     if (!mounted || !isConnected || !address || !isContractConfigured) {
+      console.log('NFT Tiers: Early return due to missing requirements', {
+        mounted,
+        isConnected,
+        address,
+        isContractConfigured,
+      })
       setTierState((prev) => ({ ...prev, isLoading: false }))
       return
     }
 
-    const balance = contractData?.[0].result
-    const type = tierType as string | undefined
+    if (balance && balance > 0n && tierData?.length) {
+      let hasGroup = false
+      let hasPro = false
+      let hasOG = false
+      let currentTier = ProfileTier.FREE
 
-    if (balance && balance > 0n && type) {
-      setTierState({
-        hasGroup: type === 'Group',
-        hasPro: type === 'Pro',
-        hasOG: type === 'OG',
-        currentTier:
-          type === 'Group'
-            ? ProfileTier.GROUP
-            : type === 'Pro'
-              ? ProfileTier.PRO
-              : type === 'OG'
-                ? ProfileTier.OG
-                : ProfileTier.FREE,
-        isLoading: false,
+      // Check each token's tier
+      tierData.forEach(({ result: type }) => {
+        const tierType = String(type)
+        console.log('Processing token tier:', { tierType })
+
+        if (tierType === 'Group' || tierType === 'OG') {
+          hasGroup = true
+        }
+        if (tierType === 'Pro' || tierType === 'Group' || tierType === 'OG') {
+          hasPro = true
+        }
+        if (tierType === 'OG') {
+          hasOG = true
+        }
+
+        // Update current tier if this token grants a higher tier
+        const tokenTier =
+          tierType === 'OG'
+            ? ProfileTier.OG
+            : tierType === 'Group'
+              ? ProfileTier.GROUP
+              : tierType === 'Pro'
+                ? ProfileTier.PRO
+                : ProfileTier.FREE
+
+        if (tokenTier > currentTier) {
+          currentTier = tokenTier
+        }
       })
+
+      const newTierState = {
+        hasGroup,
+        hasPro,
+        hasOG,
+        currentTier,
+        isLoading: false,
+      }
+
+      console.log('Setting new tier state:', newTierState)
+      setTierState(newTierState)
     } else {
+      console.log('Setting default FREE tier state due to no valid tier data')
       setTierState({
         hasGroup: false,
         hasPro: false,
@@ -110,34 +173,15 @@ export function useNFTTiers() {
         isLoading: false,
       })
     }
-  }, [mounted, address, isConnected, contractData, tierType, isContractConfigured])
+  }, [mounted, address, isConnected, balance, tokenData, tierData, isContractConfigured])
 
   // Handle client-side mounting
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const refetch = async () => {
-    if (!mounted || !isConnected || !address || !isContractConfigured) return
-    setTierState((prev) => ({ ...prev, isLoading: true }))
-
-    try {
-      await Promise.all([refetchContract(), refetchTier()])
-    } catch (error) {
-      console.error('Error refetching tier status:', error)
-      setTierState({
-        hasGroup: false,
-        hasPro: false,
-        hasOG: false,
-        currentTier: ProfileTier.FREE,
-        isLoading: false,
-      })
-    }
-  }
-
   return {
     ...tierState,
-    refetch,
     isContractConfigured,
   }
 }

@@ -5,7 +5,7 @@ import { getProfile } from '@/app/[locale]/(authenticated)/profile/services/serv
 export async function GET(request: NextRequest, context: { params: { address: string } }) {
   try {
     // Await the params to ensure they're properly resolved
-    const { params } = await context
+    const params = await Promise.resolve(context.params)
     const { address } = params
 
     if (!address || !address.startsWith('0x')) {

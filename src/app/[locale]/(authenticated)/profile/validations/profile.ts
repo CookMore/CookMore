@@ -13,6 +13,15 @@ export const profileSchema = z
     name: z.string().min(2).max(50),
     bio: z.string().min(10).max(500),
     avatar: z.string().min(1),
+    location: z.string().optional(),
+    website: z.string().url().optional(),
+    social: z
+      .object({
+        twitter: z.string().optional(),
+        instagram: z.string().optional(),
+        linkedin: z.string().optional(),
+      })
+      .optional(),
 
     experience: z
       .object({

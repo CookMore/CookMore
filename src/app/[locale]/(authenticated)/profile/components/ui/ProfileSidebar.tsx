@@ -1,19 +1,15 @@
 'use client'
 
-import { cn } from '@/app/api/utils/utils'
-import { IconChevronLeft, IconLock } from '@/app/api/icons'
-import { type Step } from '@/app/[locale]/(authenticated)/profile/steps'
-import { type Dispatch, type SetStateAction, useEffect, useState, useCallback } from 'react'
-import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
-import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { useTranslations } from 'next-intl'
+import { cn } from '@/app/api/utils/utils'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
+import type { Step } from '../../steps'
+import { ProfileTier } from '../../profile'
 
 interface ProfileSidebarProps {
   steps: Step[]
   currentStep: number
-  setCurrentStep: Dispatch<SetStateAction<number>>
+  setCurrentStep: (step: number) => void
   isExpanded: boolean
   setIsExpanded: (expanded: boolean) => void
   tier: ProfileTier
@@ -27,115 +23,108 @@ export function ProfileSidebar({
   setIsExpanded,
   tier,
 }: ProfileSidebarProps) {
-  const t = useTranslations('profile')
-  const { hasGroup, hasPro, hasOG, isLoading: nftLoading } = useNFTTiers()
-  const { isLoading: profileLoading } = useProfile()
-  const [mounted, setMounted] = useState(false)
+  const t = useTranslations()
+  const { theme } = useTheme()
 
-  const isLoading = nftLoading || profileLoading
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const canAccessStep = useCallback(
-    (step: Step) => {
-      if (!mounted || isLoading) return false
-
-      switch (step.tier) {
-        case ProfileTier.FREE:
-          return true
-        case ProfileTier.PRO:
-          return hasPro || hasGroup || hasOG
-        case ProfileTier.GROUP:
-          return hasGroup
-        case ProfileTier.OG:
-          return hasOG
-        default:
-          return false
-      }
-    },
-    [mounted, isLoading, hasPro, hasGroup, hasOG]
-  )
+  console.log('Rendering ProfileSidebar:', {
+    stepsCount: steps.length,
+    currentStep,
+    tier: ProfileTier[tier],
+    isExpanded,
+    steps: steps.map((s) => ({ id: s.id, tier: ProfileTier[s.tier] })),
+  })
 
   const handleStepClick = (index: number) => {
-    if (canAccessStep(steps[index])) {
-      setCurrentStep(index)
-    }
+    console.log('Step clicked:', {
+      index,
+      stepId: steps[index].id,
+      stepTier: ProfileTier[steps[index].tier],
+    })
+    setCurrentStep(index)
   }
-
-  if (!mounted) return null
 
   return (
     <div
       className={cn(
-        'flex h-full flex-col border-r border-github-border-default bg-github-canvas-default transition-all duration-200',
-        isExpanded ? 'w-64' : 'w-16'
+        'transition-all duration-300 ease-in-out',
+        isExpanded ? 'w-64' : 'w-16',
+        'shrink-0 border-r border-github-border-default'
       )}
     >
-      <div className='flex items-center justify-between border-b border-github-border-default p-4'>
-        <h2
-          className={cn(
-            'text-sm font-medium text-github-fg-default transition-opacity',
-            !isExpanded && 'opacity-0'
-          )}
-        >
-          {t('navigation')}
-        </h2>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className='rounded-lg p-2 text-github-fg-muted hover:bg-github-canvas-subtle'
-        >
-          <IconChevronLeft
-            className={cn('h-4 w-4 transition-transform', !isExpanded && 'rotate-180')}
-          />
-        </button>
-      </div>
+      <div className='sticky top-0 p-4'>
+        <div className='flex items-center justify-between mb-4'>
+          <h2
+            className={cn(
+              'font-medium transition-opacity duration-300',
+              isExpanded ? 'opacity-100' : 'opacity-0'
+            )}
+          >
+            {t('profile.navigation')}
+          </h2>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className='p-2 hover:bg-github-canvas-subtle rounded-md'
+            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {isExpanded ? (
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M11 19l-7-7 7-7m8 14l-7-7 7-7'
+                />
+              </svg>
+            ) : (
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M13 5l7 7-7 7M5 5l7 7-7 7'
+                />
+              </svg>
+            )}
+          </button>
+        </div>
 
-      <nav className='flex-1 space-y-1 p-2'>
-        {steps.map((step, index) => {
-          const isAccessible = canAccessStep(step)
-          const isActive = currentStep === index
+        <div className='space-y-2'>
+          {steps.map((step, index) => {
+            console.log('Rendering step button:', {
+              index,
+              stepId: step.id,
+              stepTier: ProfileTier[step.tier],
+              isCurrentStep: index === currentStep,
+            })
 
-          return (
-            <button
-              key={step.id}
-              onClick={() => handleStepClick(index)}
-              disabled={!isAccessible}
-              className={cn(
-                'flex w-full items-center space-x-3 rounded-lg p-3 text-left transition-colors',
-                isActive
-                  ? 'bg-github-canvas-subtle text-github-fg-default'
-                  : 'text-github-fg-muted hover:bg-github-canvas-subtle',
-                !isAccessible && 'cursor-not-allowed opacity-50'
-              )}
-            >
-              <div className='relative flex-shrink-0'>
-                <step.icon className='h-5 w-5' />
-                {!isAccessible && (
-                  <div className='absolute -right-1 -top-1 rounded-full bg-github-canvas-default p-0.5'>
-                    <IconLock className='h-3 w-3 text-github-fg-muted' />
+            const StepIcon = step.icon
+
+            return (
+              <button
+                key={step.id}
+                onClick={() => handleStepClick(index)}
+                className={cn(
+                  'flex items-center w-full p-2 rounded-md transition-all',
+                  'hover:bg-github-canvas-subtle',
+                  index === currentStep && 'bg-github-canvas-subtle',
+                  theme === 'neo' && ['neo-border', 'hover:-translate-y-[2px]', 'hover:neo-shadow']
+                )}
+                aria-current={index === currentStep ? 'step' : undefined}
+              >
+                <StepIcon className='w-5 h-5 shrink-0' />
+                {isExpanded && (
+                  <div className='ml-3 text-left'>
+                    <div className='text-sm font-medium'>{step.label}</div>
+                    {step.description && (
+                      <div className='text-xs text-github-fg-muted'>{step.description}</div>
+                    )}
                   </div>
                 )}
-              </div>
-              {isExpanded && (
-                <div className='min-w-0 flex-1'>
-                  <div className='text-sm font-medium'>{step.label}</div>
-                  {step.description && (
-                    <div className='mt-1 text-xs text-github-fg-muted'>{step.description}</div>
-                  )}
-                </div>
-              )}
-            </button>
-          )
-        })}
-      </nav>
-
-      {isLoading && (
-        <div className='absolute inset-0 flex items-center justify-center bg-github-canvas-default/50'>
-          <LoadingSpinner />
+              </button>
+            )
+          })}
         </div>
-      )}
+      </div>
     </div>
   )
 }

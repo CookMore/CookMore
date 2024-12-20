@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { IconCamera } from '@/components/ui/icons'
+import { IconCamera } from '@/app/api/icons'
 import { ImageUploadPopover } from '@/components/ui/ImageUploadPopover'
 import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'

@@ -15,11 +15,13 @@ export async function generateStaticParams() {
 }
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
-  const locale = (await params)?.locale || defaultLocale
+  const { locale: paramLocale } = await Promise.resolve(params)
+  const locale = paramLocale || defaultLocale
   const validLocale = locales.includes(locale) ? locale : defaultLocale
-  const messages = await getMessages(validLocale)
 
+  // Validate and set the locale
   unstable_setRequestLocale(validLocale)
+  const messages = await getMessages(validLocale)
 
   return (
     <div lang={validLocale} className='contents'>

@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { PrivyClient } from '@privy-io/server-auth'
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID!
@@ -12,34 +12,53 @@ const privyClient = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET)
 
 export async function getPrivyUser() {
   try {
-    const headersList = await headers()
-    const authHeader = await headersList.get('authorization')
+    const cookieStore = await cookies()
+    const privyToken = await cookieStore.get('privy-token')
 
-    console.log('getPrivyUser headers:', {
-      hasAuthHeader: !!authHeader,
-      authHeaderStart: authHeader?.substring(0, 20),
-      allHeaders: Object.fromEntries(headersList.entries()),
+    console.log('getPrivyUser cookies:', {
+      hasPrivyToken: !!privyToken,
+      tokenLength: privyToken?.value?.length,
+      tokenStart: privyToken?.value?.substring(0, 20),
     })
 
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.log('No Bearer token found in authorization header')
+    if (!privyToken?.value) {
+      console.log('No Privy token found in cookies')
       return null
     }
 
-    const token = authHeader.split(' ')[1]
     console.log('Verifying token:', {
-      tokenLength: token?.length,
-      tokenStart: token?.substring(0, 20),
+      tokenLength: privyToken.value.length,
+      tokenStart: privyToken.value.substring(0, 20),
     })
 
-    const verifiedUser = await privyClient.verifyAuthToken(token)
-    console.log('User verified:', {
-      hasUser: !!verifiedUser,
-      userId: verifiedUser?.sub,
-      hasWallet: !!verifiedUser?.wallet,
-    })
+    const verifiedUser = await privyClient.verifyAuthToken(privyToken.value)
 
-    return verifiedUser
+    if (!verifiedUser?.sub) {
+      console.log('No user ID found in verified token')
+      return null
+    }
+
+    try {
+      // Get user's wallet information
+      const userWallets = await privyClient.getUser(verifiedUser.sub)
+      const walletAddress = userWallets?.wallet?.address
+
+      console.log('User verified:', {
+        hasUser: !!verifiedUser,
+        userId: verifiedUser.sub,
+        hasWallet: !!walletAddress,
+        walletAddress,
+      })
+
+      return {
+        ...verifiedUser,
+        wallet: userWallets?.wallet,
+      }
+    } catch (walletError) {
+      console.error('Error fetching user wallet:', walletError)
+      // Return the verified user even if wallet fetch fails
+      return verifiedUser
+    }
   } catch (error) {
     console.error('Error verifying Privy auth token:', error)
     return null
