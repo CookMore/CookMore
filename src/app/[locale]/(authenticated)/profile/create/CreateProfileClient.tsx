@@ -36,7 +36,7 @@ export function CreateProfileClient() {
   console.log('Rendering CreateProfileClient')
   const { user } = usePrivy()
   const { theme } = useTheme()
-  const t = useTranslations('profile')
+  const t = useTranslations()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
@@ -189,7 +189,7 @@ export function CreateProfileClient() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <h1 className='text-2xl font-bold mb-6'>
-        {t('createProfile')} - {t(`tier${ProfileTier[currentTier]}`)}
+        {t('profile.createProfile')} - {t(`profile.tier.${ProfileTier[currentTier].toLowerCase()}`)}
       </h1>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -288,7 +288,7 @@ export function CreateProfileClient() {
                   disabled={currentStep === 0}
                   className='px-4 py-2 text-sm font-medium rounded-md border border-github-border-default hover:bg-github-canvas-subtle disabled:opacity-50'
                 >
-                  {t('previous')}
+                  {t('profile.form.navigation.previous')}
                 </button>
 
                 {currentStep === availableSteps.length - 1 ? (
@@ -305,7 +305,7 @@ export function CreateProfileClient() {
                     onClick={() => handleStepChange(currentStep + 1)}
                     className='px-4 py-2 text-sm font-medium rounded-md bg-github-accent-emphasis text-white hover:bg-github-accent-emphasis/90'
                   >
-                    {t('next')}
+                    {t('profile.form.navigation.next')}
                   </button>
                 )}
               </div>

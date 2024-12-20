@@ -97,6 +97,7 @@
     },
     "navigation": {
       "next": "Next",
+      "previous": "Previous",
       "back": "Back",
       "save": "Save Profile",
       "update": "Update Profile"
@@ -124,6 +125,7 @@
     "mintError": "Error checking tier status",
     "free": "Free",
     "pro": "Pro",
-    "group": "Group"
+    "group": "Group",
+    "og": "OG"
   }
 }
