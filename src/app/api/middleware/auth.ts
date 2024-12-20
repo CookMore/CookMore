@@ -5,51 +5,66 @@ import { cookies } from 'next/headers'
 interface AuthOptions {
   requireProfile?: boolean
   requireAdmin?: boolean
-  currentLocale?: string
+  currentLocale: string
 }
 
-export async function withAuth(request: NextRequest, options: AuthOptions = {}) {
+export async function withAuth(request: NextRequest, options: AuthOptions) {
   try {
     const cookieStore = await cookies()
-    const token = await cookieStore.get('AUTH_TOKEN')?.value
+    const isAuthenticated = request.cookies.has('privy-token')
     const hasProfile = (await cookieStore.get('HAS_PROFILE'))?.value === 'true'
     const path = request.nextUrl.pathname
-    const { currentLocale = 'en', requireProfile = true } = options
+    const { currentLocale, requireProfile = true } = options
 
-    // Strip locale from path if present
-    const pathWithoutLocale = path.replace(/^\/[a-z]{2}(?=\/|$)/, '')
+    console.log('Auth middleware state:', {
+      path,
+      isAuthenticated,
+      hasProfile,
+      currentLocale,
+      requireProfile,
+      cookies: Object.fromEntries(
+        Array.from(request.cookies.getAll()).map((cookie) => [cookie.name, cookie.value])
+      ),
+      headers: Object.fromEntries(request.headers.entries()),
+    })
 
-    // If no token, redirect to login unless already there
-    if (!token && pathWithoutLocale !== '/') {
+    // If not authenticated, redirect to home
+    if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to home')
       return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // Special handling for profile creation
-    if (pathWithoutLocale.startsWith('/profile/create')) {
-      if (!token) {
-        return NextResponse.redirect(new URL('/', request.url))
-      }
-      // Allow access to profile creation even without a profile
-      return NextResponse.next()
-    }
-
-    // For authenticated routes that require a profile
-    if (token && !hasProfile && requireProfile) {
-      if (!pathWithoutLocale.startsWith('/profile/create')) {
+    // For authenticated users without profiles
+    if (!hasProfile && requireProfile) {
+      const pathWithoutLocale = path.replace(new RegExp(`^/${currentLocale}`), '')
+      if (pathWithoutLocale !== '/profile/create') {
+        console.log('User authenticated but no profile, redirecting to profile creation')
         return NextResponse.redirect(new URL('/profile/create', request.url))
       }
     }
 
+    // For authenticated users with profiles trying to access profile creation
+    if (hasProfile && path.endsWith('/profile/create')) {
+      console.log('User already has profile, redirecting to profile page')
+      return NextResponse.redirect(new URL('/profile', request.url))
+    }
+
     // Admin check if needed
     if (options.requireAdmin && cookieStore.get('IS_ADMIN')?.value !== 'true') {
+      console.log('Admin access denied, redirecting to home')
       return NextResponse.redirect(new URL('/', request.url))
     }
 
     const response = NextResponse.next()
-    response.headers.set('x-auth-status', token ? 'authenticated' : 'unauthenticated')
+    response.headers.set('x-auth-status', 'authenticated')
     if (hasProfile) {
       response.headers.set('x-profile-status', 'complete')
     }
+
+    console.log('Auth middleware response:', {
+      status: response.status,
+      headers: Object.fromEntries(response.headers.entries()),
+    })
 
     return response
   } catch (error) {

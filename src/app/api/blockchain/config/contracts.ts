@@ -19,10 +19,10 @@ const TESTNET_CONTRACTS = {
 } as const
 
 const LOCAL_CONTRACTS = {
-  PROFILE: process.env.NEXT_PUBLIC_PROFILE_CONTRACT_ADDRESS,
-  TIER: process.env.NEXT_PUBLIC_TIER_CONTRACT_ADDRESS,
+  PROFILE: process.env.NEXT_PUBLIC_TESTNET_PROFILE_REGISTRY,
+  TIER: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
   USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897' as Address,
-  ACCESS_CONTROL: process.env.NEXT_PUBLIC_ACCESS_CONTROL_ADDRESS,
+  ACCESS_CONTROL: process.env.NEXT_PUBLIC_TESTNET_ACCESS_CONTROL,
 } as const
 
 // Select contracts based on environment
@@ -41,7 +41,7 @@ export function isValidContractAddress(address: string | undefined): address is 
 // Validate contract addresses
 Object.entries(CONTRACTS).forEach(([name, address]) => {
   if (!isValidContractAddress(address)) {
-    console.warn(`Invalid or missing contract address for ${name}`)
+    console.warn(`Invalid or missing contract address for ${name}:`, address)
   }
 })
 

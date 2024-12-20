@@ -39,11 +39,10 @@ export interface TransactionResponse {
 }
 
 export interface ProfileResponse {
-  exists: boolean
-  tier: ProfileTier
-  tokenId: string
-  metadataURI: string
-  metadata: ProfileMetadata
+  success: boolean
+  data: Profile | null
+  error?: string
+  tierStatus: TierStatus
 }
 
 // Event Types
@@ -356,10 +355,18 @@ export interface ProfileFormData
 }
 
 // Service Response Types
+export interface TierStatus {
+  hasGroup: boolean
+  hasPro: boolean
+  hasOG: boolean
+  currentTier: ProfileTier
+}
+
 export interface ServiceResponse<T = ProfileMetadata> {
   success: boolean
   data?: T | null
   error?: string
+  tierStatus: TierStatus
 }
 
 export interface ProfileActionResponse extends ServiceResponse {
@@ -395,12 +402,6 @@ export interface Preferences {
 }
 
 // Additional Web3 Types
-export interface TierStatus {
-  hasGroup: boolean
-  hasPro: boolean
-  currentTier: ProfileTier
-}
-
 export interface ProfileValidation {
   success: boolean
   error?: Error

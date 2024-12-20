@@ -1,5 +1,5 @@
 import { cn } from '@/app/api/utils/utils'
-import { useTheme } from '@/app/api/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { forwardRef } from 'react'
 
 interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {}

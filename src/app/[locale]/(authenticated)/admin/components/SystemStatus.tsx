@@ -7,6 +7,8 @@ import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/ro
 import { getContracts } from '@/app/api/blockchain/server/getContracts'
 import { createPublicClient, http } from 'viem'
 import { baseSepolia, base } from 'viem/chains'
+import { cn } from '@/app/api/utils/utils'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 
 interface ContractStatus {
   name: string
@@ -33,11 +35,12 @@ function SystemStatusSkeleton() {
   )
 }
 
-export function SystemStatus() {
+export default function SystemStatus() {
   const { profile } = useProfile()
   const [contracts, setContracts] = useState<ContractStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false)
+  const { theme } = useTheme()
 
   useEffect(() => {
     if (profile?.owner) {
@@ -123,30 +126,67 @@ export function SystemStatus() {
 
   return (
     <Suspense fallback={<SystemStatusSkeleton />}>
-      <div className='space-y-4'>
-        <div className='grid gap-3'>
-          {contracts.map((contract) => (
-            <div
-              key={`${contract.name}-${contract.address}`}
-              className='flex justify-between items-center p-3 bg-github-canvas-subtle rounded-md'
-            >
-              <div>
-                <div className='font-medium'>{contract.name}</div>
-                <div className='text-xs text-github-fg-muted'>{contract.address}</div>
-              </div>
+      <div
+        className={cn(
+          'p-4 rounded-lg',
+          'bg-github-canvas-default',
+          'border border-github-border-default',
+          theme === 'neo' && 'neo-border neo-shadow'
+        )}
+      >
+        <h2
+          className={cn(
+            'text-xl font-semibold mb-4',
+            'text-github-fg-default',
+            theme === 'neo' && 'font-mono tracking-tight'
+          )}
+        >
+          System Status
+        </h2>
+        <div className='space-y-4'>
+          <div className='grid gap-3'>
+            {contracts.map((contract) => (
               <div
-                className={`px-2 py-1 rounded-full text-xs ${
-                  contract.status === 'active'
-                    ? 'bg-github-success-emphasis/10 text-github-success-fg'
-                    : contract.status === 'paused'
-                      ? 'bg-github-warning-emphasis/10 text-github-warning-fg'
-                      : 'bg-github-danger-emphasis/10 text-github-danger-fg'
-                }`}
+                key={`${contract.name}-${contract.address}`}
+                className={cn(
+                  'flex justify-between items-center p-3 rounded-md',
+                  'bg-github-canvas-subtle',
+                  theme === 'neo' && 'neo-border'
+                )}
               >
-                {contract.status}
+                <div>
+                  <div
+                    className={cn(
+                      'font-medium',
+                      'text-github-fg-default',
+                      theme === 'neo' && 'font-mono'
+                    )}
+                  >
+                    {contract.name}
+                  </div>
+                  <div
+                    className={cn('text-xs text-github-fg-muted', theme === 'neo' && 'font-mono')}
+                  >
+                    {contract.address}
+                  </div>
+                </div>
+                <div
+                  className={cn(
+                    'px-2 py-1 rounded-full text-xs',
+                    contract.status === 'active' &&
+                      'bg-github-success-emphasis/10 text-github-success-fg',
+                    contract.status === 'paused' &&
+                      'bg-github-warning-emphasis/10 text-github-warning-fg',
+                    contract.status === 'unknown' &&
+                      'bg-github-danger-emphasis/10 text-github-danger-fg',
+                    theme === 'neo' && 'font-mono'
+                  )}
+                >
+                  {contract.status}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </Suspense>

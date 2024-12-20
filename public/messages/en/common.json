@@ -152,8 +152,16 @@
     }
   },
   "wallet": {
-    "connect": "Connect Wallet",
-    "disconnect": "Disconnect Wallet",
+    "connect": {
+      "start": "Connecting wallet...",
+      "success": "Wallet connected successfully",
+      "error": "Failed to connect wallet"
+    },
+    "disconnect": {
+      "start": "Disconnecting wallet...",
+      "success": "Wallet disconnected successfully",
+      "error": "Failed to disconnect wallet"
+    },
     "connecting": "Connecting...",
     "connected": "Connected",
     "notConnected": "Not Connected",

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useFormContext, Controller, type ControllerProps, type FieldValues } from 'react-hook-form'
 import { cn } from '@/app/api/utils'
-import { useTheme } from '@/app/api/providers/ThemeProvider'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { forwardRef, createContext, useContext, useId } from 'react'
 
 interface FormFieldContextValue<

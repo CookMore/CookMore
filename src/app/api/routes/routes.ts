@@ -20,7 +20,7 @@ export const ROUTES = {
     EXPLORE: '/explore',
     TIER: '/tier',
     PROFILE: {
-      HOME: '/profile',
+      HOME: '/profile/address',
       CREATE: '/profile/create',
       EDIT: '/profile/edit',
     },

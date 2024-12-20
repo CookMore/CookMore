@@ -9,6 +9,8 @@ import { getContracts } from '@/app/api/blockchain/server/getContracts'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
 import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
 import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
+import { cn } from '@/app/api/utils/utils'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 
 interface DeletedProfile {
   wallet: string
@@ -33,11 +35,12 @@ function DeletedProfilesSkeleton() {
   )
 }
 
-export function DeletedProfiles() {
+export default function DeletedProfiles() {
   const { profile } = useProfile()
   const [deletedProfiles, setDeletedProfiles] = useState<DeletedProfile[]>([])
   const [loading, setLoading] = useState(false)
   const [hasAccess, setHasAccess] = useState(false)
+  const { theme } = useTheme()
 
   useEffect(() => {
     if (profile?.owner) {
@@ -139,12 +142,27 @@ export function DeletedProfiles() {
 
   return (
     <Suspense fallback={<DeletedProfilesSkeleton />}>
-      <div className='space-y-4'>
-        <div className='flex justify-between items-center'>
-          <h3 className='text-lg font-medium'>Deleted Profiles</h3>
+      <div
+        className={cn(
+          'p-4 rounded-lg',
+          'bg-github-canvas-default',
+          'border border-github-border-default',
+          theme === 'neo' && 'neo-border neo-shadow'
+        )}
+      >
+        <div className='flex justify-between items-center mb-4'>
+          <h2
+            className={cn(
+              'text-xl font-semibold',
+              'text-github-fg-default',
+              theme === 'neo' && 'font-mono tracking-tight'
+            )}
+          >
+            Deleted Profiles
+          </h2>
           <Button
             variant='outline'
-            className='text-sm'
+            className={cn('text-sm', theme === 'neo' && 'neo-button')}
             onClick={() => setDeletedProfiles([])}
             disabled={deletedProfiles.length === 0 || loading}
           >
@@ -163,10 +181,22 @@ export function DeletedProfiles() {
             {deletedProfiles.map((profile) => (
               <div
                 key={`${profile.wallet}-${profile.profileId}`}
-                className='p-3 bg-github-canvas-subtle rounded-md'
+                className={cn(
+                  'p-3 rounded-md',
+                  'bg-github-canvas-subtle',
+                  theme === 'neo' && 'neo-border'
+                )}
               >
-                <div className='text-sm font-medium'>{profile.wallet}</div>
-                <div className='text-xs text-github-fg-muted'>
+                <div
+                  className={cn(
+                    'text-sm font-medium',
+                    'text-github-fg-default',
+                    theme === 'neo' && 'font-mono'
+                  )}
+                >
+                  {profile.wallet}
+                </div>
+                <div className={cn('text-xs text-github-fg-muted', theme === 'neo' && 'font-mono')}>
                   Profile ID: {profile.profileId}
                   <br />
                   Deleted: {new Date(profile.timestamp).toLocaleString()}

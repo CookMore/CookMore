@@ -20,24 +20,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'transition-all relative',
+          'relative',
+          // Size styles
           size === 'default' && 'px-4 py-2',
           size === 'sm' && 'px-3 py-1 text-sm',
           size === 'lg' && 'px-6 py-3 text-lg',
+          // Base styles
           'disabled:opacity-50 disabled:cursor-not-allowed',
-          theme === 'neo' && [
-            'neo-border neo-shadow',
-            'hover:translate-y-[-4px] hover:translate-x-[-4px]',
-            'active:translate-y-[2px] active:translate-x-[2px]',
-            variant === 'outline' && 'border-2 border-github-border-default',
-            'bg-github-canvas-default hover:bg-github-canvas-subtle',
-          ],
-          theme !== 'neo' && [
-            'rounded-md',
-            'border border-github-border-default',
-            variant === 'outline' && 'border-2',
-            'hover:bg-github-canvas-subtle',
-          ],
+          // Theme-specific styles
+          theme === 'neo'
+            ? [
+                'neo-button',
+                variant === 'outline' && 'border-2 border-github-border-default',
+                'bg-white text-black',
+              ]
+            : [
+                'rounded-md transition-all',
+                'border border-github-border-default',
+                variant === 'outline' && 'border-2',
+                'bg-github-btn-bg text-github-fg-default',
+                'hover:bg-github-btn-hover active:bg-github-btn-active',
+              ],
           isLoading && 'cursor-wait',
           className
         )}

@@ -15,14 +15,14 @@ import {
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 
 export function AuthButton() {
-  const { login, logout, isAuthenticated, ready, user, profile } = useAuth()
+  const { login, logout, isAuthenticated, ready, user, hasProfile } = useAuth()
   const router = useRouter()
 
   const handleProfileClick = () => {
-    if (!profile) {
+    if (!hasProfile) {
       router.push(ROUTES.AUTH.PROFILE.CREATE)
-    } else {
-      router.push(ROUTES.AUTH.PROFILE.HOME)
+    } else if (user?.wallet?.address) {
+      router.push(`${ROUTES.AUTH.PROFILE.HOME}/${user.wallet.address}`)
     }
   }
 
@@ -42,10 +42,8 @@ export function AuthButton() {
             <DefaultAvatar address={user?.wallet?.address} />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={handleProfileClick}>
-              {profile ? 'View Profile' : 'Create Profile'}
-            </DropdownMenuItem>
-            {profile && (
+            <DropdownMenuItem onClick={handleProfileClick}>Profile</DropdownMenuItem>
+            {hasProfile && (
               <DropdownMenuItem onClick={() => router.push(ROUTES.AUTH.KITCHEN.HOME)}>
                 Kitchen
               </DropdownMenuItem>

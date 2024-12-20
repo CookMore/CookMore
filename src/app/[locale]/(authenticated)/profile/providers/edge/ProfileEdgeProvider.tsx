@@ -31,7 +31,7 @@ export function ProfileEdgeProvider({
     setError(null)
 
     try {
-      const response = await fetch(`/api/profile/${address}`)
+      const response = await fetch(`/api/profile/address/${address}`)
       const data = await response.json()
       setProfile(data)
     } catch (err) {

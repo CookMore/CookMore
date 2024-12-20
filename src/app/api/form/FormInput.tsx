@@ -3,6 +3,7 @@
 import { forwardRef } from 'react'
 import { Control, FieldValues, useController } from 'react-hook-form'
 import { cn } from '@/app/api/utils/utils'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 
 // Export the FormInputProps interface
 export interface FormInputProps<T extends FieldValues> {
@@ -18,7 +19,6 @@ export interface FormInputProps<T extends FieldValues> {
   className?: string
   helperText?: string
   type?: string
-  theme?: string
   disabled?: boolean
 }
 
@@ -37,12 +37,13 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
       className,
       helperText,
       type = 'text',
-      theme,
       disabled,
       ...props
     },
     ref
   ) => {
+    const { theme } = useTheme()
+
     // Handle both controlled and form-controlled inputs
     const controllerProps = control
       ? useController({
@@ -56,12 +57,17 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
     const handleChange = controllerProps ? controllerProps.field.onChange : controlledOnChange
 
     const inputClasses = cn(
-      'w-full px-3 py-2 rounded-md',
-      'bg-github-canvas-default',
-      'border border-github-border-default',
+      'w-full px-3 py-2',
+      theme === 'neo'
+        ? ['neo-input', 'focus:rotate-[0.5deg]']
+        : [
+            'rounded-md',
+            'bg-github-canvas-default',
+            'border border-github-border-default',
+            'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:border-github-accent-emphasis',
+          ],
       'text-github-fg-default placeholder:text-github-fg-subtle',
       'transition-all duration-200 ease-in-out',
-      'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:border-github-accent-emphasis',
       'hover:border-github-border-muted',
       error &&
         'border-github-danger-emphasis focus:ring-github-danger-emphasis focus:border-github-danger-emphasis',

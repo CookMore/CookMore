@@ -10,12 +10,14 @@ import { FormInput } from '@/app/api/form/FormInput'
 import { FormDateInput } from '@/app/api/form/FormDateInput'
 import { FormTextarea } from '@/app/api/form/FormTextarea'
 import { IconBriefcase } from '@/app/api/icons'
+import type { Theme } from '@/app/api/styles/themes'
 
 type ProfileFormData = ProProfileMetadata | GroupProfileMetadata
 
 interface ExperienceSectionProps {
   control: Control<ProfileFormData>
   errors: FieldErrors<ProfileFormData>
+  theme: Theme
 }
 
 const createEmptyExperience = () => ({
@@ -27,7 +29,7 @@ const createEmptyExperience = () => ({
   description: '',
 })
 
-export function ExperienceSection({ control, errors }: ExperienceSectionProps) {
+export function ExperienceSection({ control, errors, theme }: ExperienceSectionProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'experience.history',
@@ -40,6 +42,7 @@ export function ExperienceSection({ control, errors }: ExperienceSectionProps) {
       title='Professional Experience'
       icon={<IconBriefcase />}
       description='Your culinary career history'
+      theme={theme}
     >
       <div className='space-y-6'>
         {/* Current Position */}

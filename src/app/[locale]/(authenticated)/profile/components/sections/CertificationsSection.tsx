@@ -8,14 +8,14 @@ import { Label } from '@/app/api/components/ui/label'
 import { FormSection } from '@/app/api/form/FormSection'
 import { FormArrayField } from '@/app/api/form/FormArrayField'
 import { IconCertificate } from '@/app/api//icons'
-import type { ProProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useTranslations } from 'next-intl'
-import { type Theme } from '@/app/api/providers/ThemeProvider'
+import { type Theme } from '@/app/api/providers/core/ThemeProvider'
 import { proProfileSchema } from '@/app/[locale]/(authenticated)/profile/validations/profile'
 
 interface CertificationsSectionProps {
-  control: Control<ProProfileMetadata>
-  errors: FieldErrors<ProProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
   theme: Theme
 }
 

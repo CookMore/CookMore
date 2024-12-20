@@ -59,5 +59,4 @@ class ProfileClientService {
     }
   }
 }
-
 export const profileClientService = new ProfileClientService()

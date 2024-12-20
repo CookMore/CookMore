@@ -10,14 +10,16 @@ import { FormArrayField } from '@/app/api/form/FormArrayField'
 import { IconUsers } from '@/app/api/icons'
 
 // Type imports
-import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileFormData } from '../../profile'
+import type { Theme } from '@/app/api/styles/themes'
 
 interface TeamSectionProps {
-  control?: Control<GroupProfileMetadata>
-  errors?: FieldErrors<GroupProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme: Theme
 }
 
-export function TeamSection({ control, errors }: TeamSectionProps) {
+export function TeamSection({ control, errors, theme }: TeamSectionProps) {
   return (
     <FormSection icon={IconUsers} title='Team Members'>
       <div className='space-y-6'>

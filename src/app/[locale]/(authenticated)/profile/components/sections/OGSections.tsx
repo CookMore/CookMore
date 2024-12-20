@@ -1,115 +1,125 @@
 import { useFormContext } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
-import { ProfileFormData } from '../../profile'
+import { FormSection } from '@/app/api/form/FormSection'
+import { FormField } from '@/app/api/form/form'
+import { FormSwitch } from '@/app/api/form/FormSwitch'
+import { FormSelect } from '@/app/api/form/FormSelect'
+import { IconStar, IconTrophy, IconUsers } from '@/app/api/icons'
+import type { Control, FieldErrors } from 'react-hook-form'
+import type { Theme } from '@/app/api/styles/themes'
+import type { ProfileFormData } from '../../profile'
 
 interface OGSectionProps {
-  control: any
-  errors: any
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme: Theme
 }
 
-export function OGPreferencesSection({ control, errors }: OGSectionProps) {
+export function OGPreferencesSection({ control, errors, theme }: OGSectionProps) {
   const t = useTranslations('profile')
-  const { register } = useFormContext<ProfileFormData>()
 
   return (
-    <div className='space-y-4'>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('exclusiveContent')}</label>
-        <input
-          type='checkbox'
-          {...register('ogPreferences.exclusiveContent')}
-          className='rounded border border-github-border-default bg-github-canvas-default'
+    <FormSection icon={IconStar} title={t('preferences')} theme={theme}>
+      <div className='space-y-4'>
+        <FormField
+          control={control}
+          name='preferences.exclusiveContent'
+          render={({ field }) => (
+            <FormSwitch
+              label={t('exclusiveContent')}
+              description={t('exclusiveContentDesc')}
+              {...field}
+            />
+          )}
+        />
+        <FormField
+          control={control}
+          name='preferences.earlyAccess'
+          render={({ field }) => (
+            <FormSwitch label={t('earlyAccess')} description={t('earlyAccessDesc')} {...field} />
+          )}
+        />
+        <FormField
+          control={control}
+          name='preferences.mentorship'
+          render={({ field }) => (
+            <FormSwitch label={t('mentorship')} description={t('mentorshipDesc')} {...field} />
+          )}
+        />
+        <FormField
+          control={control}
+          name='preferences.theme'
+          render={({ field }) => (
+            <FormSelect
+              label={t('theme')}
+              options={[
+                { value: 'default', label: t('themeDefault') },
+                { value: 'dark', label: t('themeDark') },
+                { value: 'light', label: t('themeLight') },
+              ]}
+              {...field}
+            />
+          )}
         />
       </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('earlyAccess')}</label>
-        <input
-          type='checkbox'
-          {...register('ogPreferences.earlyAccess')}
-          className='rounded border border-github-border-default bg-github-canvas-default'
-        />
-      </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('mentorship')}</label>
-        <input
-          type='checkbox'
-          {...register('ogPreferences.mentorship')}
-          className='rounded border border-github-border-default bg-github-canvas-default'
-        />
-      </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('theme')}</label>
-        <select
-          {...register('ogPreferences.customization.theme')}
-          className='w-full rounded-md border border-github-border-default bg-github-canvas-default px-3 py-2'
-        >
-          <option value='default'>{t('themeDefault')}</option>
-          <option value='dark'>{t('themeDark')}</option>
-          <option value='light'>{t('themeLight')}</option>
-        </select>
-      </div>
-    </div>
+    </FormSection>
   )
 }
 
-export function OGShowcaseSection({ control, errors }: OGSectionProps) {
+export function OGShowcaseSection({ control, errors, theme }: OGSectionProps) {
   const t = useTranslations('profile')
-  const { register } = useFormContext<ProfileFormData>()
 
   return (
-    <div className='space-y-4'>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('featuredRecipes')}</label>
-        <div className='space-y-2'>
-          {/* Add dynamic recipe list component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+    <FormSection icon={IconTrophy} title={t('showcase')} theme={theme}>
+      <div className='space-y-4'>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('featuredRecipes')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
+        </div>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('achievements')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
+        </div>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('contributions')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
         </div>
       </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('achievements')}</label>
-        <div className='space-y-2'>
-          {/* Add achievements component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
-        </div>
-      </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('contributions')}</label>
-        <div className='space-y-2'>
-          {/* Add contributions component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
-        </div>
-      </div>
-    </div>
+    </FormSection>
   )
 }
 
-export function OGNetworkSection({ control, errors }: OGSectionProps) {
+export function OGNetworkSection({ control, errors, theme }: OGSectionProps) {
   const t = useTranslations('profile')
-  const { register } = useFormContext<ProfileFormData>()
 
   return (
-    <div className='space-y-4'>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('connections')}</label>
-        <div className='space-y-2'>
-          {/* Add connections component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+    <FormSection icon={IconUsers} title={t('network')} theme={theme}>
+      <div className='space-y-4'>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('connections')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
+        </div>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('collaborations')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
+        </div>
+        <div>
+          <label className='block text-sm font-medium mb-1'>{t('mentees')}</label>
+          <div className='space-y-2'>
+            <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
+          </div>
         </div>
       </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('collaborations')}</label>
-        <div className='space-y-2'>
-          {/* Add collaborations component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
-        </div>
-      </div>
-      <div>
-        <label className='block text-sm font-medium mb-1'>{t('mentees')}</label>
-        <div className='space-y-2'>
-          {/* Add mentees component here */}
-          <p className='text-sm text-github-fg-muted'>{t('comingSoon')}</p>
-        </div>
-      </div>
-    </div>
+    </FormSection>
   )
 }

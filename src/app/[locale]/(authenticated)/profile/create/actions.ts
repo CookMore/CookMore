@@ -3,20 +3,47 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ProfileTier, type GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
-import { useProfileRegistry } from '@/app/api/web3/features/profile/hooks/useProfileRegistry'
+import {
+  ProfileTier,
+  type ProfileFormData,
+  type ProfileMetadata,
+} from '@/app/[locale]/(authenticated)/profile/profile'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 
 export function useProfileComplete() {
   const router = useRouter()
-  const { createProfile } = useProfileRegistry()
+  const { createProfile } = useProfile()
 
   const handleProfileComplete = useCallback(
-    async (data: GroupProfileMetadata, tier: ProfileTier) => {
+    async (formData: ProfileFormData, tier: ProfileTier) => {
       try {
-        const result = await createProfile(data, tier)
+        // Transform form data to metadata format
+        const metadata: ProfileMetadata = {
+          ...formData,
+          tier,
+          version: '1.2',
+          social: {
+            urls: [],
+            labels: [],
+          },
+          preferences: {
+            theme: 'light',
+            notifications: true,
+            displayEmail: false,
+            displayLocation: false,
+          },
+          achievements: {
+            recipesCreated: 0,
+            recipesForked: 0,
+            totalLikes: 0,
+            badges: [],
+          },
+        }
 
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to create profile')
+        const hash = await createProfile(metadata)
+
+        if (!hash) {
+          throw new Error('Failed to create profile')
         }
 
         toast.success('Profile created successfully!', {
@@ -24,7 +51,7 @@ export function useProfileComplete() {
         })
 
         router.push('/profile')
-        return result
+        return { success: true, hash }
       } catch (error) {
         console.error('Error creating profile:', error)
         toast.error('Error creating profile', {

@@ -25,41 +25,91 @@ export interface ProfileResponse {
 // Helper function to get tier status
 async function getTierStatus(address: string, contract: any): Promise<TierStatus> {
   try {
-    const balance = await publicClient
+    console.log('Checking tier status for address:', address)
+
+    // Get the balance of tokens for this address
+    const balance = (await publicClient
       .readContract({
         ...contract,
         functionName: 'balanceOf',
         args: [address],
       })
-      .catch(() => BigInt(0))
+      .catch(() => BigInt(0))) as bigint
+
+    console.log('Token balance:', balance.toString())
 
     if (balance === BigInt(0)) {
-      return { hasGroup: false, hasPro: false, currentTier: ProfileTier.FREE }
+      return { hasGroup: false, hasPro: false, hasOG: false, currentTier: ProfileTier.FREE }
     }
 
-    const tokenId = balance - BigInt(1)
-    const isGroup = await publicClient
-      .readContract({
-        ...contract,
-        functionName: 'isGroupTier',
-        args: [tokenId],
-      })
-      .catch(() => false)
+    // Since we know there are tokens, let's try to get their tiers
+    // We'll try token IDs from 0 to balance*2 to account for any gaps
+    const maxTokenId = Number(balance) * 2
+    const tiers = []
+
+    for (let i = 0; i < maxTokenId; i++) {
+      try {
+        const tier = (await publicClient.readContract({
+          ...contract,
+          functionName: 'tokenTier',
+          args: [BigInt(i)],
+        })) as string
+
+        if (tier) {
+          console.log(`Token ${i} tier:`, tier)
+          tiers.push({ tokenId: BigInt(i), tier })
+        }
+      } catch (error) {
+        // Skip if token doesn't exist or other error
+        continue
+      }
+    }
+
+    console.log('Found tiers:', tiers)
+
+    // Determine highest tier status
+    const hasOG = tiers.some(({ tier }) => tier === 'OG')
+    const hasGroup = tiers.some(({ tier }) => tier === 'Group')
+    const hasPro = tiers.some(({ tier }) => tier === 'Pro')
+
+    // Determine current tier (highest takes precedence)
+    const currentTier = hasOG
+      ? ProfileTier.OG
+      : hasGroup
+        ? ProfileTier.GROUP
+        : hasPro
+          ? ProfileTier.PRO
+          : ProfileTier.FREE
+
+    console.log('Final tier status:', {
+      hasOG,
+      hasGroup,
+      hasPro,
+      currentTier,
+    })
 
     return {
-      hasGroup: isGroup,
-      hasPro: !isGroup,
-      currentTier: isGroup ? ProfileTier.GROUP : ProfileTier.PRO,
+      hasGroup,
+      hasPro,
+      hasOG,
+      currentTier,
     }
   } catch (error) {
     console.error('Error getting tier status:', error)
-    return { hasGroup: false, hasPro: false, currentTier: ProfileTier.FREE }
+    return {
+      hasGroup: false,
+      hasPro: false,
+      hasOG: false,
+      currentTier: ProfileTier.FREE,
+    }
   }
 }
 
 // Base implementation for server-side profile fetching
 export async function getProfile(address: string): Promise<ProfileResponse> {
   try {
+    console.log('Starting getProfile for address:', address)
+
     // Get contracts
     const [profileContract, tierContract] = await Promise.all([
       getServerContract({
@@ -67,10 +117,16 @@ export async function getProfile(address: string): Promise<ProfileResponse> {
         abi: profileABI,
       }),
       getServerContract({
-        address: getContractAddress('GROUP_NFT'),
+        address: getContractAddress('TIER_CONTRACT'),
         abi: tierABI,
       }),
     ])
+
+    console.log('Contracts initialized:', {
+      profileContract: profileContract.address,
+      tierContract: tierContract.address,
+      envTierAddress: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
+    })
 
     // Get profile data and role access in parallel
     const [profileData, tierStatus, roleAccess] = await Promise.all([
@@ -80,14 +136,26 @@ export async function getProfile(address: string): Promise<ProfileResponse> {
           functionName: 'getProfile',
           args: [address],
         })
-        .catch(() => null),
+        .catch((error) => {
+          console.error('Error reading profile contract:', error)
+          return null
+        }),
       getTierStatus(address, tierContract),
       checkRoleAccess(address),
     ])
 
+    console.log('Profile data fetched:', {
+      profileExists: profileData?.exists,
+      tierStatus,
+      roleAccess,
+    })
+
     // Set the HAS_PROFILE cookie based on profile existence
     const cookieStore = await cookies()
-    cookieStore.set(COOKIE_NAMES.HAS_PROFILE, profileData?.exists ? 'true' : 'false', {
+    const hasProfile = profileData?.exists ? 'true' : 'false'
+    console.log('Setting HAS_PROFILE cookie:', hasProfile)
+
+    cookieStore.set(COOKIE_NAMES.HAS_PROFILE, hasProfile, {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -95,7 +163,7 @@ export async function getProfile(address: string): Promise<ProfileResponse> {
 
     return {
       success: true,
-      data: profileData,
+      data: profileData?.exists ? profileData : null,
       tierStatus,
       ...roleAccess,
     }
@@ -113,7 +181,7 @@ export async function getProfile(address: string): Promise<ProfileResponse> {
       success: false,
       data: null,
       error: error instanceof Error ? error.message : 'Failed to fetch profile',
-      tierStatus: { hasGroup: false, hasPro: false, currentTier: ProfileTier.FREE },
+      tierStatus: { hasGroup: false, hasPro: false, hasOG: false, currentTier: ProfileTier.FREE },
       isAdmin: false,
       canManageProfiles: false,
       canManageMetadata: false,
@@ -122,21 +190,53 @@ export async function getProfile(address: string): Promise<ProfileResponse> {
 }
 
 // Cached version for repeated calls
-export const getCachedProfile = cache(getProfile)
+export async function getCachedProfile(address: string): Promise<ProfileResponse> {
+  const cachedFn = cache(getProfile)
+  return cachedFn(address)
+}
 
-// Edge service for client-side operations
-export const profileEdgeService = {
-  getProfile,
-  createProfile: async (metadata: Profile) => {
-    // Implement profile creation logic
+// Server actions for profile operations
+export async function createProfile(metadata: Profile) {
+  try {
+    const profileContract = await getServerContract({
+      address: getContractAddress('PROFILE_REGISTRY'),
+      abi: profileABI,
+    })
+
+    // TODO: Implement actual contract interaction
     return { success: true, hash: '0x' }
-  },
-  updateProfile: async (metadata: Profile) => {
-    // Implement profile update logic
+  } catch (error) {
+    console.error('Error creating profile:', error)
+    return { success: false, error: 'Failed to create profile' }
+  }
+}
+
+export async function updateProfile(metadata: Profile) {
+  try {
+    const profileContract = await getServerContract({
+      address: getContractAddress('PROFILE_REGISTRY'),
+      abi: profileABI,
+    })
+
+    // TODO: Implement actual contract interaction
     return { success: true, hash: '0x' }
-  },
-  deleteProfile: async () => {
-    // Implement profile deletion logic
+  } catch (error) {
+    console.error('Error updating profile:', error)
+    return { success: false, error: 'Failed to update profile' }
+  }
+}
+
+export async function deleteProfile() {
+  try {
+    const profileContract = await getServerContract({
+      address: getContractAddress('PROFILE_REGISTRY'),
+      abi: profileABI,
+    })
+
+    // TODO: Implement actual contract interaction
     return { success: true }
-  },
+  } catch (error) {
+    console.error('Error deleting profile:', error)
+    return { success: false, error: 'Failed to delete profile' }
+  }
 }

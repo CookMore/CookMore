@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { baseSepolia } from 'wagmi/chains'
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
-  const t = useTranslations('wallet')
+  const t = useTranslations('wallet.connect')
 
   return (
     <Privy
@@ -24,14 +24,14 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
       }}
       onSuccess={() => {
-        toast.success(t('connect.success'))
+        toast.success(t('success'))
       }}
       onError={(error) => {
         // Only log in development
         if (process.env.NODE_ENV === 'development') {
           console.error('Privy error:', error)
         }
-        toast.error(t('connect.error'))
+        toast.error(t('error'))
       }}
     >
       {children}

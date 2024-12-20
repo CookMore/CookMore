@@ -9,16 +9,17 @@ import { FormSwitch } from '@/app/api/form/FormSwitch'
 import { IconCalendar } from '@/app/api/icons'
 
 // Type imports
-import type { ProProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface AvailabilitySectionProps {
-  control: Control<ProProfileMetadata>
-  errors: FieldErrors<ProProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme?: string
 }
 
-export function AvailabilitySection({ control, errors }: AvailabilitySectionProps) {
+export function AvailabilitySection({ control, errors, theme }: AvailabilitySectionProps) {
   return (
-    <FormSection icon={IconCalendar} title='Availability'>
+    <FormSection icon={IconCalendar} title='Availability' theme={theme}>
       <div className='space-y-6'>
         <FormSwitch
           control={control}

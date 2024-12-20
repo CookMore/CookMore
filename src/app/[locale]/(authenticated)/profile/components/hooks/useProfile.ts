@@ -1,6 +1,5 @@
 'use client'
 
-import { useContext } from 'react'
 import { useProfileEdge } from '../../providers/edge/ProfileEdgeProvider'
 import { profileClientService } from '../../services/client/profile.service'
 import { profileMetadataService } from '../../services/client/metadata.service'
@@ -64,7 +63,8 @@ export function useProfile(address?: string): UseProfileResult {
 
   // Metadata validation
   const validateMetadata = async (metadata: ProfileMetadata) => {
-    return profileMetadataService.validateMetadata(metadata)
+    const result = await profileMetadataService.validateMetadata(metadata)
+    return result !== null && result !== undefined
   }
 
   // Cache management

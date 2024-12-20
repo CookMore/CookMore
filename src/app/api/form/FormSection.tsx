@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { motion, MotionProps } from 'framer-motion'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 
 export interface FormSectionProps extends MotionProps {
   title?: string
@@ -10,7 +11,6 @@ export interface FormSectionProps extends MotionProps {
   children: React.ReactNode
   className?: string
   required?: boolean
-  theme?: string
 }
 
 const sectionVariants = {
@@ -35,21 +35,16 @@ const contentVariants = {
   },
 }
 
-export function FormSection({
-  title,
-  icon,
-  children,
-  description,
-  className,
-  theme,
-}: FormSectionProps) {
+export function FormSection({ title, icon, children, description, className }: FormSectionProps) {
+  const { theme } = useTheme()
+
   return (
     <motion.section
       variants={sectionVariants}
       initial='hidden'
       animate='visible'
-      className={`space-y-4 p-6 bg-github-canvas-subtle rounded-lg 
-                  border border-github-border-default
+      className={`space-y-4 p-6 
+                  ${theme === 'neo' ? 'neo-container' : 'bg-github-canvas-subtle rounded-lg border border-github-border-default'}
                   shadow-sm hover:shadow-md transition-all
                   hover:border-github-border-muted
                   group ${className || ''}`}

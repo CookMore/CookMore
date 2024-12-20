@@ -22,6 +22,7 @@ pragma solidity ^0.8.19;
 */
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -29,7 +30,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title CookMoreTier
 /// @notice Tiered NFT Membership System with Pro, Group, and OG levels and Treasury Split Logic.
-contract CookMoreTier is ERC721URIStorage, ReentrancyGuard, AccessControl {
+contract CookMoreTier is ERC721URIStorage, ERC721Enumerable, ReentrancyGuard, AccessControl {
     using Counters for Counters.Counter;
 
     IERC20 public immutable usdc;
@@ -101,6 +102,37 @@ contract CookMoreTier is ERC721URIStorage, ReentrancyGuard, AccessControl {
         _grantRole(FINANCIAL_MANAGER_ROLE, msg.sender);
     }
 
+    /// @notice Override supportsInterface to handle multiple inheritance
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721URIStorage, ERC721Enumerable, AccessControl)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @notice Override _beforeTokenTransfer to handle ERC721Enumerable
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+    }
+
+    /// @notice Override _burn to handle ERC721URIStorage
+    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    /// @notice Override tokenURI to handle ERC721URIStorage
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
     /// @notice Mint Pro Tier
     function mintPro() external nonReentrant {
         _processPayment(proPrice);
@@ -157,17 +189,6 @@ contract CookMoreTier is ERC721URIStorage, ReentrancyGuard, AccessControl {
         if (_newTreasury == address(0)) revert InvalidAddress();
         adminTreasury = _newTreasury;
         emit AdminTreasuryUpdated(_newTreasury);
-    }
-
-    /// @dev SupportsInterface Override
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721URIStorage, AccessControl)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 
     /// @dev Internal Payment Processing with Split

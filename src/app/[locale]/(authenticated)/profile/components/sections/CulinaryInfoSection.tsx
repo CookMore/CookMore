@@ -6,13 +6,14 @@ import { FormSection } from '@/app/api/form/FormSection'
 import { FormSelect } from '@/app/api/form/FormSelect'
 import { FormMultiSelect } from '@/app/api/form/FormMultiSelect'
 import { IconChefHat } from '@/app/api/icons'
-import { useTheme } from 'next-themes'
 import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { Theme } from '@/app/api/styles/themes'
 
 interface CulinaryInfoSectionProps {
   control: Control<ProfileFormData>
   errors: FieldErrors<ProfileFormData>
   isPro?: boolean
+  theme: Theme
 }
 
 type ExpertiseLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional'
@@ -79,9 +80,8 @@ const EQUIPMENT_OPTIONS = [
   { value: 'pizza-oven', label: 'form.culinaryInfo.equipment.pizzaOven' },
 ]
 
-export function CulinaryInfoSection({ control, errors, isPro }: CulinaryInfoSectionProps) {
+export function CulinaryInfoSection({ control, errors, isPro, theme }: CulinaryInfoSectionProps) {
   const t = useTranslations()
-  const { theme } = useTheme()
 
   const getTranslatedOptions = (options: Array<{ value: string; label: string }>) => {
     return options.map((option) => ({

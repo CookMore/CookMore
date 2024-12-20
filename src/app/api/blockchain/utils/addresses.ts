@@ -12,8 +12,6 @@ export const TESTNET_ADDRESSES = {
 
   // Membership Tokens
   TIER_CONTRACT: '0x947b40801581E896C29dD73f9C7f5dd710877b64' as Address,
-  PRO_NFT: '0xa859Ca4cF5Fc201E710C1A8Dc8540beaa9878C02' as Address,
-  GROUP_NFT: '0x6c927C8F1661460c5f3adDcd26d7698910077492' as Address,
 
   // System Contracts
   ACCESS_CONTROL: '0x771ea79cA72E32E693E38A91091fECD42ef351B8' as Address,
@@ -34,8 +32,6 @@ export const MAINNET_ADDRESSES = {
 
   // Membership Tokens
   TIER_CONTRACT: '' as Address,
-  PRO_NFT: '' as Address,
-  GROUP_NFT: '' as Address,
 
   // System Contracts
   ACCESS_CONTROL: '' as Address,

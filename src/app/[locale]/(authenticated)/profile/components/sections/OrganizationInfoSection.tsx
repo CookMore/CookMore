@@ -9,16 +9,17 @@ import { FormSection } from '@/app/api/form/FormSection'
 import { IconBuilding } from '@/app/api/icons'
 
 // Type imports
-import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface OrganizationInfoSectionProps {
-  control: Control<GroupProfileMetadata>
-  errors: FieldErrors<GroupProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme?: string
 }
 
-export function OrganizationInfoSection({ control, errors }: OrganizationInfoSectionProps) {
+export function OrganizationInfoSection({ control, errors, theme }: OrganizationInfoSectionProps) {
   return (
-    <FormSection icon={IconBuilding} title='Organization Information'>
+    <FormSection icon={IconBuilding} title='Organization Information' theme={theme}>
       <div className='space-y-6'>
         <FormInput
           control={control}

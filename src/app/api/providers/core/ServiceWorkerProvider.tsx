@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { register } from '@/app/pwa/serviceWorkerRegistration'
+import { register } from '@/pwa/serviceWorkerRegistration'
 
 export function ServiceWorkerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {

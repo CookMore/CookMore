@@ -5,11 +5,12 @@ import { FormSection } from '@/app/api/form/FormSection'
 import { FormArrayField } from '@/app/api/form/FormArrayField'
 import { FormInput } from '@/app/api/form/FormInput'
 import { IconLink } from '@/app/api/icons'
-import type { FreeProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface SocialLinksSectionProps {
-  control: Control<FreeProfileMetadata>
-  errors: FieldErrors<FreeProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
+  theme?: string
 }
 
 const isValidUrl = (url: string) => {
@@ -21,7 +22,7 @@ const isValidUrl = (url: string) => {
   }
 }
 
-export function SocialLinksSection({ control, errors }: SocialLinksSectionProps) {
+export function SocialLinksSection({ control, errors, theme }: SocialLinksSectionProps) {
   return (
     <FormSection icon={IconLink} title='Social Links'>
       <div className='space-y-6'>

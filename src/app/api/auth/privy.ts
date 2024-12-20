@@ -15,12 +15,29 @@ export async function getPrivyUser() {
     const headersList = await headers()
     const authHeader = await headersList.get('authorization')
 
+    console.log('getPrivyUser headers:', {
+      hasAuthHeader: !!authHeader,
+      authHeaderStart: authHeader?.substring(0, 20),
+      allHeaders: Object.fromEntries(headersList.entries()),
+    })
+
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('No Bearer token found in authorization header')
       return null
     }
 
     const token = authHeader.split(' ')[1]
+    console.log('Verifying token:', {
+      tokenLength: token?.length,
+      tokenStart: token?.substring(0, 20),
+    })
+
     const verifiedUser = await privyClient.verifyAuthToken(token)
+    console.log('User verified:', {
+      hasUser: !!verifiedUser,
+      userId: verifiedUser?.sub,
+      hasWallet: !!verifiedUser?.wallet,
+    })
 
     return verifiedUser
   } catch (error) {

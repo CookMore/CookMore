@@ -238,10 +238,10 @@
   --border-default: #000000;
   --border-muted: #000000;
   --border-subtle: #000000;
-  --neo-border-width: 6px;
-  --neo-shadow: 12px 12px 0px rgba(0, 0, 0, 1);
-  --neo-hover-shadow: 16px 16px 0px rgba(0, 0, 0, 1);
-  --neo-active-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  --neo-border-width: 3px;
+  --neo-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+  --neo-hover-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+  --neo-active-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
 
   /* Transition settings */
   --neo-transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -488,4 +488,40 @@
 .steel-shine::after {
   --shine-gradient: var(--steel-shine);
   opacity: 0.5;
+}
+
+/* Neo-brutalism theme styles */
+[data-theme='neo'] {
+  --neo-border-width: 3px;
+  --neo-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+  --neo-hover-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+  --neo-active-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+@layer components {
+  /* Neo-brutalism components */
+  .neo-container {
+    @apply border-[3px] border-black bg-white shadow-[6px_6px_0px_rgba(0,0,0,1)] 
+           hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] 
+           active:shadow-[2px_2px_0px_rgba(0,0,0,1)]
+           transition-all duration-200;
+  }
+
+  .neo-input {
+    @apply border-[3px] border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]
+           hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]
+           focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]
+           transition-all duration-200;
+  }
+
+  .neo-button {
+    @apply border-[3px] border-black bg-white shadow-[6px_6px_0px_rgba(0,0,0,1)]
+           hover:shadow-[8px_8px_0px_rgba(0,0,0,1)]
+           active:shadow-[2px_2px_0px_rgba(0,0,0,1)]
+           hover:-translate-y-1 hover:-translate-x-1
+           active:translate-y-1 active:translate-x-1
+           transition-all duration-200;
+  }
+
+  /* ... existing component styles ... */
 }
