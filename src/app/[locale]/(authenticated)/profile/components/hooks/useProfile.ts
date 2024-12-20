@@ -6,6 +6,7 @@ import { profileMetadataService } from '../../services/client/metadata.service'
 import { profileCacheService } from '../../services/offline/profile-cache.service'
 import type { Profile, ProfileMetadata } from '../../profile'
 import { ProfileTier } from '../../profile'
+import { usePathname } from 'next/navigation'
 
 export interface UseProfileResult {
   // Profile data
@@ -33,6 +34,38 @@ export interface UseProfileResult {
 }
 
 export function useProfile(address?: string): UseProfileResult {
+  const pathname = usePathname()
+  const isCreatingProfile = pathname?.includes('/profile/create')
+
+  // If we're creating a profile, provide a minimal implementation
+  if (isCreatingProfile) {
+    return {
+      profile: null,
+      hasProfile: false,
+      isLoading: false,
+      error: null,
+      createProfile: async (metadata: ProfileMetadata) => {
+        const result = await profileClientService.createProfile(metadata)
+        return result.hash
+      },
+      updateProfile: async () => '',
+      deleteProfile: async () => {},
+      currentTier: ProfileTier.FREE,
+      tiersLoading: false,
+      hasPro: false,
+      hasGroup: false,
+      hasOG: false,
+      refreshProfile: async () => {},
+      validateMetadata: async (metadata: ProfileMetadata) => {
+        const result = await profileMetadataService.validateMetadata(metadata)
+        return result !== null && result !== undefined
+      },
+      clearCache: async () => {
+        await profileCacheService.clearCache()
+      },
+    }
+  }
+
   const {
     profile: edgeProfile,
     isLoading: edgeLoading,

@@ -28,10 +28,10 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
       headers: Object.fromEntries(request.headers.entries()),
     })
 
-    // If not authenticated, redirect to home
+    // If not authenticated, redirect to home with locale
     if (!isAuthenticated) {
       console.log('Not authenticated, redirecting to home')
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL(`/${currentLocale}`, request.url))
     }
 
     // For authenticated users without profiles
@@ -39,20 +39,20 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
       const pathWithoutLocale = path.replace(new RegExp(`^/${currentLocale}`), '')
       if (pathWithoutLocale !== '/profile/create') {
         console.log('User authenticated but no profile, redirecting to profile creation')
-        return NextResponse.redirect(new URL('/profile/create', request.url))
+        return NextResponse.redirect(new URL(`/${currentLocale}/profile/create`, request.url))
       }
     }
 
     // For authenticated users with profiles trying to access profile creation
     if (hasProfile && path.endsWith('/profile/create')) {
       console.log('User already has profile, redirecting to profile page')
-      return NextResponse.redirect(new URL('/profile', request.url))
+      return NextResponse.redirect(new URL(`/${currentLocale}/profile`, request.url))
     }
 
     // Admin check if needed
     if (options.requireAdmin && cookieStore.get('IS_ADMIN')?.value !== 'true') {
       console.log('Admin access denied, redirecting to home')
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL(`/${currentLocale}`, request.url))
     }
 
     const response = NextResponse.next()
@@ -69,6 +69,6 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
     return response
   } catch (error) {
     console.error('Auth middleware error:', error)
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL(`/${currentLocale}`, request.url))
   }
 }

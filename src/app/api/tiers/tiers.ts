@@ -1,6 +1,69 @@
 import { IconChefHat, IconStar, IconBuilding, IconCrown } from '@/app/api/icons'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+import { createPublicClient, http } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
+import { getServerContract } from '@/app/api/blockchain/server/getContracts'
+import { CONTRACTS } from '@/app/api/blockchain/config/contracts'
+import type { Address } from 'viem'
 
+// Create public clients for both networks
+const publicClients = {
+  testnet: createPublicClient({
+    chain: baseSepolia,
+    transport: http(),
+  }),
+  mainnet: createPublicClient({
+    chain: base,
+    transport: http(),
+  }),
+}
+
+// Get the appropriate client based on environment
+const getPublicClient = () => {
+  return process.env.NEXT_PUBLIC_NETWORK_ENV === 'mainnet'
+    ? publicClients.mainnet
+    : publicClients.testnet
+}
+
+// Define the minimal ERC721 functions we need
+const minimalERC721ABI = [
+  {
+    inputs: [{ name: 'owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'tokenId', type: 'uint256' }],
+    name: 'tokenTier',
+    outputs: [{ name: '', type: 'string' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'index', type: 'uint256' },
+    ],
+    name: 'tokenOfOwnerByIndex',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'from', type: 'address' },
+      { indexed: true, name: 'to', type: 'address' },
+      { indexed: true, name: 'tokenId', type: 'uint256' },
+    ],
+    name: 'Transfer',
+    type: 'event',
+  },
+] as const
+
+// Export tier information
 export const tierInfo = {
   [ProfileTier.FREE]: {
     title: 'Free',
@@ -112,6 +175,7 @@ export const getIconComponent = (iconType: 'chef' | 'star' | 'building' | 'crown
 
 // Contract addresses
 export const TIER_CONTRACT_ADDRESS = '0x947b40801581E896C29dD73f9C7f5dd710877b64' as const
+
 // Helper to get tier info with styling
 export const getTierInfo = (tier: ProfileTier) => {
   return {
@@ -165,5 +229,115 @@ export const getTierRequirements = (tier: ProfileTier) => {
       }
     default:
       return null
+  }
+}
+
+// Function to get user's tier status
+export async function getTierStatus(address: string) {
+  try {
+    console.log('Checking tier status for address:', address)
+
+    const publicClient = getPublicClient()
+    const contract = await getServerContract({
+      address: CONTRACTS.TIER as Address,
+      abi: minimalERC721ABI,
+    })
+
+    // Get balance first
+    const balance = await publicClient.readContract({
+      ...contract,
+      functionName: 'balanceOf',
+      args: [address as `0x${string}`],
+    })
+
+    console.log('Balance check:', balance.toString())
+
+    if (balance === 0n) {
+      return {
+        hasGroup: false,
+        hasPro: false,
+        hasOG: false,
+        currentTier: ProfileTier.FREE,
+      }
+    }
+
+    // Get all Transfer events to this address
+    const logs = await publicClient.getLogs({
+      address: contract.address,
+      event: {
+        type: 'event',
+        name: 'Transfer',
+        inputs: [
+          { indexed: true, name: 'from', type: 'address' },
+          { indexed: true, name: 'to', type: 'address' },
+          { indexed: true, name: 'tokenId', type: 'uint256' },
+        ],
+      },
+      args: {
+        to: address as `0x${string}`,
+      },
+      fromBlock: 'earliest',
+    })
+
+    console.log('Found transfer events:', logs.length)
+
+    let hasGroup = false
+    let hasPro = false
+    let hasOG = false
+    let currentTier = ProfileTier.FREE
+
+    // Check each token's tier
+    for (const log of logs) {
+      const tokenId = log.args.tokenId
+      try {
+        const tierType = await publicClient.readContract({
+          ...contract,
+          functionName: 'tokenTier',
+          args: [tokenId],
+        })
+
+        console.log(`Token ${tokenId} tier:`, tierType)
+
+        // Update tier flags based on the token tier
+        if (tierType === 'Group') {
+          hasGroup = true
+          if (currentTier < ProfileTier.GROUP) {
+            currentTier = ProfileTier.GROUP
+          }
+        } else if (tierType === 'Pro') {
+          hasPro = true
+          if (currentTier < ProfileTier.PRO) {
+            currentTier = ProfileTier.PRO
+          }
+        } else if (tierType === 'OG') {
+          hasOG = true
+          currentTier = ProfileTier.OG
+        }
+      } catch (error) {
+        console.error(`Error reading tier for token ${tokenId}:`, error)
+      }
+    }
+
+    console.log('Final tier status:', {
+      hasOG,
+      hasGroup,
+      hasPro,
+      currentTier,
+    })
+
+    return {
+      hasGroup,
+      hasPro,
+      hasOG,
+      currentTier,
+    }
+  } catch (error) {
+    console.error('Error getting tier status:', error)
+    return {
+      hasGroup: false,
+      hasPro: false,
+      hasOG: false,
+      currentTier: ProfileTier.FREE,
+    }
   }
 }

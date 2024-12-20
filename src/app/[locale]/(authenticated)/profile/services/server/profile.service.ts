@@ -11,6 +11,7 @@ import { checkRoleAccess } from '../../utils/role-utils'
 import { cookies } from 'next/headers'
 import { COOKIE_NAMES } from '@/app/api/utils/cookies'
 import { publicClient } from '@/app/api/blockchain/config/client'
+import { getTierStatus as getTierStatusFromContract } from '@/app/api/tiers/tiers'
 
 export interface ProfileResponse {
   success: boolean
@@ -25,75 +26,7 @@ export interface ProfileResponse {
 // Helper function to get tier status
 async function getTierStatus(address: string, contract: any): Promise<TierStatus> {
   try {
-    console.log('Checking tier status for address:', address)
-
-    // Get the balance of tokens for this address
-    const balance = (await publicClient
-      .readContract({
-        ...contract,
-        functionName: 'balanceOf',
-        args: [address],
-      })
-      .catch(() => BigInt(0))) as bigint
-
-    console.log('Token balance:', balance.toString())
-
-    if (balance === BigInt(0)) {
-      return { hasGroup: false, hasPro: false, hasOG: false, currentTier: ProfileTier.FREE }
-    }
-
-    // Since we know there are tokens, let's try to get their tiers
-    // We'll try token IDs from 0 to balance*2 to account for any gaps
-    const maxTokenId = Number(balance) * 2
-    const tiers = []
-
-    for (let i = 0; i < maxTokenId; i++) {
-      try {
-        const tier = (await publicClient.readContract({
-          ...contract,
-          functionName: 'tokenTier',
-          args: [BigInt(i)],
-        })) as string
-
-        if (tier) {
-          console.log(`Token ${i} tier:`, tier)
-          tiers.push({ tokenId: BigInt(i), tier })
-        }
-      } catch (error) {
-        // Skip if token doesn't exist or other error
-        continue
-      }
-    }
-
-    console.log('Found tiers:', tiers)
-
-    // Determine highest tier status
-    const hasOG = tiers.some(({ tier }) => tier === 'OG')
-    const hasGroup = tiers.some(({ tier }) => tier === 'Group')
-    const hasPro = tiers.some(({ tier }) => tier === 'Pro')
-
-    // Determine current tier (highest takes precedence)
-    const currentTier = hasOG
-      ? ProfileTier.OG
-      : hasGroup
-        ? ProfileTier.GROUP
-        : hasPro
-          ? ProfileTier.PRO
-          : ProfileTier.FREE
-
-    console.log('Final tier status:', {
-      hasOG,
-      hasGroup,
-      hasPro,
-      currentTier,
-    })
-
-    return {
-      hasGroup,
-      hasPro,
-      hasOG,
-      currentTier,
-    }
+    return await getTierStatusFromContract(address)
   } catch (error) {
     console.error('Error getting tier status:', error)
     return {
