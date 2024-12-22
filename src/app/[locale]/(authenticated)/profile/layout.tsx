@@ -1,7 +1,7 @@
 'use client'
 
 import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
-import { ProfileSidebar } from './components/ui/ProfileSidebar'
+import { ProfileSidebar } from '@/app/[locale]/(authenticated)/profile/components/ui/ProfileSidebar'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'

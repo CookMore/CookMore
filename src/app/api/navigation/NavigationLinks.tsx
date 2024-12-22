@@ -4,42 +4,46 @@ import { Link } from '@/app/api/navigation/Link'
 import { usePathname } from '@/i18n'
 import { ROUTES } from '@/app/api/routes/routes'
 import { cn } from '@/app/api/utils/utils'
-import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
+import { useMemo } from 'react'
 
-interface NavigationLinksProps {
-  authenticated: boolean
-  hasProfile: boolean
-}
-
-export function NavigationLinks({ authenticated, hasProfile }: NavigationLinksProps) {
+export function NavigationLinks() {
   const pathname = usePathname()
-  const { isAdmin } = useAdminCheck()
+  const { isAuthenticated, hasProfile, isAdmin } = useAuth()
 
-  console.log('NavigationLinks Debug:', { authenticated, hasProfile, pathname, isAdmin })
+  // Memoize links to prevent unnecessary re-renders
+  const links = useMemo(() => {
+    // Define authenticated links with proper access control
+    const authenticatedLinks = [
+      { href: ROUTES.AUTH.KITCHEN.HOME, label: 'Kitchen', requiresProfile: true },
+      { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
+      { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
+      { href: ROUTES.AUTH.TIER, label: 'Tier', requiresProfile: true },
+      ...(isAdmin
+        ? [
+            {
+              href: ROUTES.AUTH.ADMIN,
+              label: 'Admin',
+              requiresProfile: false,
+              className: 'text-red-500 hover:text-red-600',
+            },
+          ]
+        : []),
+    ]
 
-  const links = authenticated
-    ? [
-        { href: ROUTES.AUTH.KITCHEN.HOME, label: 'Kitchen' },
-        { href: ROUTES.AUTH.KITCHEN.CLUB, label: 'Club' },
-        { href: ROUTES.AUTH.CALENDAR, label: 'Calendar' },
-        { href: ROUTES.AUTH.EXPLORE, label: 'Explore' },
-        { href: ROUTES.AUTH.TIER, label: 'Tier' },
-        ...(isAdmin
-          ? [
-              {
-                href: ROUTES.AUTH.ADMIN,
-                label: 'Admin',
-                className: 'text-red-500 hover:text-red-600',
-              },
-            ]
-          : []),
-      ]
-    : [
-        { href: ROUTES.MARKETING.FEATURES, label: 'Features' },
-        { href: ROUTES.MARKETING.DISCOVER, label: 'Discover' },
-        { href: ROUTES.MARKETING.PRICING, label: 'Pricing' },
-        { href: ROUTES.MARKETING.CLUB, label: 'Club' },
-      ]
+    // Define marketing links for non-authenticated users
+    const marketingLinks = [
+      { href: ROUTES.MARKETING.HOME, label: 'Home' },
+      { href: ROUTES.MARKETING.FEATURES, label: 'Features' },
+      { href: ROUTES.MARKETING.DISCOVER, label: 'Discover' },
+      { href: ROUTES.MARKETING.PRICING, label: 'Pricing' },
+    ]
+
+    // Return appropriate links based on authentication state
+    return isAuthenticated
+      ? authenticatedLinks.filter((link) => !link.requiresProfile || hasProfile)
+      : marketingLinks
+  }, [isAuthenticated, hasProfile, isAdmin])
 
   return (
     <div className='flex lg:items-center lg:justify-center lg:space-x-1'>

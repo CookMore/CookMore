@@ -1,6 +1,13 @@
 {
   "title": "Profile",
   "createProfile": "Create Profile",
+  "profileCreated": "Profile Created",
+  "redirectingToProfile": "Redirecting to your profile...",
+  "errorCreatingProfile": "Error Creating Profile",
+  "pleaseTryAgain": "Please try again",
+  "creating": "Creating...",
+  "previous": "Previous",
+  "next": "Next",
   "steps": {
     "basic-info": {
       "title": "Basic Information",

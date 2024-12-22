@@ -261,34 +261,69 @@ export async function getTierStatus(address: string) {
       }
     }
 
-    // Get all Transfer events to this address
-    const logs = await publicClient.getLogs({
-      address: contract.address,
-      event: {
-        type: 'event',
-        name: 'Transfer',
-        inputs: [
-          { indexed: true, name: 'from', type: 'address' },
-          { indexed: true, name: 'to', type: 'address' },
-          { indexed: true, name: 'tokenId', type: 'uint256' },
-        ],
-      },
-      args: {
-        to: address as `0x${string}`,
-      },
-      fromBlock: 'earliest',
+    // Get all Transfer events (both in and out)
+    const [transfersIn, transfersOut] = await Promise.all([
+      // Get transfers TO this address
+      publicClient.getLogs({
+        address: contract.address,
+        event: {
+          type: 'event',
+          name: 'Transfer',
+          inputs: [
+            { indexed: true, name: 'from', type: 'address' },
+            { indexed: true, name: 'to', type: 'address' },
+            { indexed: true, name: 'tokenId', type: 'uint256' },
+          ],
+        },
+        args: {
+          to: address as `0x${string}`,
+        },
+        fromBlock: 'earliest',
+      }),
+      // Get transfers FROM this address
+      publicClient.getLogs({
+        address: contract.address,
+        event: {
+          type: 'event',
+          name: 'Transfer',
+          inputs: [
+            { indexed: true, name: 'from', type: 'address' },
+            { indexed: true, name: 'to', type: 'address' },
+            { indexed: true, name: 'tokenId', type: 'uint256' },
+          ],
+        },
+        args: {
+          from: address as `0x${string}`,
+        },
+        fromBlock: 'earliest',
+      }),
+    ])
+
+    console.log('Found transfer events:', {
+      transfersIn: transfersIn.length,
+      transfersOut: transfersOut.length,
     })
 
-    console.log('Found transfer events:', logs.length)
+    // Track currently owned tokens
+    const ownedTokens = new Set<bigint>()
+
+    // Add tokens transferred in
+    transfersIn.forEach((log) => {
+      ownedTokens.add(log.args.tokenId)
+    })
+
+    // Remove tokens transferred out
+    transfersOut.forEach((log) => {
+      ownedTokens.delete(log.args.tokenId)
+    })
 
     let hasGroup = false
     let hasPro = false
     let hasOG = false
     let currentTier = ProfileTier.FREE
 
-    // Check each token's tier
-    for (const log of logs) {
-      const tokenId = log.args.tokenId
+    // Check tier for currently owned tokens
+    for (const tokenId of ownedTokens) {
       try {
         const tierType = await publicClient.readContract({
           ...contract,

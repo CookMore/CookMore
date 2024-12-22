@@ -2,12 +2,13 @@ import { unstable_setRequestLocale } from 'next-intl/server'
 
 interface ProfileCreateLayoutProps {
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export default async function ProfileCreateLayout({ children, params }: ProfileCreateLayoutProps) {
   // Set the locale
-  await unstable_setRequestLocale(params.locale)
+  const { locale } = await params
+  await unstable_setRequestLocale(locale)
 
   return (
     <div className='min-h-screen bg-github-canvas-default'>

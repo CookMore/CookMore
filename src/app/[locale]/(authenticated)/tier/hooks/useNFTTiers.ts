@@ -7,6 +7,7 @@ import { tierABI } from '@/app/api/blockchain/abis/tier'
 import { TIER_CONTRACT_ADDRESS } from '@/app/api/tiers/tiers'
 import { getContract } from 'viem'
 import { serializeBigInt } from '@/app/api/blockchain/utils'
+import { usePrivy } from '@privy-io/react-auth'
 
 // Define the minimal ERC721 functions we need
 const minimalERC721ABI = [
@@ -34,6 +35,7 @@ const combinedABI = [...tierABI, ...minimalERC721ABI] as const
 
 export function useNFTTiers() {
   const { address, isConnected } = useAccount()
+  const { user } = usePrivy()
   const [mounted, setMounted] = useState(false)
   const [tierState, setTierState] = useState({
     hasGroup: false,
@@ -76,10 +78,51 @@ export function useNFTTiers() {
       mounted && isConnected && !!address && isContractConfigured && !!contractData?.[1].result,
   })
 
+  // Effect to check API tier status
+  useEffect(() => {
+    const checkApiTierStatus = async () => {
+      if (!mounted || !user?.wallet?.address) {
+        setTierState((prev) => ({ ...prev, isLoading: false }))
+        return
+      }
+
+      try {
+        const timestamp = Date.now()
+        const response = await fetch(`/api/profile/address/${user.wallet.address}?t=${timestamp}`, {
+          headers: {
+            'Cache-Control': 'no-cache',
+            Pragma: 'no-cache',
+          },
+        })
+
+        if (!response.ok) {
+          console.error('API tier check failed:', response.status)
+          return
+        }
+
+        const data = await response.json()
+        const tierStatus = data.tierStatus
+
+        if (tierStatus) {
+          setTierState({
+            hasGroup: tierStatus.hasGroup,
+            hasPro: tierStatus.hasPro,
+            hasOG: tierStatus.hasOG,
+            currentTier: tierStatus.currentTier || ProfileTier.FREE,
+            isLoading: false,
+          })
+        }
+      } catch (error) {
+        console.error('Error checking API tier status:', error)
+      }
+    }
+
+    checkApiTierStatus()
+  }, [mounted, user?.wallet?.address])
+
   // Effect to update tier state based on contract data
   useEffect(() => {
     if (!mounted || !isConnected || !address || !isContractConfigured) {
-      setTierState((prev) => ({ ...prev, isLoading: false }))
       return
     }
 
@@ -87,10 +130,11 @@ export function useNFTTiers() {
     const type = tierType as string | undefined
 
     if (balance && balance > 0n && type) {
-      setTierState({
-        hasGroup: type === 'Group',
-        hasPro: type === 'Pro',
-        hasOG: type === 'OG',
+      setTierState((prev) => ({
+        ...prev,
+        hasGroup: type === 'Group' || prev.hasGroup,
+        hasPro: type === 'Pro' || prev.hasPro,
+        hasOG: type === 'OG' || prev.hasOG,
         currentTier:
           type === 'Group'
             ? ProfileTier.GROUP
@@ -98,17 +142,9 @@ export function useNFTTiers() {
               ? ProfileTier.PRO
               : type === 'OG'
                 ? ProfileTier.OG
-                : ProfileTier.FREE,
+                : prev.currentTier,
         isLoading: false,
-      })
-    } else {
-      setTierState({
-        hasGroup: false,
-        hasPro: false,
-        hasOG: false,
-        currentTier: ProfileTier.FREE,
-        isLoading: false,
-      })
+      }))
     }
   }, [mounted, address, isConnected, contractData, tierType, isContractConfigured])
 

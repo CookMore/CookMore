@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,38 +33,30 @@ import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/pro
 import { usePrivy } from '@privy-io/react-auth'
 
 export function CreateProfileClient() {
-  console.log('Rendering CreateProfileClient')
-  const { user } = usePrivy()
-  const { theme } = useTheme()
+  console.log('4. Starting CreateProfileClient render')
+
+  // Move ALL hooks to the top
   const t = useTranslations('profile')
-  const router = useRouter()
+  const { user } = usePrivy()
+  const { hasGroup, hasPro, hasOG, isLoading } = useNFTTiers()
+  const onComplete = useProfileComplete()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const { hasGroup, hasPro, hasOG, isLoading: tiersLoading } = useNFTTiers()
+  const router = useRouter()
+  const { theme } = useTheme()
 
-  const { handleProfileComplete } = useProfileComplete()
-
-  // Determine user's tier based on NFT holdings
-  const currentTier = hasOG
-    ? ProfileTier.OG
-    : hasGroup
-      ? ProfileTier.GROUP
-      : hasPro
-        ? ProfileTier.PRO
-        : ProfileTier.FREE
-
-  useEffect(() => {
-    console.log('CreateProfileClient mounted', {
-      userAddress: user?.wallet?.address,
-      currentTier,
-      hasOG,
-      hasGroup,
-      hasPro,
-    })
-  }, [user, currentTier, hasOG, hasGroup, hasPro])
+  // Calculate current tier
+  const currentTier = useMemo(() => {
+    if (hasOG) return ProfileTier.OG
+    if (hasGroup) return ProfileTier.GROUP
+    if (hasPro) return ProfileTier.PRO
+    return ProfileTier.FREE
+  }, [hasOG, hasGroup, hasPro])
 
   // Get steps based on tier
-  const availableSteps = getStepsForTier(currentTier)
+  const availableSteps = useMemo(() => {
+    return getStepsForTier(currentTier)
+  }, [currentTier])
 
   // Get validation schema based on tier
   const validationSchema = getTierValidation(currentTier)
@@ -146,11 +138,37 @@ export function CreateProfileClient() {
     formState: { errors, isValid },
   } = methods
 
+  console.log('4a. User from Privy:', user?.id)
+  console.log('5. Tier status:', { hasGroup, hasPro, hasOG, isLoading })
+  console.log('6. Current tier:', ProfileTier[currentTier])
+  console.log('7. Available steps:', availableSteps)
+
+  if (isLoading) {
+    console.log('Loading tiers...')
+    return <div>Loading...</div>
+  }
+
+  if (!theme) {
+    console.log('Theme not loaded')
+    return <div>Loading theme...</div>
+  }
+
+  if (!availableSteps || availableSteps.length === 0) {
+    console.log('No steps available')
+    return <div>Error: No steps available for your tier</div>
+  }
+
+  const handleStepChange = (stepIndex: number) => {
+    if (stepIndex >= 0 && stepIndex < availableSteps.length) {
+      setCurrentStep(stepIndex)
+    }
+  }
+
   const onSubmit = async (data: ProfileFormData) => {
     try {
       setIsSubmitting(true)
 
-      const result = await handleProfileComplete(data, currentTier)
+      const result = await onComplete(data, currentTier)
 
       if (result.success) {
         toast.success(t('profileCreated'), {
@@ -170,26 +188,17 @@ export function CreateProfileClient() {
     }
   }
 
-  const handleStepChange = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < availableSteps.length) {
-      setCurrentStep(stepIndex)
-    }
-  }
-
-  if (tiersLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-[60vh]'>
-        <div className='text-github-fg-muted'>{t('loading')}</div>
-      </div>
-    )
-  }
-
   const currentStepData = availableSteps[currentStep]
+
+  if (!currentStepData) {
+    console.log('Current step data not found')
+    return <div>Error: Step not found</div>
+  }
 
   return (
     <div className='container mx-auto px-4 py-8'>
       <h1 className='text-2xl font-bold mb-6'>
-        {t('createProfile')} - {t(`tier${ProfileTier[currentTier]}`)}
+        {t('createProfile')} - {t(`tier.${ProfileTier[currentTier].toLowerCase()}`)}
       </h1>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>

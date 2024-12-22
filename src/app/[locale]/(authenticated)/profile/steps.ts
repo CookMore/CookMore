@@ -116,20 +116,46 @@ export const steps: Step[] = [
 ]
 
 // Helper function to get steps for a specific tier
-export function getStepsForTier(tier: ProfileTier): Step[] {
-  // Filter steps based on tier
-  return steps.filter((step) => {
-    if (tier === ProfileTier.GROUP) {
-      return true // Show all steps except OG
-    }
-    if (tier === ProfileTier.PRO) {
-      return step.tier !== ProfileTier.GROUP && step.tier !== ProfileTier.OG
-    }
-    if (tier === ProfileTier.OG) {
-      return step.tier !== ProfileTier.GROUP // Show all steps except GROUP
-    }
-    return step.tier === ProfileTier.FREE
+export function getStepsForTier(tier: ProfileTier) {
+  console.log('8. getStepsForTier called with tier:', ProfileTier[tier])
+
+  if (!tier) {
+    console.warn('Warning: No tier provided to getStepsForTier')
+    return []
+  }
+
+  const filteredSteps = steps.filter((step) => {
+    const shouldInclude = (() => {
+      switch (tier) {
+        case ProfileTier.OG:
+          return true
+        case ProfileTier.GROUP:
+          return (
+            step.tier === ProfileTier.FREE ||
+            step.tier === ProfileTier.PRO ||
+            step.tier === ProfileTier.GROUP
+          )
+        case ProfileTier.PRO:
+          return step.tier === ProfileTier.FREE || step.tier === ProfileTier.PRO
+        case ProfileTier.FREE:
+        default:
+          return step.tier === ProfileTier.FREE
+      }
+    })()
+
+    console.log(`Step ${step.id} included:`, shouldInclude)
+    return shouldInclude
   })
+
+  console.log(
+    '9. Filtered steps:',
+    filteredSteps.map((step) => ({
+      id: step.id,
+      tier: ProfileTier[step.tier],
+    }))
+  )
+
+  return filteredSteps
 }
 
 console.log('[Steps] Getting steps for tier:', {
