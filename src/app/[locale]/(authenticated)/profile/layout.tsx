@@ -47,6 +47,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
               tier={tier}
             />
           }
+          isLeftSidebarExpanded={isExpanded}
         >
           {/* Main content area */}
           <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8'>

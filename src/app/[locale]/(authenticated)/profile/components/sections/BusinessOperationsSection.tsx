@@ -53,7 +53,7 @@ export function BusinessOperationsSection({
   errors,
   theme,
 }: BusinessOperationsSectionProps) {
-  const t = useTranslations('profile.businessOperations')
+  const t = useTranslations('businessOperations')
 
   // Apply theme-specific styles
   const sectionClasses = `space-y-6 ${

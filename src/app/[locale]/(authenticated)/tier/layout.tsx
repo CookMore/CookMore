@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { BasePageLayout } from '@/app/api/layouts/BasePageLayout'
+import { HydrationLoader } from '@/app/api/loading/HydrationLoader'
 import { FullPageLayout } from '@/app/api/layouts/FullPage'
 import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
@@ -40,9 +40,9 @@ function TierLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <BasePageLayout>
+    <HydrationLoader>
       <FullPageLayout fullWidth>{children}</FullPageLayout>
-    </BasePageLayout>
+    </HydrationLoader>
   )
 }
 

@@ -1,5 +1,5 @@
-import { PageLayout } from '@/app/api/layouts/PageLayout'
+import { ClientLayout } from '@/app/api/layouts/ClientLayout'
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  return <PageLayout>{children}</PageLayout>
+  return <ClientLayout>{children}</ClientLayout>
 }

@@ -1,21 +1,25 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { IconChevronDown, IconX, IconInfo } from '@/app/api/icons'
 
-export const ProfileSessionWarning: React.FC = () => {
-  const [mounted, setMounted] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(true)
-  const [isVisible, setIsVisible] = useState(true)
-  const [showPopover, setShowPopover] = useState(false)
+interface ProfileSessionWarningProps {
+  isExpanded: boolean
+  isVisible: boolean
+  showPopover: boolean
+  onExpandChange: (expanded: boolean) => void
+  onVisibilityChange: (visible: boolean) => void
+  onPopoverChange: (show: boolean) => void
+}
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Don't render anything until mounted to prevent hydration mismatch
-  if (!mounted) return null
-
+export const ProfileSessionWarning: React.FC<ProfileSessionWarningProps> = ({
+  isExpanded,
+  isVisible,
+  showPopover,
+  onExpandChange,
+  onVisibilityChange,
+  onPopoverChange,
+}) => {
   if (!isVisible) return null
 
   return (
@@ -24,7 +28,7 @@ export const ProfileSessionWarning: React.FC = () => {
         <div className='md:flex-1 md:text-center'>
           <h2 className='text-xs md:text-base font-semibold text-github-attention-fg flex justify-between items-center w-full'>
             <span className='flex-1 text-center'>Profile Creation Notice</span>
-            <button onClick={() => setIsExpanded(false)} className='ml-2 flex-shrink-0'>
+            <button onClick={() => onExpandChange(false)} className='ml-2 flex-shrink-0'>
               <IconChevronDown className='w-4 h-4 text-github-attention-fg' />
             </button>
           </h2>
@@ -35,7 +39,7 @@ export const ProfileSessionWarning: React.FC = () => {
             profile.
           </p>
           <button
-            onClick={() => setShowPopover(!showPopover)}
+            onClick={() => onPopoverChange(!showPopover)}
             className='text-github-accent-emphasis mt-2 md:mt-0 inline-block md:ml-4'
           >
             Learn More
@@ -72,7 +76,7 @@ export const ProfileSessionWarning: React.FC = () => {
                   Learn about Base
                 </a>
               </div>
-              <button onClick={() => setShowPopover(false)} className='text-blue-500 mt-4'>
+              <button onClick={() => onPopoverChange(false)} className='text-blue-500 mt-4'>
                 Close
               </button>
             </div>
@@ -84,10 +88,10 @@ export const ProfileSessionWarning: React.FC = () => {
             Profile Creation Notice
           </h2>
           <div className='flex items-center'>
-            <button onClick={() => setIsExpanded(true)} className='ml-2'>
+            <button onClick={() => onExpandChange(true)} className='ml-2'>
               <IconChevronDown className='w-4 h-4 text-github-attention-fg transform rotate-180' />
             </button>
-            <button onClick={() => setIsVisible(false)} className='ml-2'>
+            <button onClick={() => onVisibilityChange(false)} className='ml-2'>
               <IconX className='w-4 h-4 text-github-attention-fg' />
             </button>
           </div>

@@ -141,14 +141,16 @@
     "mintError": "Error checking tier status",
     "free": "Free",
     "pro": "Pro",
-<<<<<<< HEAD
-    "group": "Group"
+    "group": "Group",
+    "og": "OG"
   },
   "certifications": {
     "title": "Certifications",
     "description": "Professional Certifications",
     "add": "Add Certification",
     "remove": "Remove",
+    "label": "Certifications",
+    "addButton": "Add New Certification",
     "institution": {
       "label": "Institution",
       "placeholder": "Enter institution name"
@@ -169,9 +171,41 @@
       "label": "Description",
       "placeholder": "Describe your certification"
     }
-=======
-    "group": "Group",
-    "og": "OG"
->>>>>>> main
+  },
+  "businessOperations": {
+    "title": "Business Operations",
+    "description": "Manage your business operations",
+    "operatingHours": {
+      "label": "Operating Hours",
+      "placeholder": "Enter your operating hours",
+      "invalid": "Invalid operating hours"
+    },
+    "serviceTypes": {
+      "label": "Service Types",
+      "placeholder": "Select service types",
+      "invalid": "Invalid service types"
+    },
+    "deliveryRadius": {
+      "label": "Delivery Radius",
+      "placeholder": "Enter delivery radius",
+      "invalid": "Invalid delivery radius"
+    },
+    "seasonalMenu": {
+      "label": "Seasonal Menu",
+      "description": "Do you offer seasonal menu options?"
+    },
+    "capacity": {
+      "title": "Capacity Information",
+      "seating": {
+        "label": "Seating Capacity",
+        "placeholder": "Enter seating capacity",
+        "invalid": "Invalid seating capacity"
+      },
+      "eventSpace": {
+        "label": "Event Space Capacity",
+        "placeholder": "Enter event space capacity",
+        "invalid": "Invalid event space capacity"
+      }
+    }
   }
 }

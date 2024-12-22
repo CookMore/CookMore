@@ -3,10 +3,9 @@
 import { cn } from '@/app/api/utils/utils'
 import { IconChevronLeft, IconLock } from '@/app/api/icons'
 import { type Step } from '@/app/[locale]/(authenticated)/profile/steps'
-import { type Dispatch, type SetStateAction, useEffect, useState, useCallback } from 'react'
+import { type Dispatch, type SetStateAction, useCallback, useState, useEffect } from 'react'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
-import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { useTranslations } from 'next-intl'
 
@@ -51,6 +50,27 @@ interface ProfileSidebarProps {
   tier: ProfileTier
 }
 
+// Add skeleton component
+function StepSkeleton({ isExpanded }: { isExpanded: boolean }) {
+  return (
+    <div
+      className={cn(
+        'flex w-full items-center rounded-lg p-3 text-left border',
+        isExpanded ? 'space-x-3' : 'justify-center',
+        'bg-github-canvas-subtle border-github-border-default animate-pulse'
+      )}
+    >
+      <div className='h-5 w-5 rounded-full bg-github-border-default' />
+      {isExpanded && (
+        <div className='min-w-0 flex-1 space-y-2'>
+          <div className='h-4 w-24 bg-github-border-default rounded' />
+          <div className='h-3 w-32 bg-github-border-default rounded opacity-70' />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function ProfileSidebar({
   steps,
   currentStep,
@@ -62,18 +82,22 @@ export function ProfileSidebar({
   const t = useTranslations('profile')
   const { hasGroup, hasPro, hasOG, isLoading: nftLoading } = useNFTTiers()
   const { isLoading: profileLoading } = useProfile()
-  const [mounted, setMounted] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
+
+  // Handle hydration
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
 
   const isLoading = nftLoading || profileLoading
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Determine which steps are accessible based on tier hierarchy
   const canAccessStep = useCallback(
     (step: Step) => {
-      if (!mounted || isLoading) return false
+      if (!hydrated) return false
+
+      // Always allow access to FREE tier steps
+      if (step.tier === ProfileTier.FREE) return true
 
       // OG tier has access to everything
       if (hasOG) return true
@@ -91,28 +115,41 @@ export function ProfileSidebar({
       // Free tier only has access to Free steps
       return step.tier === ProfileTier.FREE
     },
-    [mounted, isLoading, hasOG, hasGroup, hasPro]
+    [hydrated, hasOG, hasGroup, hasPro]
   )
 
-  const handleStepClick = (index: number) => {
-    if (canAccessStep(steps[index])) {
-      setCurrentStep(index)
-    }
+  // Debug logging for hydration and loading states
+  useEffect(() => {
+    console.log('ProfileSidebar states:', {
+      hydrated,
+      nftLoading,
+      profileLoading,
+      hasGroup,
+      hasPro,
+      hasOG,
+      tier,
+    })
+  }, [hydrated, nftLoading, profileLoading, hasGroup, hasPro, hasOG, tier])
+
+  // Don't render anything until hydrated
+  if (!hydrated) {
+    return null
   }
 
-  if (!mounted) return null
+  const sidebarBaseClasses = cn(
+    'fixed left-0 top-16 bottom-0',
+    'flex flex-col border-r border-github-border-default',
+    'bg-github-canvas-default',
+    'transition-all duration-300 ease-in-out',
+    'z-[100]',
+    isExpanded ? 'w-[280px]' : 'w-[48px]'
+  )
 
-  const tierColors = tierColorMap[tier]
-
-  return (
-    <div className='relative isolate'>
-      <div
-        className={cn(
-          'flex h-full flex-col border-r border-github-border-default bg-github-canvas-default transition-all duration-200',
-          isExpanded ? 'w-64' : 'w-16'
-        )}
-      >
-        <div className='flex items-center justify-center border-b border-github-border-default py-5 px-4'>
+  // Show skeleton while loading tier information
+  if (isLoading) {
+    return (
+      <div className={sidebarBaseClasses}>
+        <div className='flex items-center justify-between border-b border-github-border-default py-5 px-4'>
           <h2
             className={cn(
               'text-base font-bold text-github-fg-default transition-opacity text-center flex-1 mt-1',
@@ -121,10 +158,94 @@ export function ProfileSidebar({
           >
             {t('navigation')}
           </h2>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={cn(
+              'flex items-center justify-center',
+              'w-8 h-8 rounded-full',
+              'bg-github-canvas-default',
+              'border-2 border-github-border-default',
+              'hover:bg-github-canvas-subtle transition-colors duration-200',
+              'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:ring-offset-2',
+              'shadow-[0_2px_4px_rgba(0,0,0,0.1)]',
+              'absolute right-0 translate-x-1/2',
+              'z-[101]',
+              'cursor-pointer'
+            )}
+            aria-label={isExpanded ? 'Retract sidebar' : 'Expand sidebar'}
+          >
+            <IconChevronLeft
+              className={cn(
+                'h-5 w-5 text-github-fg-default',
+                'transition-transform duration-200',
+                !isExpanded && 'rotate-180'
+              )}
+            />
+          </button>
         </div>
+        <nav className='flex-1 space-y-2 p-2 overflow-y-auto'>
+          {[...Array(5)].map((_, i) => (
+            <StepSkeleton key={i} isExpanded={isExpanded} />
+          ))}
+        </nav>
+      </div>
+    )
+  }
 
-        <nav className='flex-1 space-y-2 p-2'>
-          {steps.map((step, index) => {
+  const handleStepClick = (index: number) => {
+    if (canAccessStep(steps[index])) {
+      setCurrentStep(index)
+    }
+  }
+
+  return (
+    <div className={sidebarBaseClasses}>
+      <div className='flex items-center justify-between border-b border-github-border-default py-5 px-4'>
+        <h2
+          className={cn(
+            'text-base font-bold text-github-fg-default transition-opacity text-center flex-1 mt-1',
+            !isExpanded && 'opacity-0'
+          )}
+        >
+          {t('navigation')}
+        </h2>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={cn(
+            'flex items-center justify-center',
+            'w-8 h-8 rounded-full',
+            'bg-github-canvas-default',
+            'border-2 border-github-border-default',
+            'hover:bg-github-canvas-subtle transition-colors duration-200',
+            'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:ring-offset-2',
+            'shadow-[0_2px_4px_rgba(0,0,0,0.1)]',
+            'absolute right-0 translate-x-1/2',
+            'z-[101]',
+            'cursor-pointer'
+          )}
+          aria-label={isExpanded ? 'Retract sidebar' : 'Expand sidebar'}
+        >
+          <IconChevronLeft
+            className={cn(
+              'h-5 w-5 text-github-fg-default',
+              'transition-transform duration-200',
+              !isExpanded && 'rotate-180'
+            )}
+          />
+        </button>
+      </div>
+
+      <nav className='flex-1 space-y-2 p-2 overflow-y-auto'>
+        {isLoading ? (
+          // Show skeletons while loading
+          <>
+            {[...Array(5)].map((_, i) => (
+              <StepSkeleton key={i} isExpanded={isExpanded} />
+            ))}
+          </>
+        ) : (
+          // Show actual steps when loaded
+          steps.map((step, index) => {
             const isAccessible = canAccessStep(step)
             const isActive = currentStep === index
             const stepTierColors = tierColorMap[step.tier]
@@ -135,7 +256,8 @@ export function ProfileSidebar({
                 onClick={() => handleStepClick(index)}
                 disabled={!isAccessible}
                 className={cn(
-                  'flex w-full items-center space-x-3 rounded-lg p-3 text-left transition-all duration-200 border',
+                  'flex w-full items-center rounded-lg p-3 text-left transition-all duration-200 border',
+                  isExpanded ? 'space-x-3' : 'justify-center',
                   isActive
                     ? stepTierColors.active
                     : cn(
@@ -180,39 +302,9 @@ export function ProfileSidebar({
                 )}
               </button>
             )
-          })}
-        </nav>
-
-        {isLoading && (
-          <div className='absolute inset-0 flex items-center justify-center bg-github-canvas-default/50'>
-            <LoadingSpinner />
-          </div>
+          })
         )}
-      </div>
-
-      {/* Always visible retraction toggle */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={cn(
-          'absolute right-2 top-6 z-50',
-          'flex items-center justify-center',
-          'w-8 h-8 rounded-full',
-          'bg-github-canvas-default',
-          'border-2 border-github-border-default',
-          'hover:bg-github-canvas-subtle transition-colors duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-github-accent-emphasis focus:ring-offset-2',
-          'shadow-[0_2px_4px_rgba(0,0,0,0.1)]'
-        )}
-        aria-label={isExpanded ? 'Retract sidebar' : 'Expand sidebar'}
-      >
-        <IconChevronLeft
-          className={cn(
-            'h-5 w-5 text-github-fg-default',
-            'transition-transform duration-200',
-            !isExpanded && 'rotate-180'
-          )}
-        />
-      </button>
+      </nav>
     </div>
   )
 }
