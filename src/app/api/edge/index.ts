@@ -2,4 +2,5 @@ export * from './config'
 export * from './services'
 
 // Re-export service instances
-export { kitchenEdgeService, profileEdgeService } from './services'
+export { kitchenEdgeService } from './services'
+export { ProfileApiService } from './services'

@@ -1,8 +1,8 @@
-import { ProfileService } from './profile-api'
 import { RateLimiter } from './rate-limit'
+import { ProfileApiService } from '@/app/api/edge/services'
 
-export const profileApiService = new ProfileService()
 export const rateLimitService = new RateLimiter()
+export const profileEdgeService = new ProfileApiService()
 
 // Re-export other services
 export * from './kitchen'

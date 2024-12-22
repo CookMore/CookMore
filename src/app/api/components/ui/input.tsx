@@ -7,13 +7,15 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error, ...props }, ref) => {
+  ({ className, error, onChange, value, ...props }, ref) => {
     const { theme } = useTheme()
 
     return (
       <div className='w-full'>
         <input
           ref={ref}
+          value={value}
+          onChange={onChange}
           className={cn(
             'px-4 py-2 w-full transition-all',
             theme === 'neo' && [

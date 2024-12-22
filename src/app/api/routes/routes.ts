@@ -5,7 +5,6 @@ export const ROUTES = {
     FEATURES: '/features',
     DISCOVER: '/discover',
     PRICING: '/pricing',
-    CLUB: '/club',
     EXPLORE: '/discover',
     GET_STARTED: '/pricing',
   },
@@ -14,7 +13,6 @@ export const ROUTES = {
   AUTH: {
     KITCHEN: {
       HOME: '/kitchen',
-      CLUB: '/kitchen/club',
     },
     CALENDAR: '/calendar',
     EXPLORE: '/explore',
@@ -31,7 +29,7 @@ export const ROUTES = {
 // Route protection configurations
 export const routeConfig = {
   // Public routes that don't require auth
-  public: ['/club', '/discover', '/features', '/pricing', '/(marketing)'],
+  public: ['/discover', '/features', '/pricing', '/(marketing)'],
 
   // Routes that require authentication
   protected: ['/(authenticated)'],
@@ -40,7 +38,6 @@ export const routeConfig = {
   requiresProfile: [
     ROUTES.AUTH.KITCHEN.HOME,
     ROUTES.AUTH.EXPLORE,
-    ROUTES.AUTH.KITCHEN.CLUB,
     ROUTES.AUTH.CALENDAR,
     ROUTES.AUTH.TIER,
   ],

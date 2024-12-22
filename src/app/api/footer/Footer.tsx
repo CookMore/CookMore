@@ -7,6 +7,18 @@ import { cn } from '@/app/api/utils/utils'
 export function Footer() {
   const { theme } = useTheme()
 
+  const footerLinks = [
+    {
+      title: 'Product',
+      links: [
+        { href: '/features', label: 'Features' },
+        { href: '/discover', label: 'Discover' },
+        { href: '/pricing', label: 'Pricing' },
+      ],
+    },
+    // ... rest of the footer configuration
+  ]
+
   return (
     <footer
       className={cn(
@@ -88,14 +100,6 @@ export function Footer() {
                   className='text-github-fg-muted hover:text-github-fg-default transition-colors'
                 >
                   Explore Recipes
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href='/club'
-                  className='text-github-fg-muted hover:text-github-fg-default transition-colors'
-                >
-                  Club
                 </Link>
               </li>
             </ul>

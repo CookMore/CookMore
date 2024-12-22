@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { Header } from './Header'
-import { Header as MarketingHeader } from './marketing/Header'
+import { MarketingHeader } from './marketing/Header'
 import { ErrorBoundaryWrapper } from '@/app/api/error/ErrorBoundaryWrapper'
 import { Suspense } from 'react'
 import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'

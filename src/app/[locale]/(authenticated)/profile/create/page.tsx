@@ -1,19 +1,25 @@
 import { unstable_setRequestLocale } from 'next-intl/server'
 import { CreateProfileClient } from './CreateProfileClient'
+import { ProfileStepProvider } from '../ProfileStepContext'
 
 interface CreateProfilePageProps {
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export default async function CreateProfilePage({ params }: CreateProfilePageProps) {
-  // Set the locale first
-  await unstable_setRequestLocale(params.locale)
-
-  console.log('Rendering CreateProfilePage')
-
+  const { locale } = await params
+  await unstable_setRequestLocale(locale)
   return (
-    <div className='w-full'>
+    <ProfileStepProvider>
       <CreateProfileClient />
-    </div>
+    </ProfileStepProvider>
   )
+}
+
+export async function generateMetadata({ params }: CreateProfilePageProps) {
+  const { locale } = await params
+  await unstable_setRequestLocale(locale)
+  return {
+    title: 'Create Profile',
+  }
 }

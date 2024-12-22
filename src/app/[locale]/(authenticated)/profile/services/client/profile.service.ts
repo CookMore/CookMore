@@ -1,8 +1,8 @@
 'use client'
 
-import { profileEdgeService } from '../server/profile.service'
-import { profileCacheService } from '../offline/profile-cache.service'
-import type { ProfileMetadata } from '../../profile'
+import { profileEdgeService } from '@/app/api/edge'
+import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
+import type { ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 
 class ProfileClientService {
   async createProfile(metadata: ProfileMetadata) {

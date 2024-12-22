@@ -1,17 +1,9 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm, FormProvider } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
-import { ROUTES } from '@/app/api/routes/routes'
-import { useProfileComplete } from './actions'
-import { ProfileTier } from '../profile'
-import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
-import { getStepsForTier } from '../steps'
+import { ProfileSessionWarning } from '../components/ui/ProfileSessionWarning'
+import { type ProfileFormData, ProfileTier } from '../profile'
 import {
   BasicInfoSection,
   CulinaryInfoSection,
@@ -28,11 +20,22 @@ import {
   OGNetworkSection,
 } from '../components/sections'
 import { useTheme } from '@/app/api/providers/core/ThemeProvider'
-import { getTierValidation } from '../validations/profile'
-import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
-import { usePrivy } from '@privy-io/react-auth'
+import { useState, Dispatch, SetStateAction } from 'react'
+import { useProfileStep } from '../ProfileStepContext'
+import { useFormContext } from 'react-hook-form'
+import { ProfileSidebar } from '../components/ui/ProfileSidebar'
 
 export function CreateProfileClient() {
+<<<<<<< HEAD
+  const t = useTranslations('profile')
+  const { theme } = useTheme()
+  const {
+    currentStep,
+    setCurrentStep,
+    steps: availableSteps,
+    actualTier: currentTier,
+  } = useProfileStep()
+=======
   console.log('Rendering CreateProfileClient')
   const { user } = usePrivy()
   const { theme } = useTheme()
@@ -140,53 +143,95 @@ export function CreateProfileClient() {
     },
   })
 
+>>>>>>> main
   const {
     control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = methods
+    formState: { errors },
+  } = useFormContext<ProfileFormData>()
 
-  const onSubmit = async (data: ProfileFormData) => {
-    try {
-      setIsSubmitting(true)
-
-      const result = await handleProfileComplete(data, currentTier)
-
-      if (result.success) {
-        toast.success(t('profileCreated'), {
-          description: t('redirectingToProfile'),
-        })
-        router.push(ROUTES.AUTH.PROFILE.HOME)
-      } else {
-        throw new Error(result.error || 'Failed to create profile')
-      }
-    } catch (error) {
-      console.error('Error creating profile:', error)
-      toast.error(t('errorCreatingProfile'), {
-        description: error instanceof Error ? error.message : t('pleaseTryAgain'),
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleStepChange = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < availableSteps.length) {
-      setCurrentStep(stepIndex)
-    }
-  }
-
-  if (tiersLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-[60vh]'>
-        <div className='text-github-fg-muted'>{t('loading')}</div>
-      </div>
-    )
-  }
-
+  const [isExpanded, setIsExpanded] = useState(true)
   const currentStepData = availableSteps[currentStep]
 
+  if (!currentStepData) {
+    return null
+  }
+
+  const renderSection = () => {
+    const commonProps = { theme, control, errors }
+
+    switch (currentStepData.id) {
+      // Basic sections
+      case 'basic-info':
+        return <BasicInfoSection {...commonProps} />
+      case 'culinary-info':
+        return <CulinaryInfoSection {...commonProps} />
+      case 'social-links':
+        return <SocialLinksSection {...commonProps} />
+
+      // Pro sections
+      case 'experience':
+        return <ExperienceSection {...commonProps} />
+      case 'certifications':
+        return <CertificationsSection {...commonProps} />
+      case 'availability':
+        return <AvailabilitySection {...commonProps} />
+
+      // Group sections
+      case 'organization-info':
+        return <OrganizationInfoSection {...commonProps} />
+      case 'business-operations':
+        return <BusinessOperationsSection {...commonProps} />
+      case 'team':
+        return <TeamSection {...commonProps} />
+      case 'compliance':
+        return <ComplianceSection {...commonProps} tier={currentTier as unknown as ProfileTier} />
+
+      // OG sections
+      case 'og-preferences':
+        return <OGPreferencesSection {...commonProps} />
+      case 'og-showcase':
+        return <OGShowcaseSection {...commonProps} />
+      case 'og-network':
+        return <OGNetworkSection {...commonProps} />
+
+      default:
+        return null
+    }
+  }
+
   return (
+<<<<<<< HEAD
+    <div className='w-full'>
+      <DualSidebarLayout
+        mobileHeader={
+          <div className='flex-1'>
+            <h1 className='text-lg font-semibold'>
+              {t('createProfile')} - {t(`tier.${currentTier}`)}
+            </h1>
+          </div>
+        }
+        leftSidebar={
+          <ProfileSidebar
+            steps={availableSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep as Dispatch<SetStateAction<number>>}
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            tier={currentTier as unknown as ProfileTier}
+          />
+        }
+        className='w-full px-2 md:px-4'
+      >
+        <div className='w-full'>
+          <div className='bg-github-canvas-subtle border border-github-border-default rounded-lg p-3'>
+            <ProfileSessionWarning />
+          </div>
+          <div className='space-y-4 mt-4'>
+            <div className='hidden md:block'>
+              <h1 className='text-2xl font-bold text-center'>
+                {t('createProfile')} - {t(`tier.${currentTier.toLowerCase()}`)}
+              </h1>
+=======
     <div className='container mx-auto px-4 py-8'>
       <h1 className='text-2xl font-bold mb-6'>
         {t('profile.createProfile')} - {t(`profile.tier.${ProfileTier[currentTier].toLowerCase()}`)}
@@ -309,10 +354,12 @@ export function CreateProfileClient() {
                   </button>
                 )}
               </div>
+>>>>>>> main
             </div>
-          </DualSidebarLayout>
-        </form>
-      </FormProvider>
+            <div className='space-y-4'>{renderSection()}</div>
+          </div>
+        </div>
+      </DualSidebarLayout>
     </div>
   )
 }
