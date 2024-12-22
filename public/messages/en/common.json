@@ -293,5 +293,14 @@
         "planned": "Planned"
       }
     }
+  },
+  "profile": {
+    "previous": "Previous",
+    "next": "Next",
+    "tierFREE": "Free",
+    "tierPRO": "Pro",
+    "tierGROUP": "Group",
+    "tierOG": "OG",
+    "loading": "Loading"
   }
 }

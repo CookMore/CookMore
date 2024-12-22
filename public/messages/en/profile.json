@@ -113,6 +113,7 @@
     },
     "navigation": {
       "next": "Next",
+      "previous": "Previous",
       "back": "Back",
       "save": "Save Profile",
       "update": "Update Profile"
@@ -140,6 +141,7 @@
     "mintError": "Error checking tier status",
     "free": "Free",
     "pro": "Pro",
+<<<<<<< HEAD
     "group": "Group"
   },
   "certifications": {
@@ -167,5 +169,9 @@
       "label": "Description",
       "placeholder": "Describe your certification"
     }
+=======
+    "group": "Group",
+    "og": "OG"
+>>>>>>> main
   }
 }
