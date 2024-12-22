@@ -38,7 +38,7 @@ export function PanelContainer({ children }: PanelContainerProps) {
 
   if (!mounted) {
     return (
-      <div className='fixed right-0 top-14 h-[calc(100vh-4rem)] w-12 bg-github-canvas-default border-l border-github-border-default'>
+      <div className='fixed right-0 top-16 h-[calc(100vh-4rem)] w-12 bg-github-canvas-default border-l border-github-border-default'>
         <div className='animate-pulse space-y-4 p-4'>
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className='h-8 w-8 bg-github-canvas-subtle rounded-md' />
@@ -51,7 +51,7 @@ export function PanelContainer({ children }: PanelContainerProps) {
   return (
     <div
       className={cn(
-        'fixed right-0 top-14 h-[calc(100vh-4rem)] bg-github-canvas-default border-l border-github-border-default transition-all duration-300 ease-in-out z-[45]',
+        'fixed right-0 top-16 h-[calc(100vh-4rem)] bg-github-canvas-default border-l border-github-border-default transition-all duration-300 ease-in-out z-[45]',
         theme === 'neo' && [
           'neo-border border-r-0',
           'before:absolute before:inset-0 before:bg-github-canvas-default before:-z-10',

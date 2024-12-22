@@ -1,20 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useHydration } from '@/app/api/hooks/useHydration'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 import { cn } from '@/app/api/utils/utils'
 
-interface BasePageLayoutProps {
+interface HydrationLoaderProps {
   children: React.ReactNode
   className?: string
 }
 
-export function BasePageLayout({ children, className }: BasePageLayoutProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+export function HydrationLoader({ children, className }: HydrationLoaderProps) {
+  const mounted = useHydration()
 
   if (!mounted) {
     return (
