@@ -8,7 +8,7 @@ import { Label } from '@/app/api/components/ui/label'
 import { FormField } from '@/app/api/form/form'
 import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useTranslations } from 'next-intl'
-import { type Theme } from '@/app/api/providers/ThemeProvider'
+import { type Theme } from '@/app/api/providers/core/ThemeProvider'
 import { profileSchema } from '@/app/[locale]/(authenticated)/profile/validations/profile'
 import { zodResolver } from '@hookform/resolvers/zod'
 

@@ -4,9 +4,7 @@ import { getProfile } from '@/app/[locale]/(authenticated)/profile/services/serv
 
 export async function GET(request: NextRequest, context: { params: { address: string } }) {
   try {
-    // Await the params to ensure they're properly resolved
-    const { params } = await context
-    const { address } = params
+    const { address } = context.params
 
     if (!address || !address.startsWith('0x')) {
       return NextResponse.json({ error: 'Invalid wallet address' }, { status: 400 })

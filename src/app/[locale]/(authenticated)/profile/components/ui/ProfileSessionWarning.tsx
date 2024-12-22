@@ -1,17 +1,25 @@
 'use client'
 
-import React, { useState } from 'react'
-import { IconChevronDown, IconX, IconInfo } from '@/components/ui/icons'
+import React, { useState, useEffect } from 'react'
+import { IconChevronDown, IconX, IconInfo } from '@/app/api/icons'
 
 export const ProfileSessionWarning: React.FC = () => {
+  const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
   const [isVisible, setIsVisible] = useState(true)
   const [showPopover, setShowPopover] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) return null
+
   if (!isVisible) return null
 
   return (
-    <div className='relative max-w-sm mx-auto my-2 p-2 bg-github-attention-subtle border border-github-attention-muted rounded-md text-center animate-fade-in md:max-w-3xl md:flex md:items-center md:justify-center'>
+    <div className='relative max-w-sm mx-auto p-2 bg-github-attention-subtle border border-github-attention-muted rounded-md text-center animate-fade-in md:max-w-3xl md:flex md:items-center md:justify-center'>
       {isExpanded ? (
         <div className='md:flex-1 md:text-center'>
           <h2 className='text-xs md:text-base font-semibold text-github-attention-fg flex justify-between items-center w-full'>

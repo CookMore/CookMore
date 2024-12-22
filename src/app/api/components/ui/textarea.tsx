@@ -7,15 +7,17 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, error, ...props }, ref) => {
+  ({ className, error, onChange, value, ...props }, ref) => {
     const { theme } = useTheme()
 
     return (
       <div className='w-full'>
         <textarea
           ref={ref}
+          value={value}
+          onChange={onChange}
           className={cn(
-            'px-4 py-2 w-full transition-all min-h-[100px]',
+            'px-4 py-2 w-full transition-all',
             theme === 'neo' && [
               'neo-input',
               'focus:rotate-[0.5deg]',

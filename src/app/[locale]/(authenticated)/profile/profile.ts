@@ -1,15 +1,9 @@
-import type {
-  FreeProfileMetadata,
-  ProProfileMetadata,
-  GroupProfileMetadata,
-  CURRENT_PROFILE_VERSION,
-  ProfileTier,
-} from '@/app/[locale]/(authenticated)/profile/profile'
+// Type for Ethereum addresses
+type Address = `0x${string}`
 
 // Version Control
 export const PROFILE_VERSIONS = ['1.0', '1.1', '1.2'] as const
 export type ProfileVersion = (typeof PROFILE_VERSIONS)[number]
-
 export const CURRENT_PROFILE_VERSION = PROFILE_VERSIONS[PROFILE_VERSIONS.length - 1]
 
 // Profile Tiers
@@ -412,4 +406,64 @@ export interface ProfileVerification {
   hasValidTier: boolean
   hasValidMetadata: boolean
   isVerified: boolean
+}
+
+interface OGExtension {
+  ogBenefits: {
+    // Core OG benefits
+    joinDate: string
+    memberNumber: number
+
+    // Custom branding options
+    customBranding: {
+      primaryColor: string
+      secondaryColor: string
+    }
+
+    // API access for integrations
+    apiAccess: {
+      enabled: boolean
+      key?: string
+      permissions?: string[]
+    }
+  }
+
+  // Showcase their special status/achievements
+  showcase: {
+    featured: boolean
+    highlights: Array<{
+      title: string
+      description: string
+      date: string
+      media?: string
+    }>
+    specialAccess: string[]
+  }
+
+  // Network and collaboration
+  network: {
+    mentorship: {
+      available: boolean
+      specialties: string[]
+      maxMentees?: number
+    }
+    collaborations: Array<{
+      type: string
+      description: string
+      status: 'active' | 'completed' | 'planned'
+    }>
+    events: Array<{
+      name: string
+      date: string
+      type: 'workshop' | 'masterclass' | 'collaboration'
+      capacity: number
+    }>
+  }
+
+  // Verification and status
+  verificationStatus: {
+    verified: boolean
+    verifiedDate?: string
+    verificationLevel: 'basic' | 'advanced' | 'expert'
+  }
 }

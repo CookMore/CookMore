@@ -11,15 +11,17 @@ import {
   IconCrown,
   IconTrophy,
 } from '@/app/api/icons'
-import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+import { ProfileTier } from './profile'
 
 export interface Step {
   id: string
   label: string
   description?: string
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  icon: typeof IconUser
   tier: ProfileTier
 }
+
+export type ProfileStep = Step
 
 export const steps: Step[] = [
   // Free Tier Steps
@@ -117,47 +119,29 @@ export const steps: Step[] = [
 
 // Helper function to get steps for a specific tier
 export function getStepsForTier(tier: ProfileTier) {
-  console.log('8. getStepsForTier called with tier:', ProfileTier[tier])
-
   if (!tier) {
     console.warn('Warning: No tier provided to getStepsForTier')
     return []
   }
 
-  const filteredSteps = steps.filter((step) => {
-    const shouldInclude = (() => {
-      switch (tier) {
-        case ProfileTier.OG:
-          return true
-        case ProfileTier.GROUP:
-          return (
-            step.tier === ProfileTier.FREE ||
-            step.tier === ProfileTier.PRO ||
-            step.tier === ProfileTier.GROUP
-          )
-        case ProfileTier.PRO:
-          return step.tier === ProfileTier.FREE || step.tier === ProfileTier.PRO
-        case ProfileTier.FREE:
-        default:
-          return step.tier === ProfileTier.FREE
-      }
-    })()
-
-    console.log(`Step ${step.id} included:`, shouldInclude)
-    return shouldInclude
+  return steps.filter((step) => {
+    switch (tier) {
+      case ProfileTier.OG:
+        return true
+      case ProfileTier.GROUP:
+        return (
+          step.tier === ProfileTier.FREE ||
+          step.tier === ProfileTier.PRO ||
+          step.tier === ProfileTier.GROUP
+        )
+      case ProfileTier.PRO:
+        return step.tier === ProfileTier.FREE || step.tier === ProfileTier.PRO
+      case ProfileTier.FREE:
+      default:
+        return step.tier === ProfileTier.FREE
+    }
   })
-
-  console.log(
-    '9. Filtered steps:',
-    filteredSteps.map((step) => ({
-      id: step.id,
-      tier: ProfileTier[step.tier],
-    }))
-  )
-
-  return filteredSteps
 }
-
 console.log('[Steps] Getting steps for tier:', {
   FREE: getStepsForTier(ProfileTier.FREE),
   PRO: getStepsForTier(ProfileTier.PRO),

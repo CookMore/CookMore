@@ -8,6 +8,7 @@
   "creating": "Creating...",
   "previous": "Previous",
   "next": "Next",
+  "navigation": "Navigation",
   "steps": {
     "basic-info": {
       "title": "Basic Information",
@@ -24,6 +25,14 @@
     "experience": {
       "title": "Experience",
       "description": "Your professional experience"
+    },
+    "certifications": {
+      "title": "Certifications",
+      "description": "Your professional certifications and credentials"
+    },
+    "business-operations": {
+      "title": "Business Operations",
+      "description": "Your business operations and management details"
     }
   },
   "basicInfo": {
@@ -132,5 +141,31 @@
     "free": "Free",
     "pro": "Pro",
     "group": "Group"
+  },
+  "certifications": {
+    "title": "Certifications",
+    "description": "Professional Certifications",
+    "add": "Add Certification",
+    "remove": "Remove",
+    "institution": {
+      "label": "Institution",
+      "placeholder": "Enter institution name"
+    },
+    "name": {
+      "label": "Certification Name",
+      "placeholder": "Enter certification name"
+    },
+    "date": {
+      "label": "Date Received",
+      "placeholder": "Select date"
+    },
+    "expiry": {
+      "label": "Expiry Date",
+      "placeholder": "Select expiry date"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe your certification"
+    }
   }
 }
