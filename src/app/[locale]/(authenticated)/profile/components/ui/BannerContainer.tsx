@@ -1,15 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { IconCamera } from '@/components/ui/icons'
-import { ImageUploadPopover } from '@/components/ui/ImageUploadPopover'
-import { Tooltip } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { Camera } from 'lucide-react'
+import { ImageUploadPopover } from '@/app/api/components/ui/ImageUploadPopover'
+import { cn } from '@/app/api/utils/utils'
+
+interface Position {
+  x: number
+  y: number
+  scale: number
+}
 
 interface BannerContainerProps {
   imageUrl?: string | null
   onImageSelect: (file: File) => void
-  onImagePositionSet?: (position: { x: number; y: number; scale: number }) => void
+  onImagePositionSet?: (position: Position) => void
   onImageRemove?: () => void
   loading?: boolean
 }
@@ -21,7 +26,7 @@ export function BannerContainer({
   onImageRemove,
   loading = false,
 }: BannerContainerProps) {
-  const [position, setPosition] = useState({ x: 0, y: 0, scale: 1 })
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0, scale: 1 })
 
   const getImageStyle = () => ({
     transform: `translate(${position.x}px, ${position.y}px) scale(${position.scale})`,
@@ -46,7 +51,7 @@ export function BannerContainer({
       onImageSelect={onImageSelect}
       currentImageUrl={imageUrl || undefined}
       onRemove={onImageRemove}
-      onPositionSet={(pos) => {
+      onPositionSet={(pos: Position) => {
         setPosition(pos)
         onImagePositionSet?.(pos)
       }}
@@ -59,8 +64,9 @@ export function BannerContainer({
         className={cn(
           'relative w-full h-48 sm:h-64',
           'group cursor-pointer',
-          'hover:ring-2 hover:ring-github-accent-emphasis',
-          'hover:ring-offset-2 hover:ring-offset-github-canvas-default',
+          'border border-github-border-default',
+          'hover:border-github-accent-emphasis hover:ring-1 hover:ring-github-accent-emphasis',
+          'hover:ring-offset-1 hover:ring-offset-github-canvas-default',
           'transition-all duration-200',
           'bg-github-canvas-subtle',
           'overflow-hidden rounded-lg',
@@ -72,7 +78,7 @@ export function BannerContainer({
             <img src={imageUrl} alt='Banner' className='object-cover' style={getImageStyle()} />
           ) : (
             <div className='flex items-center justify-center w-full h-full'>
-              <IconCamera className='w-8 h-8 text-github-fg-muted' />
+              <Camera className='w-8 h-8 text-github-fg-muted' />
             </div>
           )}
         </div>
@@ -84,7 +90,7 @@ export function BannerContainer({
             className='absolute inset-0 bg-black/50 flex items-center justify-center 
                       opacity-0 group-hover:opacity-100 transition-opacity duration-200'
           >
-            <IconCamera className='w-12 h-12 text-white' />
+            <Camera className='w-12 h-12 text-white' />
           </div>
         )}
       </div>

@@ -9,6 +9,13 @@
   "previous": "Previous",
   "next": "Next",
   "navigation": "Navigation",
+  "localStorageNote": "Changes stored in browser until profile is minted",
+  "autosave": {
+    "saving": "Saving draft locally...",
+    "saved": "Draft saved at {time}",
+    "storageNote": "Changes stored in browser until profile is minted",
+    "error": "Error saving draft"
+  },
   "steps": {
     "basic-info": {
       "title": "Basic Information",
@@ -36,6 +43,8 @@
     }
   },
   "basicInfo": {
+    "title": "Basic Information",
+    "description": "Tell us about yourself and your culinary journey",
     "name": {
       "label": "Name",
       "placeholder": "Enter your name",
@@ -51,11 +60,11 @@
       "label": "Location",
       "placeholder": "Where are you based?"
     },
-    "website": {
-      "label": "Website",
-      "placeholder": "Your website URL"
-    },
     "social": {
+      "website": {
+        "label": "Website",
+        "placeholder": "Your website URL"
+      },
       "twitter": {
         "label": "Twitter",
         "placeholder": "Your Twitter handle"

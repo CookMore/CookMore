@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Control, FieldErrors } from 'react-hook-form'
+import { Control, FieldErrors, useFormContext } from 'react-hook-form'
 import { Input } from '@/app/api/components/ui/input'
 import { FormField } from '@/app/api/form/form'
 import { Label } from '@/app/api/components/ui/label'
@@ -11,12 +11,12 @@ import { FormSwitch } from '@/app/api/form/FormSwitch'
 import { IconGear } from '@/app/api/icons'
 import type { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useTranslations } from 'next-intl'
-import { type Theme } from '@/app/api/providers/ThemeProvider'
+import { type Theme } from '@/app/api/providers/core/ThemeProvider'
 import { groupProfileSchema } from '@/app/[locale]/(authenticated)/profile/validations/profile'
 
 interface BusinessOperationsSectionProps {
-  control: Control<GroupProfileMetadata>
-  errors: FieldErrors<GroupProfileMetadata>
+  control: Control<ProfileFormData>
+  errors: FieldErrors<ProfileFormData>
   theme: Theme
 }
 
@@ -53,7 +53,7 @@ export function BusinessOperationsSection({
   errors,
   theme,
 }: BusinessOperationsSectionProps) {
-  const t = useTranslations('businessOperations')
+  const t = useTranslations('profile.businessOperations')
 
   // Apply theme-specific styles
   const sectionClasses = `space-y-6 ${

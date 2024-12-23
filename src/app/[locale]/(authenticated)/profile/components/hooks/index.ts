@@ -1,4 +1,4 @@
 'use client'
 
-export { useProfile } from './useProfile'
-export type { UseProfileResult } from './useProfile'
+export { useProfile } from './core/useProfile'
+export type { UseProfileResult } from './core/useProfile'

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useRouter } from 'next/navigation'
-import { ROUTES } from '@/lib/routes'
+import { ROUTES } from '@/app/api/routes/routes'
 
 export function useWalletState() {
   const { user, logout } = usePrivy()

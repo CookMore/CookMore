@@ -1,23 +1,35 @@
 'use client'
 
 import { useState } from 'react'
-import { Icons } from '@/components/icons'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
+import { IconEdit } from '@/app/api/icons'
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/api/components/ui/popover'
+import { Button } from '@/app/api/components/ui/button'
 import { toast } from 'sonner'
 
 interface ImageUploadPopoverProps {
   onImageSelect: (file: File) => Promise<void>
   children: React.ReactNode
+  accept?: string
+  maxSize?: number
 }
 
-export function ImageUploadPopover({ onImageSelect, children }: ImageUploadPopoverProps) {
+export function ImageUploadPopover({
+  onImageSelect,
+  children,
+  accept = 'image/*',
+  maxSize = 5 * 1024 * 1024,
+}: ImageUploadPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (maxSize && file.size > maxSize) {
+      toast.error(`File size must be less than ${Math.round(maxSize / 1024 / 1024)}MB`)
+      return
+    }
 
     try {
       setIsUploading(true)
@@ -38,13 +50,13 @@ export function ImageUploadPopover({ onImageSelect, children }: ImageUploadPopov
       <PopoverContent className='w-80'>
         <div className='space-y-4'>
           <div className='flex items-center space-x-2'>
-            <Icons.image className='h-4 w-4' />
+            <IconEdit className='h-4 w-4' />
             <h4 className='font-medium'>Upload Image</h4>
           </div>
           <div className='relative'>
             <input
               type='file'
-              accept='image/*'
+              accept={accept}
               onChange={handleFileChange}
               className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
               disabled={isUploading}

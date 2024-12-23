@@ -24,6 +24,9 @@ import { useState, useEffect } from 'react'
 import { useProfileStep } from '../ProfileStepContext'
 import { useFormContext } from 'react-hook-form'
 import { ProfileSidebar } from '../components/ui/ProfileSidebar'
+import { AutoSaveIndicator } from '../components/ui/AutoSaveIndicator'
+import { useProfileStorage } from '../components/hooks/core/useProfileStorage'
+import { cn } from '@/app/api/utils/utils'
 
 export function CreateProfileClient() {
   const t = useTranslations('profile')
@@ -33,12 +36,19 @@ export function CreateProfileClient() {
     setCurrentStep,
     steps: availableSteps,
     actualTier: currentTier,
+    nextStep,
+    prevStep,
+    isFirstStep,
+    isLastStep,
   } = useProfileStep()
 
   const {
     control,
     formState: { errors },
   } = useFormContext<ProfileFormData>()
+
+  // Storage state
+  const { isSaving, lastSaved } = useProfileStorage()
 
   // Sidebar state
   const [isExpanded, setIsExpanded] = useState(true)
@@ -134,7 +144,36 @@ export function CreateProfileClient() {
               {t('createProfile')} - {t(`tier.${currentTier.toLowerCase()}`)}
             </h1>
             <div className='space-y-4'>{renderSection()}</div>
+            <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
+              <button
+                onClick={prevStep}
+                disabled={isFirstStep}
+                className={cn(
+                  'px-4 py-2 rounded-md border font-medium',
+                  'transition-colors duration-200',
+                  !isFirstStep
+                    ? 'border-github-border-default text-github-fg-default hover:bg-github-canvas-subtle'
+                    : 'border-github-border-muted text-github-fg-muted cursor-not-allowed'
+                )}
+              >
+                {t('previous')}
+              </button>
+              <button
+                onClick={nextStep}
+                disabled={isLastStep}
+                className={cn(
+                  'px-4 py-2 rounded-md font-medium',
+                  'transition-colors duration-200',
+                  !isLastStep
+                    ? 'bg-github-accent-emphasis text-github-fg-onEmphasis hover:bg-github-accent-muted'
+                    : 'bg-github-canvas-subtle text-github-fg-muted cursor-not-allowed'
+                )}
+              >
+                {t('next')}
+              </button>
+            </div>
           </div>
+          <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
         </div>
       </DualSidebarLayout>
     </div>

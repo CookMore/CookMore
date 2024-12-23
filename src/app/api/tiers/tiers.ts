@@ -111,7 +111,7 @@ export const tierInfo = {
   [ProfileTier.OG]: {
     title: 'OG',
     description: 'Limited edition for early adopters',
-    price: '$150 USDC',
+    price: '$500 USDC',
     features: [
       'All Group features',
       'Lifetime platform fee waiver',
@@ -198,35 +198,6 @@ export const getNextTier = (currentTier: ProfileTier): ProfileTier | null => {
       return ProfileTier.GROUP
     case ProfileTier.GROUP:
       return ProfileTier.OG
-    default:
-      return null
-  }
-}
-
-// Helper to get tier requirements
-export const getTierRequirements = (tier: ProfileTier) => {
-  switch (tier) {
-    case ProfileTier.PRO:
-      return {
-        minRecipes: 5,
-        minFollowers: 100,
-        minRating: 4.5,
-      }
-    case ProfileTier.GROUP:
-      return {
-        minRecipes: 20,
-        minFollowers: 1000,
-        minRating: 4.8,
-        requiresVerification: true,
-      }
-    case ProfileTier.OG:
-      return {
-        minRecipes: 50,
-        minFollowers: 5000,
-        minRating: 4.9,
-        requiresVerification: true,
-        requiresInvitation: true,
-      }
     default:
       return null
   }

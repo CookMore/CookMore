@@ -1,234 +1,124 @@
 'use client'
 
-import { useState } from 'react'
-import { IconCamera } from '@/app/api/icons'
-import { DefaultAvatar } from '@/app/api/avatar/DefaultAvatar'
-import { ImageUploadPopover } from '@/app/api/components/ui/ImageUploadPopover'
+import { useCallback, useState } from 'react'
+import Image from 'next/image'
+import { toast } from 'sonner'
 import { cn } from '@/app/api/utils/utils'
+import { ImageUploadPopover } from '@/app/api/components/ui/ImageUploadPopover'
+import type { UploadProgress } from '../hooks/ipfs/useIPFS'
 
 interface AvatarContainerProps {
-  imageUrl?: string | null
-  name?: string
-  size?: 'xs' | 'base' | 'sm' | 'md' | 'lg'
-  shape?: 'circle' | 'square' | 'banner'
-  onImageSelect: (file: File) => void
-  onImagePositionSet?: (position: { x: number; y: number; scale: number }) => void
-  onImageRemove?: () => void
-  label?: string
-  maxSize?: number // in MB
-  isGallery?: boolean // New prop to handle gallery mode
-  showCamera?: boolean // Add this prop
-  loading?: boolean
-  required?: boolean
+  avatarCID?: string
+  onUpload: (file: File) => Promise<string | null>
+  isUploading?: boolean
+  uploadProgress?: UploadProgress | null
+  error?: Error | null
+  className?: string
 }
 
-const sizeClasses = {
-  xs: 'w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20',
-  base: 'w-20 h-20',
-  sm: 'w-24 h-24',
-  md: 'w-32 h-32',
-  lg: 'w-40 h-40',
+interface DefaultAvatarProps {
+  showShadow?: boolean
+}
+
+function DefaultAvatar({ showShadow }: DefaultAvatarProps) {
+  return (
+    <div
+      className={cn(
+        'w-full h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+        showShadow && 'shadow-lg'
+      )}
+    >
+      <span className='text-4xl text-gray-400'>👤</span>
+    </div>
+  )
 }
 
 export function AvatarContainer({
-  imageUrl,
-  name,
-  size = 'md',
-  shape = 'circle',
-  onImageSelect,
-  onImagePositionSet,
-  onImageRemove,
-  label,
-  maxSize = 5,
-  isGallery = false,
-  showCamera = false,
-  loading = false,
-  required = false,
+  avatarCID,
+  onUpload,
+  isUploading,
+  uploadProgress,
+  error,
+  className,
 }: AvatarContainerProps) {
-  const [position, setPosition] = useState({ x: 0, y: 0, scale: 1 })
-  const [galleryImages, setGalleryImages] = useState<(string | null)[]>([null, null, null])
-  const [galleryPositions, setGalleryPositions] = useState([
-    { x: 0, y: 0, scale: 1 },
-    { x: 0, y: 0, scale: 1 },
-    { x: 0, y: 0, scale: 1 },
-  ])
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  const getImageStyle = () => ({
-    transform: `translate(${position.x}px, ${position.y}px) scale(${position.scale})`,
-    width: '200%',
-    height: '200%',
-    maxWidth: 'none',
-    position: 'absolute' as const,
-    left: '-50%',
-    top: '-50%',
-    transformOrigin: 'center center',
-  })
+  const handleFileSelect = useCallback(
+    async (file: File) => {
+      try {
+        // Create preview URL
+        const preview = URL.createObjectURL(file)
+        setPreviewUrl(preview)
 
-  const handleGalleryImageSelect = (index: number, file: File) => {
-    const url = URL.createObjectURL(file)
-    const newImages = [...galleryImages]
-    newImages[index] = url
-    setGalleryImages(newImages)
-    console.log(`Gallery image ${index + 1} selected:`, url)
-  }
+        // Upload file
+        const cid = await onUpload(file)
 
-  const handleGalleryPositionSet = (
-    index: number,
-    newPosition: { x: number; y: number; scale: number }
-  ) => {
-    const newPositions = [...galleryPositions]
-    newPositions[index] = newPosition
-    setGalleryPositions(newPositions)
-    console.log(`Gallery image ${index + 1} position set:`, newPosition)
-  }
+        if (!cid) {
+          // If upload failed, remove preview
+          URL.revokeObjectURL(preview)
+          setPreviewUrl(null)
+        }
+      } catch (err) {
+        // Clean up preview on error
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl)
+          setPreviewUrl(null)
+        }
 
-  // Add loading overlay
-  const LoadingOverlay = () => (
-    <div className='absolute inset-0 bg-github-canvas-default/80 flex items-center justify-center'>
-      <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-github-accent-emphasis' />
-    </div>
+        if (err instanceof Error) {
+          toast.error(err.message)
+        } else {
+          toast.error('Failed to upload avatar')
+        }
+      }
+    },
+    [onUpload, previewUrl]
   )
 
-  if (isGallery) {
-    return (
-      <div className='grid grid-cols-3 gap-2'>
-        {[0, 1, 2].map((index) => (
-          <div key={index} className='flex flex-col items-center space-y-1'>
-            <ImageUploadPopover
-              onImageSelect={(file) => handleGalleryImageSelect(index, file)}
-              currentImageUrl={galleryImages[index] || undefined}
-              onRemove={() => {
-                const newImages = [...galleryImages]
-                newImages[index] = null
-                setGalleryImages(newImages)
-              }}
-              onPositionSet={(pos) => handleGalleryPositionSet(index, pos)}
-              position={galleryPositions[index]}
-              shape='square'
-              maxSize={maxSize}
-            >
-              <div
-                className={`
-                  relative ${sizeClasses['xs']}
-                  group cursor-pointer
-                  hover:ring-2 hover:ring-github-accent-emphasis
-                  hover:ring-offset-2 hover:ring-offset-github-canvas-default
-                  transition-all duration-200
-                  bg-github-canvas-subtle
-                  overflow-hidden
-                  rounded-lg
-                `}
-              >
-                <div className='relative w-full h-full overflow-hidden'>
-                  {galleryImages[index] ? (
-                    <img
-                      src={galleryImages[index]!}
-                      alt={`Gallery ${index + 1}`}
-                      className='object-cover'
-                      style={{
-                        transform: `translate(${galleryPositions[index].x}px, ${galleryPositions[index].y}px) scale(${galleryPositions[index].scale})`,
-                        width: '200%',
-                        height: '200%',
-                        maxWidth: 'none',
-                        position: 'absolute',
-                        left: '-50%',
-                        top: '-50%',
-                        transformOrigin: 'center center',
-                      }}
-                    />
-                  ) : (
-                    <DefaultAvatar
-                      name={`Gallery ${index + 1}`}
-                      className='w-full h-full rounded-lg'
-                    />
-                  )}
-                </div>
-
-                <div
-                  className='absolute inset-0 bg-black/50 flex items-center justify-center 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-200'
-                >
-                  <IconCamera className='w-8 h-8 text-white' />
-                </div>
-              </div>
-            </ImageUploadPopover>
-            <span className='text-[10px] sm:text-xs text-github-fg-muted'>Image {index + 1}</span>
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  // Original single avatar code
   return (
-    <div className='space-y-2'>
+    <div className={cn('relative w-32 h-32', className)}>
       <ImageUploadPopover
-        onImageSelect={onImageSelect}
-        currentImageUrl={imageUrl || undefined}
-        onRemove={onImageRemove}
-        onPositionSet={(pos) => {
-          setPosition(pos)
-          onImagePositionSet?.(pos)
-        }}
-        position={position}
-        shape={shape}
-        maxSize={maxSize}
-        disabled={loading}
+        onImageSelect={handleFileSelect}
+        accept='image/*'
+        maxSize={5 * 1024 * 1024} // 5MB
       >
-        <div
-          className={cn(
-            'relative',
-            sizeClasses[size],
-            'group cursor-pointer',
-            'hover:ring-2 hover:ring-github-accent-emphasis',
-            'hover:ring-offset-2 hover:ring-offset-github-canvas-default',
-            'transition-all duration-200',
-            'bg-github-canvas-subtle',
-            'overflow-hidden',
-            shape === 'circle' ? 'rounded-full' : 'rounded-lg',
-            loading && 'cursor-wait'
+        <div className='relative w-full h-full rounded-full overflow-hidden'>
+          {/* Preview or IPFS Image */}
+          {(previewUrl || avatarCID) && (
+            <Image
+              src={previewUrl || `/api/ipfs/${avatarCID}`}
+              alt='Profile avatar'
+              fill
+              className='object-cover'
+            />
           )}
-        >
-          <div className='relative w-full h-full overflow-hidden'>
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={name || 'Image'}
-                className='object-cover'
-                style={getImageStyle()}
-              />
-            ) : showCamera ? (
-              <div className='flex items-center justify-center w-full h-full'>
-                <IconCamera className='w-6 h-6 text-github-fg-muted' />
-              </div>
-            ) : (
-              <DefaultAvatar
-                name={name}
-                className={`w-full h-full ${shape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}
-              />
-            )}
-          </div>
 
-          {loading ? (
-            <LoadingOverlay />
-          ) : (
-            <div
-              className='absolute inset-0 bg-black/50 flex items-center justify-center 
-                      opacity-0 group-hover:opacity-100 transition-opacity duration-200'
-            >
-              <IconCamera className='w-8 h-8 text-white' />
+          {/* Default Avatar */}
+          {!previewUrl && !avatarCID && <DefaultAvatar showShadow />}
+
+          {/* Upload Progress Overlay */}
+          {isUploading && uploadProgress && (
+            <div className='absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center'>
+              <div className='w-16 h-16 border-4 border-t-blue-500 border-blue-200 rounded-full animate-spin' />
+              <span className='text-white mt-2'>{Math.round(uploadProgress.progress)}%</span>
             </div>
           )}
+
+          {/* Error State */}
+          {error && (
+            <div className='absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center'>
+              <span className='text-white text-sm px-2 text-center'>{error.message}</span>
+            </div>
+          )}
+
+          {/* Hover State */}
+          <div className='absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-opacity flex items-center justify-center'>
+            <span className='text-white opacity-0 hover:opacity-100 transition-opacity'>
+              Change Avatar
+            </span>
+          </div>
         </div>
       </ImageUploadPopover>
-      {label && (
-        <div className='flex items-center justify-center'>
-          <span className='text-sm text-github-fg-muted'>
-            {label}
-            {required && <span className='text-github-danger-fg ml-1'>*</span>}
-          </span>
-        </div>
-      )}
     </div>
   )
 }
