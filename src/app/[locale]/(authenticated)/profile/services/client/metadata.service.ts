@@ -1,8 +1,9 @@
 'use client'
 
 import { ProfileTier } from '../../profile'
-import type { ProfileMetadata } from '../../profile'
-import { getProfileSchema } from '../../validations/schemas'
+import type { ProfileMetadata, OGExtension } from '../../profile'
+import { CURRENT_PROFILE_VERSION } from '../../profile'
+import { getProfileSchema } from '../../validations/validation'
 
 export class ProfileMetadataService {
   // Validate metadata against schema
@@ -21,45 +22,132 @@ export class ProfileMetadataService {
 
   // Create empty metadata for a tier
   createEmptyMetadata(tier: ProfileTier): ProfileMetadata {
-    const schema = getProfileSchema(tier)
-    const shape = schema.shape
-
-    // Create empty object based on schema shape
-    const metadata: Partial<ProfileMetadata> = {
+    // Base metadata fields for all tiers
+    const baseMetadata = {
+      version: CURRENT_PROFILE_VERSION,
       tier,
       name: '',
       bio: '',
       avatar: '',
-    }
-
-    // Add tier-specific fields
-    if (tier === ProfileTier.PRO) {
-      metadata.experience = {
-        years: 0,
+      social: { urls: [], labels: [] },
+      preferences: {
+        theme: 'system' as const,
+        notifications: true,
+        displayEmail: false,
+        displayLocation: false,
+      },
+      culinaryInfo: {
+        expertise: 'beginner' as const,
         specialties: [],
-        certifications: [],
-      }
-      metadata.socialLinks = {
-        website: '',
-        twitter: '',
-        instagram: '',
-      }
-    } else if (tier === ProfileTier.GROUP) {
-      metadata.organizationInfo = {
-        name: '',
-        type: 'restaurant',
-        size: 1,
-        location: '',
-      }
-      metadata.compliance = {
-        hasHealthPermit: false,
-        permitNumber: '',
-        lastInspectionDate: '',
-      }
-      metadata.businessHours = []
+        dietaryPreferences: [],
+        cuisineTypes: [],
+        techniques: [],
+        equipment: [],
+      },
+      achievements: {
+        recipesCreated: 0,
+        recipesForked: 0,
+        totalLikes: 0,
+        badges: [],
+      },
     }
 
-    return metadata as ProfileMetadata
+    if (tier === ProfileTier.FREE) {
+      return baseMetadata as FreeProfileMetadata
+    }
+
+    if (tier === ProfileTier.PRO) {
+      return {
+        ...baseMetadata,
+        experience: {
+          current: {
+            title: '',
+            company: '',
+            startDate: '',
+          },
+          history: [],
+        },
+        education: [],
+        culinaryInfo: {
+          ...baseMetadata.culinaryInfo,
+          certifications: [],
+        },
+      } as ProProfileMetadata
+    }
+
+    if (tier === ProfileTier.GROUP) {
+      return {
+        ...baseMetadata,
+        baseName: '',
+        organizationInfo: {
+          type: 'restaurant',
+          establishedYear: new Date().getFullYear().toString(),
+          size: 'small',
+          team: [],
+        },
+        compliance: {
+          certifications: [],
+          licenses: [],
+        },
+        businessOperations: {
+          operatingHours: [],
+          serviceTypes: [],
+          specializations: [],
+        },
+      } as GroupProfileMetadata
+    }
+
+    if (tier === ProfileTier.OG) {
+      return {
+        ...baseMetadata,
+        baseName: '',
+        organizationInfo: {
+          type: 'restaurant',
+          establishedYear: new Date().getFullYear().toString(),
+          size: 'small',
+          team: [],
+        },
+        compliance: {
+          certifications: [],
+          licenses: [],
+        },
+        businessOperations: {
+          operatingHours: [],
+          serviceTypes: [],
+          specializations: [],
+        },
+        ogBenefits: {
+          joinDate: new Date().toISOString(),
+          memberNumber: 0,
+          customBranding: {
+            primaryColor: '#000000',
+            secondaryColor: '#ffffff',
+          },
+          apiAccess: {
+            enabled: false,
+          },
+        },
+        showcase: {
+          featured: false,
+          highlights: [],
+          specialAccess: [],
+        },
+        network: {
+          mentorship: {
+            available: false,
+            specialties: [],
+          },
+          collaborations: [],
+          events: [],
+        },
+        verificationStatus: {
+          verified: false,
+          verificationLevel: 'basic',
+        },
+      } as GroupProfileMetadata & OGExtension
+    }
+
+    return baseMetadata as FreeProfileMetadata
   }
 
   // Merge metadata updates

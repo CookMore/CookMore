@@ -24,27 +24,18 @@ export function useIPFSUpload(): UseIPFSUpload {
   const uploadFile = useCallback(async (file: File, type: 'avatar' | 'banner') => {
     setIsUploading(true)
     setError(null)
-    setUploadProgress({ progress: 0 })
+    setUploadProgress({ fileName: file.name, progress: 0 })
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', type)
-
-      const response = await fetch('/api/ipfs/upload', {
-        method: 'POST',
-        body: formData,
+      const result = await ipfsService.uploadFile(file, (progress) => {
+        setUploadProgress({ fileName: file.name, progress })
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload file')
-      }
-
-      const { cid } = await response.json()
-      return cid
+      return result.cid
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to upload file'))
-      throw err
+      const error = err instanceof Error ? err : new Error('Failed to upload file')
+      setError(error)
+      toast.error(error.message)
+      throw error
     } finally {
       setIsUploading(false)
       setUploadProgress(null)
@@ -52,7 +43,6 @@ export function useIPFSUpload(): UseIPFSUpload {
   }, [])
 
   const uploadAvatar = useCallback((file: File) => uploadFile(file, 'avatar'), [uploadFile])
-
   const uploadBanner = useCallback((file: File) => uploadFile(file, 'banner'), [uploadFile])
 
   return {

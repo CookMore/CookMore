@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { baseProfileSchema, ogStatusSchema, ogCustomizationSchema } from './schemas'
+import { ProfileTier } from '../profile'
 
 export enum ProfileTierEnum {
   FREE = 0,
@@ -19,6 +20,21 @@ export const freeProfileSchema = baseProfileSchema
 export const proProfileSchema = baseProfileSchema
   .extend({
     tier: z.literal(ProfileTierEnum.PRO),
+    culinaryInfo: z
+      .object({
+        certifications: z
+          .array(
+            z.object({
+              name: z.string().min(1, 'Certification name is required'),
+              issuer: z.string().min(1, 'Issuer is required'),
+              date: z.string(),
+              expiryDate: z.string().optional(),
+              verificationLink: z.string().url().optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
     experience: z.object({
       current: z
         .object({
@@ -75,3 +91,21 @@ export type ProfileFormData = z.infer<typeof baseProfileSchema>
 export type ProProfileFormData = z.infer<typeof proProfileSchema>
 export type GroupProfileFormData = z.infer<typeof groupProfileSchema>
 export type OGProfileFormData = z.infer<typeof ogProfileSchema>
+
+export function getProfileSchema(tier: ProfileTier) {
+  switch (tier) {
+    case ProfileTier.FREE:
+      return freeProfileSchema
+    case ProfileTier.PRO:
+      return proProfileSchema
+    case ProfileTier.GROUP:
+      return groupProfileSchema
+    case ProfileTier.OG:
+      return ogProfileSchema
+    default:
+      return freeProfileSchema
+  }
+}
+
+// Re-export everything from schemas
+export * from './schemas'

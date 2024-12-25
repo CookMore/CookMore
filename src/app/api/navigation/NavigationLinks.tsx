@@ -46,7 +46,7 @@ export function NavigationLinks() {
   }, [isAuthenticated, hasProfile, isAdmin])
 
   return (
-    <div className='flex lg:items-center lg:justify-center lg:space-x-1'>
+    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-1'>
       {links.map(({ href, label, className }) => {
         const isActive = pathname === href
         return (
@@ -62,6 +62,8 @@ export function NavigationLinks() {
                 ? 'text-github-fg-default after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-github-accent-emphasis lg:after:hidden lg:bg-github-canvas-subtle'
                 : 'text-github-fg-muted',
               'flex w-full items-center lg:w-auto',
+              'rounded-md',
+              'hover:bg-github-canvas-subtle',
               className
             )}
           >

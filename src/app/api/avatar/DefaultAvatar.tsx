@@ -28,13 +28,13 @@ export function DefaultAvatar({ size = 40, address, className = '' }: DefaultAva
 
     return {
       background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
-      text: `hsl(${hue}, ${saturation}%, 20%)`
+      text: `hsl(${hue}, ${saturation}%, 20%)`,
     }
   }, [activeAddress])
 
   const initials = useMemo(() => {
     if (!activeAddress) return '??'
-    return `${activeAddress.slice(2, 4).toUpperCase()}`
+    return `0x${activeAddress.slice(2, 4).toUpperCase()}`
   }, [activeAddress])
 
   return (
@@ -45,7 +45,7 @@ export function DefaultAvatar({ size = 40, address, className = '' }: DefaultAva
         height: size,
         backgroundColor: colors.background,
         color: colors.text,
-        fontSize: size * 0.4
+        fontSize: size * 0.3,
       }}
     >
       {initials}

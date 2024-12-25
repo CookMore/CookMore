@@ -5,7 +5,7 @@ import { profileABI } from '@/app/api/blockchain/abis'
 import { getContractAddress } from '@/app/api/blockchain/utils/addresses'
 import type { ProfileMetadata } from '../../profile'
 import { revalidatePath } from 'next/cache'
-import { getProfileSchema } from '../../validations/schemas'
+import { getProfileSchema } from '../../validations/validation'
 import { ROLES } from '../../constants/roles'
 import { hasRequiredRole } from '../../utils/role-utils'
 

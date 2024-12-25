@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useAccount } from 'wagmi'
-import type { ProfileFormData, ProfileTier } from '../profile'
+import type { ProfileFormData, ProfileTier } from '../../../profile'
 
 interface StoredProfileData {
   formData: Partial<ProfileFormData>

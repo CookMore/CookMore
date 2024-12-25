@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
-import { useProfileContract } from '../components/hooks/contracts/useProfileContract'
-import { useProfileMetadata } from '../components/hooks/core/useProfileMetadata'
-import type { ProfileFormData, ProfileTier } from '../profile'
+import { useProfileContract } from '../contracts/useProfileContract'
+import { useProfileMetadata } from './useProfileMetadata'
+import type { ProfileFormData, ProfileTier } from '../../../profile'
 
 interface ProfileCreationState {
   step: number

@@ -24,9 +24,9 @@ import { useState, useEffect } from 'react'
 import { useProfileStep } from '../ProfileStepContext'
 import { useFormContext } from 'react-hook-form'
 import { ProfileSidebar } from '../components/ui/ProfileSidebar'
-import { AutoSaveIndicator } from '../components/ui/AutoSaveIndicator'
 import { useProfileStorage } from '../components/hooks/core/useProfileStorage'
 import { cn } from '@/app/api/utils/utils'
+import { ProfileCreationHeader } from '../components/ui/ProfileCreationHeader'
 
 export function CreateProfileClient() {
   const t = useTranslations('profile')
@@ -120,10 +120,10 @@ export function CreateProfileClient() {
             tier={currentTier as unknown as ProfileTier}
           />
         }
-        className='w-full px-2 min-[768px]:px-4'
+        className='w-full'
       >
-        <div className='w-full pt-2 min-[768px]:pt-0'>
-          <div className='bg-github-canvas-subtle border border-github-border-default rounded-lg p-3'>
+        <div className='w-full'>
+          <div>
             <ProfileSessionWarning
               isExpanded={warningState.isExpanded}
               isVisible={warningState.isVisible}
@@ -139,10 +139,14 @@ export function CreateProfileClient() {
               }
             />
           </div>
-          <div className='space-y-4 mt-4'>
-            <h1 className='text-2xl font-bold text-center'>
-              {t('createProfile')} - {t(`tier.${currentTier.toLowerCase()}`)}
-            </h1>
+          <div className='space-y-4 mt-3'>
+            <ProfileCreationHeader
+              tier={currentTier as unknown as ProfileTier}
+              currentStep={currentStep + 1}
+              totalSteps={availableSteps.length}
+              isSaving={isSaving}
+              lastSaved={lastSaved}
+            />
             <div className='space-y-4'>{renderSection()}</div>
             <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
               <button
@@ -173,7 +177,6 @@ export function CreateProfileClient() {
               </button>
             </div>
           </div>
-          <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
         </div>
       </DualSidebarLayout>
     </div>

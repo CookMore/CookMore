@@ -1,121 +1,125 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import Image from 'next/image'
-import { toast } from 'sonner'
-import { cn } from '@/app/api/utils/utils'
-import { ImageUploadPopover } from '@/app/api/components/ui/ImageUploadPopover'
+import { useState } from 'react'
+import { Camera } from 'lucide-react'
+import { ImageUploadPopover } from '@/app/api/image/ImageUploadPopover'
+import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 import type { UploadProgress } from '../hooks/ipfs/useIPFS'
+import { cn } from '@/app/api/utils/utils'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+
+interface Position {
+  x: number
+  y: number
+  scale: number
+}
 
 interface AvatarContainerProps {
-  avatarCID?: string
+  avatarUrl: string | null
   onUpload: (file: File) => Promise<string | null>
+  onRemove?: () => void
   isUploading?: boolean
   uploadProgress?: UploadProgress | null
   error?: Error | null
-  className?: string
+  tier?: ProfileTier
 }
 
-interface DefaultAvatarProps {
-  showShadow?: boolean
-}
-
-function DefaultAvatar({ showShadow }: DefaultAvatarProps) {
-  return (
-    <div
-      className={cn(
-        'w-full h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-        showShadow && 'shadow-lg'
-      )}
-    >
-      <span className='text-4xl text-gray-400'>👤</span>
-    </div>
-  )
+const tierStyles = {
+  [ProfileTier.FREE]: {
+    ring: 'ring-github-border-default',
+    border: 'border-github-border-default',
+  },
+  [ProfileTier.PRO]: {
+    ring: 'ring-github-accent-emphasis',
+    border: 'border-github-accent-emphasis',
+  },
+  [ProfileTier.GROUP]: {
+    ring: 'ring-github-success-emphasis',
+    border: 'border-github-success-emphasis',
+  },
+  [ProfileTier.OG]: {
+    ring: 'ring-github-done-emphasis',
+    border: 'border-github-done-emphasis',
+  },
 }
 
 export function AvatarContainer({
-  avatarCID,
+  avatarUrl,
   onUpload,
-  isUploading,
+  onRemove,
+  isUploading = false,
   uploadProgress,
   error,
-  className,
+  tier = ProfileTier.FREE,
 }: AvatarContainerProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0, scale: 1 })
 
-  const handleFileSelect = useCallback(
-    async (file: File) => {
-      try {
-        // Create preview URL
-        const preview = URL.createObjectURL(file)
-        setPreviewUrl(preview)
+  // Convert IPFS URL to HTTP URL if needed
+  const displayUrl = avatarUrl?.startsWith('ipfs://')
+    ? `https://gateway.pinata.cloud/ipfs/${avatarUrl.replace('ipfs://', '')}`
+    : avatarUrl
 
-        // Upload file
-        const cid = await onUpload(file)
-
-        if (!cid) {
-          // If upload failed, remove preview
-          URL.revokeObjectURL(preview)
-          setPreviewUrl(null)
-        }
-      } catch (err) {
-        // Clean up preview on error
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl)
-          setPreviewUrl(null)
-        }
-
-        if (err instanceof Error) {
-          toast.error(err.message)
-        } else {
-          toast.error('Failed to upload avatar')
-        }
-      }
-    },
-    [onUpload, previewUrl]
-  )
+  const style = tierStyles[tier]
 
   return (
-    <div className={cn('relative w-32 h-32', className)}>
+    <div className='relative w-32 h-32'>
+      {isUploading && (
+        <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 rounded-full'>
+          <div className='text-white text-center'>
+            {uploadProgress && (
+              <div className='w-16 h-2 bg-gray-700 rounded-full overflow-hidden'>
+                <div
+                  className='h-full bg-white transition-all duration-300'
+                  style={{ width: `${uploadProgress.progress}%` }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <ImageUploadPopover
-        onImageSelect={handleFileSelect}
-        accept='image/*'
-        maxSize={5 * 1024 * 1024} // 5MB
+        onImageSelect={onUpload}
+        currentImageUrl={displayUrl}
+        onRemove={onRemove}
+        onPositionSet={(pos: Position) => {
+          setPosition(pos)
+        }}
+        error={error?.message}
       >
-        <div className='relative w-full h-full rounded-full overflow-hidden'>
-          {/* Preview or IPFS Image */}
-          {(previewUrl || avatarCID) && (
-            <Image
-              src={previewUrl || `/api/ipfs/${avatarCID}`}
-              alt='Profile avatar'
-              fill
-              className='object-cover'
-            />
+        <div
+          className={cn(
+            'w-full h-full flex items-center justify-center cursor-pointer rounded-full overflow-hidden',
+            'ring-4 ring-offset-2 ring-offset-github-canvas-default transition-shadow',
+            style.ring,
+            'hover:shadow-xl'
           )}
-
-          {/* Default Avatar */}
-          {!previewUrl && !avatarCID && <DefaultAvatar showShadow />}
-
-          {/* Upload Progress Overlay */}
-          {isUploading && uploadProgress && (
-            <div className='absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center'>
-              <div className='w-16 h-16 border-4 border-t-blue-500 border-blue-200 rounded-full animate-spin' />
-              <span className='text-white mt-2'>{Math.round(uploadProgress.progress)}%</span>
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && (
-            <div className='absolute inset-0 bg-red-500 bg-opacity-50 flex items-center justify-center'>
-              <span className='text-white text-sm px-2 text-center'>{error.message}</span>
-            </div>
-          )}
-
-          {/* Hover State */}
-          <div className='absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-opacity flex items-center justify-center'>
-            <span className='text-white opacity-0 hover:opacity-100 transition-opacity'>
-              Change Avatar
-            </span>
+          style={{
+            transform: `scale(${position.scale}) translate(${position.x}px, ${position.y}px)`,
+          }}
+        >
+          <div className='relative w-full h-full overflow-hidden'>
+            {displayUrl ? (
+              <div className='relative w-full h-full'>
+                <img
+                  src={displayUrl}
+                  alt='Avatar'
+                  className='absolute w-full h-full object-cover'
+                  style={{
+                    transform: `scale(${position.scale}) translate(${position.x}px, ${position.y}px)`,
+                  }}
+                />
+                <div className='absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity'>
+                  <div className='p-2 bg-black bg-opacity-50 rounded-full'>
+                    <Camera className='w-6 h-6 text-white' />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className='flex flex-col items-center justify-center space-y-2 bg-gray-100 w-full h-full'>
+                <Camera className='w-8 h-8 text-gray-400' />
+              </div>
+            )}
           </div>
         </div>
       </ImageUploadPopover>

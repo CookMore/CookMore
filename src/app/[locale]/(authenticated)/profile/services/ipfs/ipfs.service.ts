@@ -29,7 +29,48 @@ export class IPFSService {
     }
   }
 
+  getHttpUrl(ipfsCid: string): string {
+    console.log('IPFS Service - getHttpUrl input:', { ipfsCid })
+
+    // If it's already a gateway URL, return as is
+    if (ipfsCid.startsWith(`https://${this.defaultGateway}/ipfs/`)) {
+      console.log('IPFS Service - URL is already in gateway format, returning as is:', { ipfsCid })
+      return ipfsCid
+    }
+
+    // Remove any number of ipfs:// prefixes to handle potential double prefixing
+    const cid = ipfsCid.replace(/^(ipfs:\/\/)+/, '')
+    const url = `https://${this.defaultGateway}/ipfs/${cid}`
+    console.log('IPFS Service - URL transformation:', {
+      originalCid: ipfsCid,
+      cleanedCid: cid,
+      gateway: this.defaultGateway,
+      finalUrl: url,
+      hasIpfsPrefix: ipfsCid.startsWith('ipfs://'),
+      urlLength: url.length,
+    })
+    return url
+  }
+
   async uploadFile(file: File, onProgress?: (progress: number) => void): Promise<IpfsUploadResult> {
+    if (!this.jwt) {
+      const error = new IPFSError('Pinata JWT not configured')
+      toast.error(error.message)
+      throw error
+    }
+
+    if (!file) {
+      const error = new IPFSError('No file provided for upload')
+      toast.error(error.message)
+      throw error
+    }
+
+    console.log('Starting file upload:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+    })
+
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -41,23 +82,45 @@ export class IPFSService {
           if (event.lengthComputable && onProgress) {
             const progress = (event.loaded / event.total) * 100
             onProgress(progress)
+            console.log('Upload progress:', progress.toFixed(2) + '%')
           }
         })
 
         xhr.onload = async () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             const result = JSON.parse(xhr.responseText)
-            const cid = `ipfs://${result.IpfsHash}`
-            resolve({
-              cid,
-              url: this.getHttpUrl(cid),
+            console.log('IPFS Service - Upload success:', {
+              response: result,
+              status: xhr.status,
+              responseType: xhr.responseType,
             })
+
+            const cid = `ipfs://${result.IpfsHash}`
+            console.log('IPFS Service - Generated CID:', { cid })
+
+            const url = this.getHttpUrl(cid)
+            console.log('IPFS Service - Final result:', {
+              cid,
+              url,
+              originalHash: result.IpfsHash,
+            })
+
+            resolve({ cid, url })
           } else {
-            reject(new IPFSError(`Upload failed with status ${xhr.status}`))
+            let errorMessage = `Upload failed with status ${xhr.status}`
+            try {
+              const errorResponse = JSON.parse(xhr.responseText)
+              errorMessage = `${errorMessage}: ${errorResponse.message || errorResponse.error || 'Unknown error'}`
+              console.error('Upload error response:', errorResponse)
+            } catch (e) {
+              console.error('Could not parse error response:', xhr.responseText)
+            }
+            reject(new IPFSError(errorMessage))
           }
         }
 
         xhr.onerror = () => {
+          console.error('Network error during upload')
           reject(new IPFSError('Network error during upload'))
         }
       })
@@ -129,13 +192,6 @@ export class IPFSService {
       toast.error('Failed to fetch metadata from IPFS')
       throw new IPFSError('Failed to fetch metadata')
     }
-  }
-
-  getHttpUrl(ipfsUrl: string, gateway?: IpfsGateway): string {
-    if (!ipfsUrl) return ''
-    const useGateway = gateway || this.defaultGateway
-    const hash = ipfsUrl.replace('ipfs://', '')
-    return `https://${useGateway}/ipfs/${hash}`
   }
 
   setDefaultGateway(gateway: IpfsGateway): void {

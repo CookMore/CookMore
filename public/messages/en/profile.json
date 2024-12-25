@@ -216,5 +216,24 @@
         "invalid": "Invalid event space capacity"
       }
     }
+  },
+  "creation": {
+    "welcome": {
+      "free": "Start your culinary journey",
+      "pro": "Create your professional chef profile",
+      "group": "Set up your restaurant's profile",
+      "og": "Welcome back, founding chef"
+    },
+    "subtitle": {
+      "free": "Build your basic cooking profile",
+      "pro": "Showcase your professional expertise",
+      "group": "Establish your restaurant's presence",
+      "og": "Create your exclusive profile"
+    },
+    "progress": "Step {current} of {total}",
+    "notice": {
+      "title": "Profile Creation Notice",
+      "description": "Your profile data is stored locally until you complete the creation process. To ensure your profile is saved permanently, please complete all required fields and mint your profile NFT."
+    }
   }
 }

@@ -11,6 +11,18 @@ export const preferencesSchema = z.object({
   privacy: z.enum(['public', 'private', 'connections']).optional(),
 })
 
+const urlOrIpfsSchema = z.string().refine(
+  (value) => {
+    if (!value) return true // Allow empty strings
+    return (
+      value.startsWith('http://') || value.startsWith('https://') || value.startsWith('ipfs://')
+    )
+  },
+  {
+    message: 'Must be a valid URL or IPFS address',
+  }
+)
+
 export const baseProfileSchema = z.object({
   version: z.string().optional(),
   name: z
@@ -25,9 +37,9 @@ export const baseProfileSchema = z.object({
     .or(z.literal(''))
     .optional(),
   description: z.string().optional(),
-  avatar: z.string().optional(),
+  avatar: urlOrIpfsSchema.optional(),
   image: z.union([z.string(), z.instanceof(File)]).optional(),
-  banner: z.string().optional(),
+  banner: urlOrIpfsSchema.optional(),
   location: z.string().optional(),
   social: socialLinksSchema.optional(),
   preferences: preferencesSchema.optional(),

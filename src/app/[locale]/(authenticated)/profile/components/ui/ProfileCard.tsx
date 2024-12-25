@@ -1,9 +1,9 @@
 'use client'
 
-import { IconUser, IconBook, IconChefHat } from '@/components/ui/icons'
+import { IconUser, IconBook, IconChefHat } from '@/app/api/icons'
 import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
-import { cn } from '@/lib/utils/utils'
-import { ipfsService } from '@/lib/services/ipfs-service'
+import { cn } from '@/app/api/utils/utils'
+import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 
 interface ProfileCardProps {
   profile: Partial<GroupProfileMetadata>
@@ -15,7 +15,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const getImageUrl = (url?: string) => {
     if (!url) return null
     if (url.startsWith('blob:')) return url
-    if (url.startsWith('ipfs:')) return ipfsService.getIPFSUrl(url)
+    if (url.startsWith('ipfs:')) return ipfsService.getHttpUrl(url)
     return url
   }
 
