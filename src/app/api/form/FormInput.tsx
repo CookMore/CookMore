@@ -86,6 +86,7 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
           <label htmlFor={name} className={labelClasses}>
             {label}
             {required && <span className='text-github-danger-fg ml-1'>*</span>}
+            {!required && <span className='ml-1 text-github-fg-muted'>(Optional)</span>}
           </label>
         )}
         {multiline ? (
@@ -95,7 +96,11 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
             value={inputValue}
             onChange={handleChange as React.ChangeEventHandler<HTMLTextAreaElement>}
             placeholder={placeholder}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${name}-error` : helperText ? `${name}-helper` : undefined}
             className={cn(inputClasses, 'min-h-[100px] resize-y')}
+            disabled={disabled}
             {...props}
           />
         ) : (
@@ -106,12 +111,19 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
             value={inputValue}
             onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>}
             placeholder={placeholder}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${name}-error` : helperText ? `${name}-helper` : undefined}
             className={inputClasses}
+            disabled={disabled}
             {...props}
           />
         )}
         {error && (
-          <p className='mt-1.5 text-sm text-github-danger-fg flex items-center gap-1.5'>
+          <p
+            id={`${name}-error`}
+            className='mt-1.5 text-sm text-github-danger-fg flex items-center gap-1.5'
+          >
             <svg className='w-4 h-4' viewBox='0 0 20 20' fill='currentColor'>
               <path
                 fillRule='evenodd'
@@ -123,7 +135,10 @@ export const FormInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
           </p>
         )}
         {helperText && !error && (
-          <p className='mt-1.5 text-sm text-github-fg-muted flex items-center gap-1.5'>
+          <p
+            id={`${name}-helper`}
+            className='mt-1.5 text-sm text-github-fg-muted flex items-center gap-1.5'
+          >
             <svg className='w-4 h-4' viewBox='0 0 20 20' fill='currentColor'>
               <path
                 fillRule='evenodd'

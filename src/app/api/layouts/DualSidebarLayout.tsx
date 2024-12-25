@@ -7,8 +7,6 @@ interface DualSidebarLayoutProps {
   leftSidebar?: React.ReactNode
   rightSidebar?: React.ReactNode
   className?: string
-  mobileHeader?: React.ReactNode
-  isLeftSidebarExpanded?: boolean
 }
 
 export function DualSidebarLayout({
@@ -16,22 +14,11 @@ export function DualSidebarLayout({
   leftSidebar,
   rightSidebar,
   className,
-  mobileHeader,
-  isLeftSidebarExpanded = true,
 }: DualSidebarLayoutProps) {
   return (
     <div className='flex min-h-screen bg-github-canvas-default'>
-      {/* Mobile Header */}
-      {mobileHeader && (
-        <div className='md:hidden fixed top-0 left-0 right-0 z-50 bg-github-canvas-default border-b border-github-border-default'>
-          <div className='flex items-center h-12 px-4'>{mobileHeader}</div>
-        </div>
-      )}
-
       {/* Layout Container */}
       <div className='flex flex-1 relative'>
-        {/* Left Sidebar Container - Only handles background */}
-
         {/* Left Sidebar Content */}
         {leftSidebar}
 
@@ -39,13 +26,12 @@ export function DualSidebarLayout({
         <main
           className={cn(
             'flex-1 min-w-0 transition-all duration-300 ease-in-out relative z-10',
-            isLeftSidebarExpanded ? 'pl-[280px]' : 'pl-[48px]',
-            mobileHeader ? 'mt-12 md:mt-0' : '',
+            'md:pl-[80px] pl-0',
             rightSidebar ? 'lg:mr-[256px]' : '',
             className
           )}
         >
-          <div className='w-full h-full'>{children}</div>
+          <div className='w-full h-full mx-auto max-w-[1440px] px-8'>{children}</div>
         </main>
 
         {/* Right Sidebar */}

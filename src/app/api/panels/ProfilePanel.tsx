@@ -57,7 +57,9 @@ export function ProfilePanel() {
         {activeAddress && (
           <div className='p-4 bg-github-canvas-default rounded-lg border border-github-border-default'>
             <h4 className='text-sm font-medium text-github-fg-default mb-2'>Wallet Address</h4>
-            <p className='text-xs font-mono text-github-fg-muted break-all'>{activeAddress}</p>
+            <p className='text-xs font-mono text-github-fg-muted break-all'>
+              {activeAddress.startsWith('0x') ? activeAddress : `0x${activeAddress}`}
+            </p>
           </div>
         )}
 

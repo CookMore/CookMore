@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/app/api/components/ui/button'
 import { IconSettings } from '@/app/api/icons'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/core/useProfile'
 import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
 import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
 import { useState, useEffect } from 'react'

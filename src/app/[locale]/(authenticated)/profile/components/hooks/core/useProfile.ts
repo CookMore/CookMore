@@ -1,11 +1,11 @@
 'use client'
 
-import { useProfileEdge } from '../../providers/edge/ProfileEdgeProvider'
-import { profileClientService } from '../../services/client/profile.service'
-import { profileMetadataService } from '../../services/client/metadata.service'
-import { profileCacheService } from '../../services/offline/profile-cache.service'
-import type { Profile, ProfileMetadata } from '../../profile'
-import { ProfileTier } from '../../profile'
+import { useProfileEdge } from '../../../providers/edge/ProfileEdgeProvider'
+import { profileClientService } from '../../../services/client/profile.service'
+import { profileMetadataService } from '../../../services/client/metadata.service'
+import { profileCacheService } from '../../../services/offline/profile-cache.service'
+import type { Profile, ProfileMetadata } from '../../../profile'
+import { ProfileTier } from '../../../profile'
 import { usePathname } from 'next/navigation'
 
 export interface UseProfileResult {
