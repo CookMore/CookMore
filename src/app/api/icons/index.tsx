@@ -702,6 +702,7 @@ export function IconAcademic(props: React.SVGProps<SVGSVGElement>) {
         strokeWidth={2}
         d='M12 14l-9-5v9.5a2.5 2.5 0 005 0V14'
       />
+      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 14v8' />
     </svg>
   )
 }
@@ -1077,6 +1078,32 @@ export function IconArrowUpRight(props: React.SVGProps<SVGSVGElement>) {
         strokeLinejoin='round'
         strokeWidth={2}
         d='M7 17L17 7M17 7H7M17 7V17'
+      />
+    </svg>
+  )
+}
+
+export function IconCurrencyEthereum(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth={2}
+        d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.24 4v6.557L7.2 10.5l-1.2 1.5 6 4.5 6-4.5-1.2-1.5-3.56 2.057V6h-1.48z'
+      />
+    </svg>
+  )
+}
+
+export function IconUtensils(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth={2}
+        d='M4 3h2v7H4V3zm5 0h2v7H9V3zm5 0h2v7h-2V3zm5 0h2v7h-2V3zM4 12h2v7H4v-7zm5 0h2v7H9v-7zm5 0h2v7h-2v-7zm5 0h2v7h-2v-7z'
       />
     </svg>
   )

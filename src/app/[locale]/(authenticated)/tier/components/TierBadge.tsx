@@ -1,38 +1,19 @@
 'use client'
 
-import Image from 'next/image'
+import { cn } from '@/app/api/utils/utils'
+import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { Tooltip } from '@/app/api/tooltip/tooltip'
 import { useMediaQuery } from '@/app/api/hooks/useMediaQuery'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-
-const LITE_IMAGE_URL =
-  'https://ipfs.io/ipfs/bafkreieeswhm4qgx2x3i7hw2jbmnrt7zkgogdk676kk25tkbr5wisyv5za'
-const PRO_IMAGE_URL = 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
-const GROUP_IMAGE_URL = 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
-const OG_IMAGE_URL = 'https://ipfs.io/ipfs/QmXYZ...' // Replace with actual OG badge IPFS URL
+import { tierInfo, tierStyles } from '@/app/api/tiers/tiers'
+import Image from 'next/image'
 
 interface TierBadgeProps {
   tier: ProfileTier
   size?: 'sm' | 'md' | 'lg'
   hasProfile?: boolean
   className?: string
-}
-
-const getTierDisplayName = (tier: ProfileTier) => {
-  switch (tier) {
-    case ProfileTier.FREE:
-      return 'Lite'
-    case ProfileTier.PRO:
-      return 'Pro'
-    case ProfileTier.GROUP:
-      return 'Group'
-    case ProfileTier.OG:
-      return 'OG'
-    default:
-      return tier
-  }
 }
 
 export function TierBadge({
@@ -43,7 +24,8 @@ export function TierBadge({
 }: TierBadgeProps) {
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 640px)')
-  const displayName = getTierDisplayName(tier)
+  const info = tierInfo[tier]
+  const style = tierStyles[tier]
 
   const dimensions = {
     sm: 32,
@@ -67,7 +49,7 @@ export function TierBadge({
 
   const tooltipContent = (
     <div className='max-w-xs'>
-      <p className='font-medium mb-1'>{displayName} Tier</p>
+      <p className='font-medium mb-1'>{info.title} Tier</p>
       <p className='text-sm text-github-fg-muted'>
         {tier === ProfileTier.FREE
           ? 'Upgrade to Pro, Group, or OG tier to unlock premium features.'
@@ -85,27 +67,33 @@ export function TierBadge({
     <Tooltip content={tooltipContent}>
       <button
         onClick={handleClick}
-        className={`relative ${hasProfile ? 'hover:opacity-90' : ''} transition-opacity ${className}`}
+        className={cn(
+          'relative flex items-center gap-2',
+          hasProfile ? 'hover:opacity-90' : '',
+          'transition-opacity',
+          className
+        )}
       >
-        <div className={`w-${dim / 4} h-${dim / 4} relative`}>
+        <div className={cn('relative', `w-${dim} h-${dim}`)}>
           <Image
             src={
               tier === ProfileTier.FREE
-                ? LITE_IMAGE_URL
+                ? 'https://ipfs.io/ipfs/bafkreieeswhm4qgx2x3i7hw2jbmnrt7zkgogdk676kk25tkbr5wisyv5za'
                 : tier === ProfileTier.PRO
-                  ? PRO_IMAGE_URL
+                  ? 'https://ipfs.io/ipfs/QmQnkRY6b2ckAbYQtn7btBWw3p2LcL2tZReFxViJ3aayk3'
                   : tier === ProfileTier.GROUP
-                    ? GROUP_IMAGE_URL
-                    : OG_IMAGE_URL
+                    ? 'https://ipfs.io/ipfs/QmRNqHVG9VHBafsd9ypQt82rZwVMd14Qt2DWXiK5dptJRs'
+                    : 'https://ipfs.io/ipfs/QmXYZ...' // OG badge
             }
-            alt={`${displayName} NFT`}
+            alt={`${info.title} NFT Badge`}
             width={dim}
             height={dim}
-            className='rounded-md'
+            className={cn('rounded-md', style.bgColor)}
             priority
             unoptimized
           />
         </div>
+        <span className={cn('text-sm font-medium', style.color)}>{info.title}</span>
       </button>
     </Tooltip>
   )

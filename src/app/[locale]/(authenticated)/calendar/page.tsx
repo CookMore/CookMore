@@ -1,61 +1,72 @@
 'use client'
 
-import { useState } from 'react'
-import { SingleSidebarLayout } from '@/components/layouts/SingleSidebarLayout'
-import { IconCalendar, IconBook, IconStar } from '@/components/ui/icons'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
+import { CalendarSidebar } from './CalendarSidebar'
+import MealPlanner from './MealPlanner'
+import MealCalendar from './MealCalendar'
+import MealShoppingList from './MealShoppingList'
+import { cn } from '@/app/api/utils/utils'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
 
 export default function CalendarPage() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [mounted, setMounted] = useState(false)
+  const [activeView, setActiveView] = useState('MealPlanner')
+  const [mealPlans, setMealPlans] = useState<string[]>([])
+  const { user, tier } = useAuth()
 
-  return (
-    <SingleSidebarLayout>
-      <div className='space-y-8'>
-        {/* Header */}
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
-            <IconCalendar className='w-6 h-6 text-github-accent-fg' />
-            <h1 className='text-2xl font-semibold text-github-fg-default'>AI Food Calendar</h1>
+  useEffect(() => {
+    console.log('CalendarPage mounting...', { tier, user })
+    setMounted(true)
+    console.log('CalendarPage mounted')
+    return () => {
+      console.log('CalendarPage unmounting')
+    }
+  }, [tier, user])
+
+  // Show loading state during hydration
+  if (!mounted) {
+    return (
+      <div className='min-h-screen bg-github-canvas-default'>
+        <div className='animate-pulse fixed left-0 top-16 bottom-0 w-[280px] bg-github-canvas-subtle z-40' />
+        <div className={cn('animate-pulse', 'ml-[280px]', 'p-8', 'relative', 'z-30')}>
+          <div className='h-8 bg-github-canvas-subtle rounded w-1/4 mb-6'></div>
+          <div className='space-y-4'>
+            <div className='h-32 bg-github-canvas-subtle rounded'></div>
+            <div className='h-32 bg-github-canvas-subtle rounded'></div>
           </div>
-          <Button
-            className='flex items-center gap-2'
-            onClick={() => {
-              // TODO: Implement AI meal planning
-              console.log('Generate AI meal plan')
-            }}
-          >
-            <IconBook className='w-4 h-4' />
-            Generate Meal Plan
-          </Button>
-        </div>
-
-        {/* Calendar Grid */}
-        <div className='grid grid-cols-7 gap-4'>
-          {/* TODO: Implement calendar grid with meal planning */}
-          {/* This will include:
-              - Calendar view with meal slots
-              - AI-suggested recipes
-              - Nutritional planning
-              - Shopping list generation
-              - Recipe integration
-              - Seasonal ingredients
-          */}
-        </div>
-
-        {/* Features Section */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-          <div className='p-6 rounded-lg border border-github-border-default bg-github-canvas-subtle'>
-            <IconStar className='w-8 h-8 text-github-accent-fg mb-4' />
-            <h3 className='text-lg font-medium mb-2'>AI Recipe Suggestions</h3>
-            <p className='text-github-fg-muted'>
-              Get personalized recipe suggestions based on your preferences and seasonal
-              ingredients.
-            </p>
-          </div>
-
-          {/* Add more feature cards */}
         </div>
       </div>
-    </SingleSidebarLayout>
+    )
+  }
+
+  const renderActiveView = () => {
+    console.log('Rendering active view:', activeView, { tier })
+    switch (activeView) {
+      case 'MealPlanner':
+        return <MealPlanner setMealPlans={setMealPlans} tier={tier} />
+      case 'MealShoppingList':
+        return <MealShoppingList tier={tier} />
+      case 'CalendarView':
+        return <MealCalendar mealPlans={mealPlans} tier={tier} />
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className='min-h-screen bg-github-canvas-default'>
+      <CalendarSidebar setActiveView={setActiveView} tier={tier} />
+      <main
+        className={cn(
+          'transition-all duration-300 ease-in-out',
+          'ml-[280px]', // Match sidebar width
+          'p-8',
+          'relative',
+          'z-30' // Below sidebar z-index
+        )}
+      >
+        {renderActiveView()}
+      </main>
+    </div>
   )
 }

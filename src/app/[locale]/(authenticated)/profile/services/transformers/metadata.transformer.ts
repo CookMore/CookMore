@@ -1,6 +1,20 @@
 import type { ProfileFormData } from '../../profile'
 import type { OnChainMetadata, IPFSMetadata, ExtendedProfileData } from '../../types/metadata'
 
+interface NFTMetadata extends IPFSMetadata {
+  animation_url?: string
+  properties: {
+    static_render: string
+    dynamic_render: string
+    profile_data: ExtendedProfileData
+    tier_info: {
+      tier: string
+      tier_level: number
+      mint_date: string
+    }
+  }
+}
+
 export class MetadataTransformer {
   /**
    * Transform form data into separate on-chain and IPFS metadata
@@ -12,13 +26,28 @@ export class MetadataTransformer {
     onChainMetadata: OnChainMetadata
     ipfsMetadata: IPFSMetadata
   }> {
+    // Validate required fields
+    if (!formData.basicInfo?.name) {
+      throw new Error('Profile name is required')
+    }
+
+    // Add debug logging
+    console.log('Transforming form data:', {
+      formData,
+      basicInfo: formData.basicInfo,
+      hasName: !!formData.basicInfo?.name,
+    })
+
     // Core metadata for on-chain storage
     const onChainMetadata: OnChainMetadata = {
       name: formData.basicInfo.name,
-      bio: formData.basicInfo.bio || '',
+      bio: formData.basicInfo?.bio || '',
       avatar: avatarCID || '',
       ipfsNotesCID: '', // Will be set after IPFS upload
     }
+
+    // Ensure single ipfs:// prefix
+    const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
 
     // Extended data for IPFS storage
     const extendedData: ExtendedProfileData = {
@@ -27,40 +56,16 @@ export class MetadataTransformer {
 
       // Basic Info
       location: formData.basicInfo.location,
-      website: formData.basicInfo.website,
+      website: formData.basicInfo.social?.website,
 
-      // Business Operations
-      businessOperations: formData.businessOperations
-        ? {
-            operatingHours: formData.businessOperations.operatingHours || [],
-            serviceTypes: formData.businessOperations.serviceTypes || [],
-            deliveryRadius: formData.businessOperations.deliveryRadius,
-            capacity: formData.businessOperations.capacity,
-            seasonalMenu: formData.businessOperations.seasonalMenu || false,
-          }
-        : undefined,
+      // Culinary Info
+      culinaryInfo: formData.culinaryInfo,
 
-      // Certifications
-      certifications: formData.certifications?.map((cert) => ({
-        name: cert.name,
-        institution: cert.institution,
-        dateReceived: cert.dateReceived,
-        expiryDate: cert.expiryDate,
-        verificationHash: cert.verificationHash,
-      })),
+      // Achievements
+      achievements: formData.achievements,
 
       // Social Links
-      social: {
-        twitter: formData.socialLinks?.twitter,
-        instagram: formData.socialLinks?.instagram,
-        website: formData.socialLinks?.website,
-      },
-
-      // Additional Media
-      media: {
-        gallery: formData.media?.gallery || [],
-        documents: formData.media?.documents || [],
-      },
+      social: formData.socialLinks || {},
     }
 
     // Complete IPFS metadata structure
@@ -68,7 +73,7 @@ export class MetadataTransformer {
       schema: 'https://cookmore.xyz/schemas/profile/v1',
       name: formData.basicInfo.name,
       description: formData.basicInfo.bio || '',
-      image: avatarCID || '',
+      image: formatIpfsUrl(avatarCID || ''),
       attributes: extendedData,
     }
 
@@ -133,6 +138,69 @@ export class MetadataTransformer {
     return {
       valid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
+    }
+  }
+
+  static async transformToNFTMetadata(
+    formData: ProfileFormData,
+    staticImageCID: string,
+    dynamicRendererCID: string,
+    tier: string
+  ): Promise<NFTMetadata> {
+    try {
+      const { onChainMetadata, ipfsMetadata } = await this.transformFormData(
+        formData,
+        staticImageCID
+      )
+
+      // Ensure single ipfs:// prefix
+      const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+
+      return {
+        ...ipfsMetadata,
+        name: `${formData.basicInfo.name}'s Chef Profile`,
+        description: formData.basicInfo.bio || '',
+        image: formatIpfsUrl(staticImageCID),
+        animation_url: formatIpfsUrl(dynamicRendererCID),
+        attributes: [
+          { trait_type: 'Tier', value: tier },
+          { trait_type: 'Name', value: formData.basicInfo.name },
+          { trait_type: 'Specialty', value: formData.culinaryInfo?.expertise || 'Beginner' },
+          // Add other relevant attributes
+        ],
+        properties: {
+          static_render: formatIpfsUrl(staticImageCID),
+          dynamic_render: formatIpfsUrl(dynamicRendererCID),
+          profile_data: ipfsMetadata.attributes,
+          tier_info: {
+            tier,
+            tier_level: this.getTierLevel(tier),
+            mint_date: new Date().toISOString(),
+          },
+        },
+      }
+    } catch (error) {
+      console.error('Error transforming NFT metadata:', {
+        error,
+        formData,
+        hasBasicInfo: !!formData.basicInfo,
+      })
+      throw error
+    }
+  }
+
+  private static getTierLevel(tier: string): number {
+    switch (tier.toLowerCase()) {
+      case 'free':
+        return 0
+      case 'pro':
+        return 1
+      case 'group':
+        return 2
+      case 'og':
+        return 3
+      default:
+        return 0
     }
   }
 }

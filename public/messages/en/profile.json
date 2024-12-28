@@ -151,7 +151,8 @@
     "free": "Free",
     "pro": "Pro",
     "group": "Group",
-    "og": "OG"
+    "og": "OG",
+    "0": "Your current tier"
   },
   "certifications": {
     "title": "Certifications",
@@ -222,13 +223,15 @@
       "free": "Start your culinary journey",
       "pro": "Create your professional chef profile",
       "group": "Set up your restaurant's profile",
-      "og": "Welcome back, founding chef"
+      "og": "Welcome back, founding chef",
+      "0": "Welcome to Profile Creation"
     },
     "subtitle": {
       "free": "Build your basic cooking profile",
       "pro": "Showcase your professional expertise",
       "group": "Establish your restaurant's presence",
-      "og": "Create your exclusive profile"
+      "og": "Create your exclusive profile",
+      "0": "Let's set up your profile"
     },
     "progress": "Step {current} of {total}",
     "notice": {

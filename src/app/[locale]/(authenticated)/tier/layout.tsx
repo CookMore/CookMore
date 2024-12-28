@@ -1,27 +1,24 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { HydrationLoader } from '@/app/api/loading/HydrationLoader'
-import { FullPageLayout } from '@/app/api/layouts/FullPage'
-import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
-import { ProfileProvider } from '@/app/[locale]/(authenticated)/profile/providers/ProfileProvider'
+import { ProfileEdgeProvider } from '@/app/[locale]/(authenticated)/profile/providers/edge/ProfileEdgeProvider'
 
 function TierLayoutContent({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-  const { isAdmin, isLoading: adminLoading } = useAdminCheck()
-  const { profile, isLoading: profileLoading } = useProfile()
+  const { isLoading: authLoading, user } = useAuth()
 
   useEffect(() => {
-    if (adminLoading || profileLoading) return
-    if (!isAdmin && !adminLoading) {
-      router.replace('/profile/create')
-    }
-  }, [isAdmin, adminLoading, profileLoading, router])
+    console.log('TierLayoutContent state:', {
+      authLoading,
+      userWallet: user?.wallet?.address,
+    })
+  }, [authLoading, user?.wallet?.address])
 
-  if (adminLoading || profileLoading) {
+  // Show loading state while checking auth
+  if (authLoading) {
+    console.log('TierLayoutContent: Loading state')
     return (
       <div className='flex min-h-screen items-center justify-center p-4'>
         <div className='w-full space-y-6'>
@@ -35,21 +32,30 @@ function TierLayoutContent({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!isAdmin) {
-    return null
-  }
-
-  return (
-    <HydrationLoader>
-      <FullPageLayout fullWidth>{children}</FullPageLayout>
-    </HydrationLoader>
-  )
+  console.log('TierLayoutContent: Rendering content')
+  return <HydrationLoader>{children}</HydrationLoader>
 }
 
 export default function TierLayout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    console.log('TierLayout: Mounted', { userWallet: user?.wallet?.address })
+  }, [user?.wallet?.address])
+
+  if (!user?.wallet?.address) {
+    console.log('TierLayout: No wallet')
+    return (
+      <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8 flex items-center justify-center'>
+        <p>Loading wallet...</p>
+      </div>
+    )
+  }
+
+  console.log('TierLayout: Rendering with ProfileEdgeProvider')
   return (
-    <ProfileProvider>
+    <ProfileEdgeProvider address={user.wallet.address}>
       <TierLayoutContent>{children}</TierLayoutContent>
-    </ProfileProvider>
+    </ProfileEdgeProvider>
   )
 }

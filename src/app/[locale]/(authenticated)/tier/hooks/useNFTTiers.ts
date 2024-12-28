@@ -47,7 +47,7 @@ export function useNFTTiers() {
 
   // Check if contract address is set
   const isContractConfigured =
-    TIER_CONTRACT_ADDRESS !== '0x1234567890123456789012345678901234567890'
+    TIER_CONTRACT_ADDRESS !== '0x947b40801581E896C29dD73f9C7f5dd710877b64'
 
   // Use wagmi's useContractReads for batch reading
   const { data: contractData, refetch: refetchContract } = useContractReads({

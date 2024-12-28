@@ -7,6 +7,13 @@ import { cn } from '@/app/api/utils/utils'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { useMemo } from 'react'
 
+interface NavLink {
+  href: string
+  label: string
+  requiresProfile?: boolean
+  className?: string
+}
+
 export function NavigationLinks() {
   const pathname = usePathname()
   const { isAuthenticated, hasProfile, isAdmin } = useAuth()
@@ -14,7 +21,7 @@ export function NavigationLinks() {
   // Memoize links to prevent unnecessary re-renders
   const links = useMemo(() => {
     // Define authenticated links with proper access control
-    const authenticatedLinks = [
+    const authenticatedLinks: NavLink[] = [
       { href: ROUTES.AUTH.KITCHEN.HOME, label: 'Kitchen', requiresProfile: true },
       { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
       { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
@@ -32,7 +39,7 @@ export function NavigationLinks() {
     ]
 
     // Define marketing links for non-authenticated users
-    const marketingLinks = [
+    const marketingLinks: NavLink[] = [
       { href: ROUTES.MARKETING.HOME, label: 'Home' },
       { href: ROUTES.MARKETING.FEATURES, label: 'Features' },
       { href: ROUTES.MARKETING.DISCOVER, label: 'Discover' },

@@ -1,3 +1,5 @@
+import { decodeEventLog } from 'viem'
+
 export const profileABI = [
   {
     inputs: [{ internalType: 'string', name: 'metadataURI', type: 'string' }],
@@ -134,3 +136,12 @@ export const profileABI = [
     type: 'event',
   },
 ] as const
+
+// Function to decode logs using the profileABI
+export function decodeProfileLog(log) {
+  return decodeEventLog({
+    abi: profileABI,
+    data: log.data,
+    topics: log.topics,
+  })
+}

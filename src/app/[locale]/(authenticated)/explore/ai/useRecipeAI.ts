@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
 
 interface Message {
   role: 'user' | 'assistant'

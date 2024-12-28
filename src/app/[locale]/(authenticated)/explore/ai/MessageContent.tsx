@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/app/api/utils/utils'
 
 interface MessageContentProps {
   content: string

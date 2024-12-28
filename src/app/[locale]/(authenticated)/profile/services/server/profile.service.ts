@@ -1,7 +1,7 @@
 'use server'
 
 import { getServerContract } from '@/app/api/blockchain/server/getContracts'
-import { profileABI, tierABI } from '@/app/api/blockchain/abis'
+import { profileABI } from '@/app/api/blockchain/abis'
 import { cache } from 'react'
 import { Profile } from '../../profile'
 import { ProfileTier } from '../../profile'
@@ -24,7 +24,7 @@ export interface ProfileResponse {
 }
 
 // Helper function to get tier status
-async function getTierStatus(address: string, contract: any): Promise<TierStatus> {
+async function getTierStatus(address: string): Promise<TierStatus> {
   try {
     return await getTierStatusFromContract(address)
   } catch (error) {
@@ -40,84 +40,108 @@ async function getTierStatus(address: string, contract: any): Promise<TierStatus
 
 // Base implementation for server-side profile fetching
 export async function getProfile(address: string): Promise<ProfileResponse> {
+  console.log('Starting getProfile for address:', address)
+
   try {
-    console.log('Starting getProfile for address:', address)
+    const contract = (await getServerContract({
+      address: getContractAddress('PROFILE_REGISTRY'),
+      abi: profileABI,
+    })) as any
 
-    // Get contracts
-    const [profileContract, tierContract] = await Promise.all([
-      getServerContract({
-        address: getContractAddress('PROFILE_REGISTRY'),
-        abi: profileABI,
-      }),
-      getServerContract({
-        address: getContractAddress('TIER_CONTRACT'),
-        abi: tierABI,
-      }),
-    ])
+    if (!contract?.read) {
+      console.error('Contract or read methods not available')
+      return {
+        success: true,
+        data: null,
+        tierStatus: {
+          hasGroup: false,
+          hasPro: false,
+          hasOG: false,
+          currentTier: 0,
+        },
+      }
+    }
 
-    console.log('Contracts initialized:', {
-      profileContract: profileContract.address,
-      tierContract: tierContract.address,
-      envTierAddress: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
-    })
+    // Check if profile exists in contract
+    let profileId
+    try {
+      profileId = await contract.read.getProfileId([address])
+      console.log('Profile ID check:', {
+        profileId: profileId?.toString(),
+        address,
+      })
+    } catch (error) {
+      console.error('Error reading profile ID:', error)
+      return {
+        success: true,
+        data: null,
+        tierStatus: {
+          hasGroup: false,
+          hasPro: false,
+          hasOG: false,
+          currentTier: 0,
+        },
+      }
+    }
 
-    // Get profile data and role access in parallel
-    const [profileData, tierStatus, roleAccess] = await Promise.all([
-      publicClient
-        .readContract({
-          ...profileContract,
-          functionName: 'getProfile',
-          args: [address],
-        })
-        .catch((error) => {
-          console.error('Error reading profile contract:', error)
-          return null
-        }),
-      getTierStatus(address, tierContract),
-      checkRoleAccess(address),
-    ])
+    const exists = profileId > 0n
 
-    console.log('Profile data fetched:', {
-      profileExists: profileData?.exists,
-      tierStatus,
-      roleAccess,
-    })
+    if (!exists) {
+      console.log('No valid profile found for address:', address)
+      return {
+        success: true,
+        data: null,
+        tierStatus: {
+          hasGroup: false,
+          hasPro: false,
+          hasOG: false,
+          currentTier: 0,
+        },
+      }
+    }
 
-    // Set the HAS_PROFILE cookie based on profile existence
-    const cookieStore = await cookies()
-    const hasProfile = profileData?.exists ? 'true' : 'false'
-    console.log('Setting HAS_PROFILE cookie:', hasProfile)
+    // Verify the profile by checking if it has valid metadata
+    let metadataURI
+    try {
+      metadataURI = await contract.read.tokenURI([profileId])
+    } catch (error) {
+      console.error('Failed to get metadata URI:', error)
+      return {
+        success: true,
+        data: null,
+        tierStatus: {
+          hasGroup: false,
+          hasPro: false,
+          hasOG: false,
+          currentTier: 0,
+        },
+      }
+    }
 
-    cookieStore.set(COOKIE_NAMES.HAS_PROFILE, hasProfile, {
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    })
+    const tierStatus = await getTierStatus(address)
 
     return {
       success: true,
-      data: profileData?.exists ? profileData : null,
+      data: {
+        exists: true,
+        wallet: address,
+        metadataURI,
+        tier: 0,
+      },
       tierStatus,
-      ...roleAccess,
     }
   } catch (error) {
     console.error('Error in getProfile:', error)
-    // Set HAS_PROFILE to false on error
-    const cookieStore = await cookies()
-    cookieStore.set(COOKIE_NAMES.HAS_PROFILE, 'false', {
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    })
-
     return {
       success: false,
       data: null,
-      error: error instanceof Error ? error.message : 'Failed to fetch profile',
-      tierStatus: { hasGroup: false, hasPro: false, hasOG: false, currentTier: ProfileTier.FREE },
-      isAdmin: false,
-      canManageProfiles: false,
-      canManageMetadata: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      tierStatus: {
+        hasGroup: false,
+        hasPro: false,
+        hasOG: false,
+        currentTier: 0,
+      },
     }
   }
 }
