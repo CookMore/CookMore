@@ -47,13 +47,30 @@ class ProfileCacheService {
   async cacheProfile(address: string, profile: Profile) {
     const db = await this.getDB()
     if (!db) return
-    await db.put('profiles', profile, address)
+
+    // Add timestamp to cache
+    const cacheEntry = {
+      ...profile,
+      cachedAt: Date.now(),
+    }
+
+    await db.put('profiles', cacheEntry, address)
   }
 
   async getCachedProfile(address: string): Promise<Profile | null> {
     const db = await this.getDB()
     if (!db) return null
-    return db.get('profiles', address)
+
+    const cached = await db.get('profiles', address)
+    if (!cached) return null
+
+    // Invalidate cache after 5 minutes
+    if (Date.now() - cached.cachedAt > 5 * 60 * 1000) {
+      await this.clearCache()
+      return null
+    }
+
+    return cached
   }
 
   async cacheMetadata(address: string, metadata: ProfileMetadata) {

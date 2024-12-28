@@ -12,12 +12,13 @@ import {
   IconTrophy,
 } from '@/app/api/icons'
 import { ProfileTier } from './profile'
+import { type ComponentType } from 'react'
 
 export interface Step {
   id: string
   label: string
   description?: string
-  icon: typeof IconUser
+  icon: ComponentType<{ className?: string }>
   tier: ProfileTier
 }
 
@@ -118,12 +119,7 @@ export const steps: Step[] = [
 ]
 
 // Helper function to get steps for a specific tier
-export function getStepsForTier(tier: ProfileTier) {
-  if (!tier) {
-    console.warn('Warning: No tier provided to getStepsForTier')
-    return []
-  }
-
+export function getStepsForTier(tier: ProfileTier = ProfileTier.FREE) {
   return steps.filter((step) => {
     switch (tier) {
       case ProfileTier.OG:

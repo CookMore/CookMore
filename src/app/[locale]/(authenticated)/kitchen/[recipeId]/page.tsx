@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useParams } from 'next/navigation'
-import { PageHeader } from '@/components/ui/PageHeader'
+import { PageHeader } from '@/app/api/header/PageHeader'
 
 export default function RecipeIdPage() {
   const params = useParams()

@@ -18,23 +18,33 @@ export async function getServerContract<TAbi extends Abi>({
   key?: string
 }) {
   try {
+    console.log('Attempting to get contract for key:', key)
+
     if (!contractInstances[key]) {
+      console.log('No cached contract instance found for key:', key)
+
       if (!address) {
+        console.error(`Contract address not configured for ${key}`)
         throw new Error(`Contract address not configured for ${key}`)
       }
 
       if (!publicClient) {
+        console.error('Public client not initialized')
         throw new Error('Public client not initialized')
       }
 
       // Ensure the client is ready
       await new Promise((resolve) => setTimeout(resolve, 0))
+      console.log('Public client is ready')
 
       contractInstances[key] = getContract({
         address,
         abi,
         publicClient,
       })
+      console.log('Contract instance created for key:', key)
+    } else {
+      console.log('Using cached contract instance for key:', key)
     }
 
     return contractInstances[key]

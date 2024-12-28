@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import type { IPFSMetadata } from '../../types/metadata'
+import type { ProfileMetadata } from '../../profile'
 
 export type IpfsGateway = 'gateway.pinata.cloud' | 'ipfs.io' | 'dweb.link' | 'cloudflare-ipfs.com'
 
@@ -30,26 +31,46 @@ export class IPFSService {
   }
 
   getHttpUrl(ipfsCid: string): string {
-    console.log('IPFS Service - getHttpUrl input:', { ipfsCid })
-
-    // If it's already a gateway URL, return as is
-    if (ipfsCid.startsWith(`https://${this.defaultGateway}/ipfs/`)) {
-      console.log('IPFS Service - URL is already in gateway format, returning as is:', { ipfsCid })
-      return ipfsCid
+    if (!ipfsCid) {
+      console.warn('IPFS Service - Empty CID provided')
+      return ''
     }
 
-    // Remove any number of ipfs:// prefixes to handle potential double prefixing
-    const cid = ipfsCid.replace(/^(ipfs:\/\/)+/, '')
-    const url = `https://${this.defaultGateway}/ipfs/${cid}`
-    console.log('IPFS Service - URL transformation:', {
-      originalCid: ipfsCid,
-      cleanedCid: cid,
-      gateway: this.defaultGateway,
-      finalUrl: url,
-      hasIpfsPrefix: ipfsCid.startsWith('ipfs://'),
-      urlLength: url.length,
-    })
-    return url
+    console.log('IPFS Service - getHttpUrl input:', { ipfsCid })
+
+    try {
+      // If it's already a gateway URL, return as is
+      if (ipfsCid.startsWith('http://') || ipfsCid.startsWith('https://')) {
+        console.log('IPFS Service - URL is already in HTTP format, returning as is:', { ipfsCid })
+        return ipfsCid
+      }
+
+      // If it's already a gateway IPFS URL, return as is
+      if (ipfsCid.startsWith(`https://${this.defaultGateway}/ipfs/`)) {
+        console.log('IPFS Service - URL is already in gateway format, returning as is:', {
+          ipfsCid,
+        })
+        return ipfsCid
+      }
+
+      // Remove any number of ipfs:// prefixes to handle potential double prefixing
+      const cid = ipfsCid.replace(/^(ipfs:\/\/)+/, '')
+
+      // Clean any remaining forward slashes
+      const cleanCid = cid.replace(/^\/+|\/+$/g, '')
+
+      const url = `https://${this.defaultGateway}/ipfs/${cleanCid}`
+      console.log('IPFS Service - URL transformation:', {
+        originalCid: ipfsCid,
+        cleanedCid: cleanCid,
+        gateway: this.defaultGateway,
+        finalUrl: url,
+      })
+      return url
+    } catch (error) {
+      console.error('IPFS Service - Error processing URL:', error)
+      return ipfsCid // Return original input if processing fails
+    }
   }
 
   async uploadFile(file: File, onProgress?: (progress: number) => void): Promise<IpfsUploadResult> {
@@ -196,6 +217,101 @@ export class IPFSService {
 
   setDefaultGateway(gateway: IpfsGateway): void {
     this.defaultGateway = gateway
+  }
+
+  async uploadHTML(content: string, filename: string): Promise<IpfsUploadResult> {
+    const blob = new Blob([content], { type: 'text/html' })
+    const file = new File([blob], filename, { type: 'text/html' })
+    return this.uploadFile(file)
+  }
+
+  generateDynamicRenderer(profileData: ProfileMetadata): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${profileData.name}'s Chef Profile</title>
+  <style>
+    .profile-card {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--bg-color, #fff);
+    }
+    [data-tier="pro"] { --bg-color: #f8f9fa; }
+    [data-tier="group"] { --bg-color: #f3f4f6; }
+    [data-tier="og"] { --bg-color: #f1f5f9; }
+  </style>
+</head>
+<body>
+  <div id="profile-renderer" data-profile-id="${profileData.profileId}" data-tier="${profileData.tier}">
+    <div class="profile-card">
+      <img id="avatar" src="${this.getHttpUrl(profileData.avatar)}" alt="Profile" />
+      <h1>${profileData.name}</h1>
+      <p>${profileData.bio || ''}</p>
+      <div id="dynamic-content"></div>
+    </div>
+  </div>
+  <script>
+    const profileData = ${JSON.stringify(profileData)};
+    
+    class ProfileRenderer {
+      constructor(data) {
+        this.data = data;
+        this.render();
+      }
+
+      render() {
+        const content = document.getElementById('dynamic-content');
+        this.renderTierSpecificContent(content);
+        this.setupInteractivity();
+      }
+
+      renderTierSpecificContent(container) {
+        const { tier, culinaryInfo, achievements } = this.data;
+        
+        // Render tier-specific features
+        const tierContent = document.createElement('div');
+        tierContent.className = 'tier-content';
+        
+        if (culinaryInfo) {
+          tierContent.innerHTML += \`
+            <div class="expertise">
+              <h3>Expertise</h3>
+              <p>\${culinaryInfo.expertise}</p>
+            </div>
+          \`;
+        }
+
+        if (achievements) {
+          tierContent.innerHTML += \`
+            <div class="achievements">
+              <h3>Achievements</h3>
+              <p>Recipes Created: \${achievements.recipesCreated}</p>
+              <p>Total Likes: \${achievements.totalLikes}</p>
+            </div>
+          \`;
+        }
+
+        container.appendChild(tierContent);
+      }
+
+      setupInteractivity() {
+        // Add any interactive features here
+        document.querySelector('.profile-card').addEventListener('click', () => {
+          // Handle interactions
+        });
+      }
+    }
+
+    // Initialize the renderer
+    new ProfileRenderer(profileData);
+  </script>
+</body>
+</html>`
   }
 }
 

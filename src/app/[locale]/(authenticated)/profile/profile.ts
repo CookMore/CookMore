@@ -36,7 +36,12 @@ export interface ProfileResponse {
   success: boolean
   data: Profile | null
   error?: string
-  tierStatus: TierStatus
+  tierStatus: {
+    hasGroup: boolean
+    hasPro: boolean
+    hasOG: boolean
+    currentTier: number
+  }
 }
 
 // Event Types
@@ -335,17 +340,26 @@ export interface Profile {
 }
 
 // Form Data Type
-export interface ProfileFormData
-  extends Omit<BaseProfileMetadata, 'version' | 'social' | 'preferences' | 'achievements'> {
-  tier: ProfileTier
-  education?: Array<{
-    institution: string
-    degree?: string
-    field?: string
-    startYear: string
-    endYear?: string
+export interface ProfileFormData {
+  basicInfo: {
+    name: string
+    bio?: string
+    avatar?: string
+    banner?: string
     location?: string
-  }>
+    social?: {
+      twitter?: string
+      website?: string
+    }
+  }
+  socialLinks?: {
+    twitter?: string
+    instagram?: string
+    website?: string
+  }
+  tier: ProfileTier
+  version: ProfileVersion
+  // ... other sections
 }
 
 // Service Response Types

@@ -1,5 +1,6 @@
 'use client'
 
+import { IconUser, IconSettings } from '@/app/api/icons'
 import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
 import { ProfileSidebar } from '@/app/[locale]/(authenticated)/profile/components/ui/ProfileSidebar'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile'
@@ -7,6 +8,7 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { ProfileEdgeProvider } from './providers/edge/ProfileEdgeProvider'
+import { ProfileTier } from './profile'
 
 interface ProfileLayoutProps {
   children: React.ReactNode
@@ -24,8 +26,18 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
   const steps = [
-    { title: 'Profile', href: '/profile' },
-    { title: 'Settings', href: '/profile/settings' },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: IconUser,
+      tier: ProfileTier.FREE,
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: IconSettings,
+      tier: ProfileTier.FREE,
+    },
   ]
 
   // Wrap all content with ProfileEdgeProvider if we have a wallet address
@@ -44,7 +56,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
               setCurrentStep={setCurrentStep}
               isExpanded={isExpanded}
               setIsExpanded={setIsExpanded}
-              tier={tier}
+              tier={tier || ProfileTier.FREE}
             />
           }
           isLeftSidebarExpanded={isExpanded}

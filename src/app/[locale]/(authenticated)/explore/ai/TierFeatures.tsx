@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { cn } from '@/lib/utils'
+import { cn } from '@/app/api/utils/utils'
 import { useRouter } from 'next/navigation'
-import { tierInfo as tierConfiguration } from '@/lib/tiers'
+import { tierInfo as tierConfiguration } from '@/app/api/tiers/tiers'
 
 interface TierFeaturesProps {
   currentTier?: ProfileTier

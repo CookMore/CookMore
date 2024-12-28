@@ -1,15 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ChatInterface } from '@/components/kitchen/ai/ChatInterface'
-import { useRecipeAI } from '@/lib/ai/hooks/useRecipeAI'
-import { useNFTTiers } from '@/lib/web3'
-import { TierFeatures } from '@/components/kitchen/ai/TierFeatures'
-import { PageHeader } from '@/components/ui/PageHeader'
+import { ChatInterface } from './ai/ChatInterface'
+import { useRecipeAI } from './ai/useRecipeAI'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
+import { TierFeatures } from './ai/TierFeatures'
+import { PageHeader } from '@/app/api/header/PageHeader'
 
 export default function ExplorePage() {
   const { messages, isLoading, sendMessage, currentTier } = useRecipeAI()
-  const { hasPro, hasGroup } = useNFTTiers()
+  const { hasProfile, currentTier: authTier } = useAuth()
+
+  // If we have profile info from auth, use that tier instead
+  const effectiveTier = hasProfile ? authTier : currentTier
 
   return (
     <div>
@@ -20,7 +23,7 @@ export default function ExplorePage() {
           explore new culinary ideas.
         </p>
 
-        <TierFeatures currentTier={currentTier} />
+        <TierFeatures currentTier={effectiveTier} />
       </div>
 
       {/* AI Chat Interface */}
@@ -33,7 +36,7 @@ export default function ExplorePage() {
           messages={messages}
           isLoading={isLoading}
           onSendMessage={sendMessage}
-          currentTier={currentTier}
+          currentTier={effectiveTier}
         />
       </motion.div>
     </div>

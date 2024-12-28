@@ -18,7 +18,7 @@ export const ROUTES = {
     EXPLORE: '/explore',
     TIER: '/tier',
     PROFILE: {
-      HOME: '/profile/address',
+      HOME: '/profile',
       CREATE: '/profile/create',
       EDIT: '/profile/edit',
     },

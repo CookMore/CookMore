@@ -12,11 +12,18 @@ interface ProfileCardProps {
 export function ProfileCard({ profile }: ProfileCardProps) {
   if (!profile) return null
 
-  const getImageUrl = (url?: string) => {
+  const getImageUrl = (url?: string | null) => {
     if (!url) return null
-    if (url.startsWith('blob:')) return url
-    if (url.startsWith('ipfs:')) return ipfsService.getHttpUrl(url)
-    return url
+    try {
+      if (url.startsWith('blob:')) return url
+      if (url.startsWith('ipfs:')) return ipfsService.getHttpUrl(url)
+      if (url.startsWith('http:') || url.startsWith('https:')) return url
+      // If it's just a CID, treat it as IPFS
+      return ipfsService.getHttpUrl(`ipfs://${url}`)
+    } catch (error) {
+      console.error('Error processing image URL:', error)
+      return null
+    }
   }
 
   const bannerUrl = getImageUrl(profile.banner)

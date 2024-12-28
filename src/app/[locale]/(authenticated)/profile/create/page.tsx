@@ -3,23 +3,19 @@ import { CreateProfileClient } from './CreateProfileClient'
 import { ProfileStepProvider } from '../ProfileStepContext'
 
 interface CreateProfilePageProps {
-  params: Promise<{ locale: string }>
+  params: Promise<{ locale: string }> | { locale: string }
 }
 
 export default async function CreateProfilePage({ params }: CreateProfilePageProps) {
-  const { locale } = await params
+  // Ensure params is resolved if it's a promise
+  const { locale } = await Promise.resolve(params)
+
+  // Ensure locale is handled asynchronously
   await unstable_setRequestLocale(locale)
+
   return (
     <ProfileStepProvider>
       <CreateProfileClient />
     </ProfileStepProvider>
   )
-}
-
-export async function generateMetadata({ params }: CreateProfilePageProps) {
-  const { locale } = await params
-  await unstable_setRequestLocale(locale)
-  return {
-    title: 'Create Profile',
-  }
 }

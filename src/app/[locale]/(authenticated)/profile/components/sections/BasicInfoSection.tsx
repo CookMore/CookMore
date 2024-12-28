@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFormContext } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -20,9 +20,7 @@ import { useAccount } from 'wagmi'
 import { ipfsService } from '../../services/ipfs/ipfs.service'
 import { useProfileStorage } from '@/app/[locale]/(authenticated)/profile/components/hooks/core/useProfileStorage'
 import { cn } from '@/app/api/utils/utils'
-import { Button } from '@/app/api/components/ui/button'
-import { IconEye } from '@tabler/icons-react'
-import { ProfilePreview } from '../ui/ProfilePreview'
+import { ProfileFormData } from '@/app/[locale]/(authenticated)/profile/profile'
 
 interface BasicInfoFormData {
   name: string
@@ -41,6 +39,7 @@ interface BasicInfoSectionProps {
   onSubmit: (data: BasicInfoFormData) => void
   isLoading?: boolean
   theme?: Theme
+  onValidationChange?: (isValid: boolean) => void
 }
 
 export function BasicInfoSection({
@@ -48,9 +47,11 @@ export function BasicInfoSection({
   onSubmit,
   isLoading,
   theme = 'dark' as Theme,
+  onValidationChange,
 }: BasicInfoSectionProps) {
   const t = useTranslations('profile.basicInfo')
   const { address } = useAccount()
+  const { watch: watchParentForm, setValue: setParentValue } = useFormContext<ProfileFormData>()
 
   const {
     control,
@@ -77,30 +78,36 @@ export function BasicInfoSection({
   const { hasGroup, hasPro, hasOG } = useNFTTiers()
   const { saveDraft, loadDraft } = useProfileStorage()
   const [isInitialized, setIsInitialized] = useState(false)
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   // Determine current tier
   const currentTier = useMemo(() => {
     console.log('Determining tier:', { hasOG, hasGroup, hasPro })
-    // Force immediate tier calculation
     let tier = ProfileTier.FREE
-    if (hasGroup) tier = ProfileTier.GROUP
-    if (hasPro) tier = ProfileTier.PRO
-    if (hasOG) tier = ProfileTier.OG
-    console.log('Selected tier:', { tier, tierType: typeof tier, tierValue: Number(tier) })
-    return Number(tier) as ProfileTier
+    // Check in reverse order to get highest tier
+    if (hasOG) {
+      tier = ProfileTier.OG
+    } else if (hasGroup) {
+      tier = ProfileTier.GROUP
+    } else if (hasPro) {
+      tier = ProfileTier.PRO
+    }
+    console.log('Selected tier:', { tier, tierType: typeof tier, tierValue: tier })
+    return tier
   }, [hasOG, hasGroup, hasPro])
 
   // Load draft data when component mounts
   useEffect(() => {
     const initializeForm = async () => {
       try {
+        if (!address) return // Don't load draft if no address
+
         const draft = await loadDraft()
         if (draft?.formData) {
-          // Update form with draft data
           Object.entries(draft.formData).forEach(([key, value]) => {
             if (value !== undefined) {
               setValue(key as keyof BasicInfoFormData, value)
+              // Also update parent form
+              setParentValue(`basicInfo.${key}`, value)
             }
           })
         }
@@ -111,14 +118,30 @@ export function BasicInfoSection({
       }
     }
 
-    if (!isInitialized) {
+    if (!isInitialized && address) {
       initializeForm()
     }
-  }, [loadDraft, setValue, isInitialized])
+  }, [loadDraft, setValue, setParentValue, address, isInitialized])
 
-  // Watch the avatar and banner values
-  const avatarCID = watch('avatar')
-  const bannerCID = watch('banner')
+  // Update parent form when local form changes
+  useEffect(() => {
+    const subscription = watch((formData) => {
+      // Update the parent form's basicInfo field
+      setParentValue('basicInfo', {
+        name: formData.name || '',
+        bio: formData.bio || '',
+        avatar: formData.avatar,
+        banner: formData.banner,
+        location: formData.location,
+        social: formData.social,
+      })
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, setParentValue])
+
+  // Watch both local and parent form values for images
+  const avatarCID = watch('avatar') || watchParentForm('basicInfo.avatar')
+  const bannerCID = watch('banner') || watchParentForm('basicInfo.banner')
 
   // Save draft whenever form values change
   useEffect(() => {
@@ -153,44 +176,33 @@ export function BasicInfoSection({
     return url
   }
 
+  // Handle avatar upload with parent form update
   const handleAvatarUpload = useCallback(
     async (file: File) => {
-      console.log('BasicInfoSection - Starting avatar upload:', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-      })
       setAvatarError(null)
       setIsUploadingAvatar(true)
       try {
         const cid = await uploadAvatar(file)
-        console.log('BasicInfoSection - Upload complete:', { cid })
         setValue('avatar', cid)
-        console.log('BasicInfoSection - Form value set:', {
-          fieldName: 'avatar',
-          value: cid,
-        })
+        // Update parent form
+        setParentValue('basicInfo.avatar', cid)
         // Save draft immediately after successful upload
         const formData = watch()
-        const updatedFormData = {
-          ...formData,
-          avatar: cid,
-        }
-        await saveDraft(updatedFormData, currentTier, 0)
+        await saveDraft(formData, currentTier, 0)
         return cid
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to upload avatar')
         setAvatarError(error)
         toast.error(error.message)
-        console.error('BasicInfoSection - Upload error:', error)
         return null
       } finally {
         setIsUploadingAvatar(false)
       }
     },
-    [uploadAvatar, setValue, watch, currentTier, saveDraft]
+    [uploadAvatar, setValue, setParentValue, watch, currentTier, saveDraft]
   )
 
+  // Handle banner upload with parent form update
   const handleBannerUpload = useCallback(
     async (file: File) => {
       setBannerError(null)
@@ -199,13 +211,11 @@ export function BasicInfoSection({
         const cid = await uploadBanner(file)
         const bannerUrl = `ipfs://${cid}`
         setValue('banner', bannerUrl)
+        // Update parent form
+        setParentValue('basicInfo.banner', bannerUrl)
         // Save draft immediately after successful upload
         const formData = watch()
-        const updatedFormData = {
-          ...formData,
-          banner: bannerUrl,
-        }
-        await saveDraft(updatedFormData, currentTier, 0)
+        await saveDraft(formData, currentTier, 0)
         return bannerUrl
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to upload banner')
@@ -216,7 +226,7 @@ export function BasicInfoSection({
         setIsUploadingBanner(false)
       }
     },
-    [uploadBanner, setValue, watch, currentTier, saveDraft]
+    [uploadBanner, setValue, setParentValue, watch, currentTier, saveDraft]
   )
 
   // Apply theme-specific styles
@@ -244,32 +254,49 @@ export function BasicInfoSection({
             : 'bg-github-canvas-default rounded-lg p-4'
   }`
 
-  // Check if required fields are filled for minting
-  const { requiredFields, canMint } = useMemo(() => {
-    // Watch specific fields for live updates
-    const name = watch('name')
-    const bio = watch('bio')
-    const avatar = watch('avatar')
+  // Track required fields
+  const [requiredFields, setRequiredFields] = useState({
+    name: false,
+    bio: false,
+    avatar: false,
+  })
 
-    const required = {
-      name: Boolean(name?.trim()),
-      bio: Boolean(bio?.trim()),
-      avatar: Boolean(avatar),
-    }
+  // Watch required fields
+  const watchedName = watch('name')
+  const watchedBio = watch('bio')
+  const watchedAvatar = watch('avatar')
 
-    console.log('Mint availability check:', {
-      required,
-      name,
-      bio,
-      avatar,
-      currentTier,
+  // Validate required fields and update parent
+  useEffect(() => {
+    const isNameValid = !!watchedName
+    const isBioValid = !!watchedBio
+    const isAvatarValid = !!watchedAvatar
+
+    setRequiredFields({
+      name: isNameValid,
+      bio: isBioValid,
+      avatar: isAvatarValid,
     })
 
-    return {
-      requiredFields: required,
-      canMint: Object.values(required).every(Boolean),
+    // All fields must be valid to enable minting
+    const isValid = isNameValid && isBioValid && isAvatarValid
+    console.log('Validation state:', {
+      name: isNameValid,
+      bio: isBioValid,
+      avatar: isAvatarValid,
+      isValid,
+    })
+
+    onValidationChange?.(isValid)
+  }, [watchedName, watchedBio, watchedAvatar, onValidationChange])
+
+  // Update validation UI classes
+  const getValidationClass = (fieldName: 'name' | 'bio' | 'avatar') => {
+    if (!requiredFields[fieldName]) {
+      return 'border-github-danger-emphasis'
     }
-  }, [watch, currentTier])
+    return ''
+  }
 
   // Handle form submission with canMint
   const handleFormSubmit = useCallback(
@@ -282,6 +309,16 @@ export function BasicInfoSection({
     [onSubmit]
   )
 
+  // Watch for changes in required fields
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      // Check if required fields are filled
+      const isValid = !!value.basicInfo?.name
+      onValidationChange?.(isValid)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, onValidationChange])
+
   return (
     <div className={sectionClasses}>
       <div className='flex items-center justify-between mb-4'>
@@ -289,20 +326,12 @@ export function BasicInfoSection({
           <h2 className='text-lg font-medium'>{t('title')}</h2>
           <p className='text-sm text-gray-500'>{t('description')}</p>
         </div>
-        <Button
-          variant='secondary'
-          onClick={() => setIsPreviewOpen(true)}
-          className='flex items-center gap-2'
-        >
-          <IconEye className='w-4 h-4' />
-          Preview
-        </Button>
       </div>
 
-      {/* Requirements Summary */}
-      <div className='mb-6 p-4 rounded-lg border border-github-border-default bg-github-canvas-subtle'>
-        <h3 className='text-sm font-medium mb-2'>Required for Minting</h3>
-        <ul className='space-y-1'>
+      {/* Required Fields List */}
+      <div className='mb-6 p-4 bg-github-canvas-default rounded-lg border border-github-border-default'>
+        <h4 className='text-sm font-medium mb-2'>Required for Minting:</h4>
+        <ul className='space-y-2'>
           <li className='flex items-center text-sm'>
             <span
               className={cn(
@@ -385,7 +414,7 @@ export function BasicInfoSection({
                   placeholder={t('name.placeholder')}
                   {...field}
                   disabled={isLoading}
-                  className={cn(!requiredFields.name && 'border-github-danger-emphasis')}
+                  className={cn(getValidationClass('name'))}
                 />
               </FormField>
             )}
@@ -408,7 +437,7 @@ export function BasicInfoSection({
                   placeholder={t('bio.placeholder')}
                   {...field}
                   disabled={isLoading}
-                  className={cn(!requiredFields.bio && 'border-github-danger-emphasis')}
+                  className={cn(getValidationClass('bio'))}
                 />
               </FormField>
             )}
@@ -466,14 +495,6 @@ export function BasicInfoSection({
           />
         </div>
       </form>
-
-      {/* Preview Modal */}
-      <ProfilePreview
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        tier={currentTier}
-        formData={watch()}
-      />
     </div>
   )
 }

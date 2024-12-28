@@ -1,14 +1,13 @@
 'use client'
 
-import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { TierCard } from './components/TierCard'
 import { IconStar } from '@/app/api/icons'
-import { useAdminCheck } from '@/app/api/auth/hooks/useAdminCheck'
-import { BasePageLayout } from '@/app/api/layouts/BasePageLayout'
-import { FullPageLayout } from '@/app/api/layouts/FullPage'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
+import { FormProvider, useForm } from 'react-hook-form'
 
 function LoadingTiers() {
   return (
@@ -24,45 +23,38 @@ function LoadingTiers() {
 
 export default function TierPage() {
   const [mounted, setMounted] = useState(false)
-  const { hasGroup, hasPro, hasOG, isLoading, refetch } = useNFTTiers()
-  const { isAdmin } = useAdminCheck()
-  const currentTier = hasOG
-    ? ProfileTier.OG
-    : hasGroup
-      ? ProfileTier.GROUP
-      : hasPro
-        ? ProfileTier.PRO
-        : ProfileTier.FREE
+  const { currentTier, isLoading: authLoading } = useAuth()
+  const methods = useForm()
 
   useEffect(() => {
     setMounted(true)
+    console.log('TierPage: Mounted')
   }, [])
 
-  const handleMintSuccess = () => {
-    refetch()
-  }
+  useEffect(() => {
+    console.log('TierPage state:', {
+      mounted,
+      authLoading,
+      currentTier,
+    })
+  }, [mounted, authLoading, currentTier])
 
-  if (!isAdmin) {
-    return null
-  }
-
-  if (!mounted || isLoading) {
+  if (!mounted || authLoading) {
+    console.log('TierPage: Loading state')
     return (
-      <BasePageLayout>
-        <FullPageLayout fullWidth>
-          <div className='w-full px-4 sm:px-6 lg:px-8'>
-            <LoadingTiers />
-          </div>
-        </FullPageLayout>
-      </BasePageLayout>
+      <div className='w-full px-4 sm:px-6 lg:px-8'>
+        <LoadingTiers />
+      </div>
     )
   }
+
+  console.log('TierPage: Rendering content')
 
   const tiers = [ProfileTier.FREE, ProfileTier.PRO, ProfileTier.GROUP, ProfileTier.OG]
 
   return (
-    <BasePageLayout>
-      <FullPageLayout fullWidth>
+    <FormProvider {...methods}>
+      <DualSidebarLayout>
         <div className='w-full'>
           {/* Header */}
           <div className='px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12 text-center'>
@@ -83,8 +75,7 @@ export default function TierPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className='mx-auto max-w-2xl text-sm sm:text-base text-github-fg-muted'
             >
-              Choose the perfect tier for your culinary journey. Each tier comes with unique
-              features and benefits to help you grow as a chef.
+              Manage membership tiers and their features. Only administrators can access this page.
             </motion.p>
           </div>
 
@@ -104,8 +95,8 @@ export default function TierPage() {
                 >
                   <TierCard
                     tier={tier}
-                    currentTier={currentTier}
-                    onMintSuccess={handleMintSuccess}
+                    currentTier={currentTier || ProfileTier.FREE}
+                    onMintSuccess={() => {}} // Tier status will update through auth context
                   />
                 </motion.div>
               ))}
@@ -155,7 +146,7 @@ export default function TierPage() {
             </div>
           </motion.div>
         </div>
-      </FullPageLayout>
-    </BasePageLayout>
+      </DualSidebarLayout>
+    </FormProvider>
   )
 }

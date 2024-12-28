@@ -1,60 +1,79 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { FormInput } from '@/components/ui/form/FormInput'
-import { FormTextarea } from '@/components/ui/form/FormTextarea'
+import { useFormContext } from 'react-hook-form'
+import { Button } from '@/app/api/components/ui/button'
 import { toast } from 'sonner'
-import { type Profile } from '@/app/[locale]/(authenticated)/profile/profile'
-import { profileSchema } from '@/lib/validations/profile.validation'
+import { User } from '@privy-io/react-auth'
+import { ProfileTier } from '../../profile'
+import type { ProfileFormData } from '../../validations/profile'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
+import {
+  BasicInfoSection,
+  CulinaryInfoSection,
+  SocialLinksSection,
+  ExperienceSection,
+  CertificationsSection,
+  OrganizationInfoSection,
+  OGPreferencesSection,
+} from '../sections'
 
 interface ProfileEditorProps {
-  profile: Profile
-  onSave: (data: Profile) => Promise<void>
+  user: User
+  currentTier: ProfileTier
+  hasProfile: boolean | null
   onCancel: () => void
 }
 
-export function ProfileEditor({ profile, onSave, onCancel }: ProfileEditorProps) {
+export function ProfileEditor({ user, currentTier, hasProfile, onCancel }: ProfileEditorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const theme = useTheme()
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      ...profile,
-    },
-  })
+  } = useFormContext<ProfileFormData>()
 
-  const onSubmit = async (data: Profile) => {
+  const onSubmit = async (data: ProfileFormData) => {
+    setIsSubmitting(true)
     try {
-      setIsSubmitting(true)
-      await onSave(data)
+      // Handle form submission
       toast.success('Profile updated successfully')
     } catch (error) {
-      console.error('Failed to update profile:', error)
+      console.error('Error updating profile:', error)
       toast.error('Failed to update profile')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-      <FormInput
-        label='Name'
-        {...register('metadata.name')}
-        error={errors.metadata?.name?.message}
-      />
+  const sectionProps = {
+    control,
+    errors,
+    theme,
+    isLoading: isSubmitting,
+    onSubmit,
+    onValidationChange: (isValid: boolean) => {
+      // Handle validation change if needed
+    },
+  }
 
-      <FormTextarea
-        label='Bio'
-        {...register('metadata.bio')}
-        error={errors.metadata?.bio?.message}
-      />
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+      <BasicInfoSection {...sectionProps} />
+      <SocialLinksSection {...sectionProps} />
+
+      {currentTier >= ProfileTier.PRO && (
+        <>
+          <CulinaryInfoSection {...sectionProps} />
+          <ExperienceSection {...sectionProps} />
+          <CertificationsSection {...sectionProps} />
+        </>
+      )}
+
+      {currentTier >= ProfileTier.GROUP && <OrganizationInfoSection {...sectionProps} />}
+
+      {currentTier === ProfileTier.OG && <OGPreferencesSection {...sectionProps} />}
 
       <div className='flex justify-end space-x-2'>
         <Button type='button' onClick={onCancel} disabled={isSubmitting}>

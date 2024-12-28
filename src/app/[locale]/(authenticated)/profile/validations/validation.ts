@@ -87,7 +87,12 @@ export const ogProfileSchema = groupProfileSchema
   })
   .strict()
 
-export type ProfileFormData = z.infer<typeof baseProfileSchema>
+export type ProfileFormData =
+  | z.infer<typeof freeProfileSchema>
+  | z.infer<typeof proProfileSchema>
+  | z.infer<typeof groupProfileSchema>
+  | z.infer<typeof ogProfileSchema>
+
 export type ProProfileFormData = z.infer<typeof proProfileSchema>
 export type GroupProfileFormData = z.infer<typeof groupProfileSchema>
 export type OGProfileFormData = z.infer<typeof ogProfileSchema>
