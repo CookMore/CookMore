@@ -8,7 +8,7 @@ import { Progress } from '@/app/api/components/ui/progress'
 import { AutoSaveIndicator } from './AutoSaveIndicator'
 import { ProfileTier as NFTTier, ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { Button } from '@/app/api/components/ui/button'
-import { IconEye, IconCurrencyEthereum } from '@tabler/icons-react'
+import { IconEye, IconCurrencyEthereum } from '@/app/api/icons/index'
 
 interface ProfileCreationHeaderProps {
   tier: ProfileTier | keyof typeof ProfileTier
@@ -18,10 +18,13 @@ interface ProfileCreationHeaderProps {
   lastSaved?: Date | null | undefined
   className?: string
   canMint: boolean
-  onPreview: () => void
-  onMint: () => void
+  onShowPreview: () => void
+  onCreateBadge: () => void
   isPreviewOpen?: boolean
   isMinting?: boolean
+  generationProgress?: {
+    stage: string
+  }
 }
 
 const tierIcons: Record<Lowercase<keyof typeof ProfileTier>, typeof ChefHat> = {
@@ -58,10 +61,11 @@ export function ProfileCreationHeader({
   lastSaved,
   className,
   canMint,
-  onPreview,
-  onMint,
+  onShowPreview,
+  onCreateBadge,
   isPreviewOpen,
   isMinting,
+  generationProgress,
 }: ProfileCreationHeaderProps) {
   const t = useTranslations('profile')
   const progress = (currentStep / totalSteps) * 100
@@ -83,15 +87,15 @@ export function ProfileCreationHeader({
           <div className='flex gap-2'>
             <Button
               variant='secondary'
-              onClick={onPreview}
+              onClick={onShowPreview}
               className='flex items-center gap-2'
-              disabled={isPreviewOpen}
+              disabled={isPreviewOpen || isMinting}
             >
               <IconEye className='w-4 h-4' />
               Preview
             </Button>
             <Button
-              onClick={onMint}
+              onClick={onCreateBadge}
               disabled={!canMint || isMinting}
               className={cn(
                 'flex items-center gap-2 transition-colors',
@@ -103,12 +107,16 @@ export function ProfileCreationHeader({
               {isMinting ? (
                 <>
                   <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
-                  Minting...
+                  {/* Show different states during the minting process */}
+                  {generationProgress?.stage === 'preparing' && 'Creating Ownership Badge...'}
+                  {generationProgress?.stage === 'capturing' && 'Generating Badge...'}
+                  {generationProgress?.stage === 'processing' && 'Storing Verification Data...'}
+                  {!generationProgress && 'Minting Ownership Badge...'}
                 </>
               ) : (
                 <>
                   <IconCurrencyEthereum className='w-4 h-4' />
-                  Mint Profile
+                  Mint
                 </>
               )}
             </Button>

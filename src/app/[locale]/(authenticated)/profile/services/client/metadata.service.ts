@@ -234,41 +234,20 @@ export class ProfileMetadataService {
     return publicData
   }
 
-  async generateNFTMetadata(
-    profileData: ProfileMetadata,
-    staticImage: File,
-    dynamicRenderer: string
-  ): Promise<string> {
+  async generateNFTMetadata(profileData: ProfileMetadata, staticImage: File): Promise<string> {
     try {
       // 1. Upload static image
       const { cid: staticImageCID } = await ipfsService.uploadFile(staticImage)
 
-      // 2. Upload dynamic renderer
-      const rendererBlob = new Blob([dynamicRenderer], { type: 'text/html' })
-      const rendererFile = new File([rendererBlob], 'renderer.html', { type: 'text/html' })
-      const { cid: rendererCID } = await ipfsService.uploadFile(rendererFile)
+      // 2. Transform metadata
+      const metadata = await MetadataTransformer.transformToNFTMetadata(profileData, staticImageCID)
 
-      // 3. Generate NFT metadata
-      const nftMetadata = await MetadataTransformer.transformToNFTMetadata(
-        profileData,
-        staticImageCID,
-        rendererCID,
-        typeof profileData.tier === 'number'
-          ? profileData.tier.toString()
-          : String(profileData.tier)
-      )
+      // 3. Upload metadata
+      const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+      const metadataFile = new File([metadataBlob], 'metadata.json', { type: 'application/json' })
+      const { cid: metadataCID } = await ipfsService.uploadFile(metadataFile)
 
-      // 4. Upload NFT metadata
-      const { cid: metadataCID } = await ipfsService.uploadMetadata(nftMetadata)
-
-      // Ensure proper CID format
-      const metadataCIDStr = metadataCID.toString()
-      if (!metadataCIDStr) {
-        throw new Error('Invalid metadata CID')
-      }
-
-      // Remove ipfs:// prefix if present to avoid duplication
-      return metadataCIDStr.replace('ipfs://', '')
+      return metadataCID
     } catch (error) {
       console.error('Error generating NFT metadata:', error)
       throw error
@@ -284,11 +263,7 @@ export class ProfileMetadataService {
       const dynamicRenderer = ipfsService.generateDynamicRenderer(profileData)
 
       // 3. Generate and upload metadata
-      const metadataCID = await this.generateNFTMetadata(
-        profileData,
-        staticPreview,
-        dynamicRenderer
-      )
+      const metadataCID = await this.generateNFTMetadata(profileData, staticPreview)
 
       // 4. Call contract to mint
       // Note: This will be implemented when we integrate with the contract
@@ -305,36 +280,38 @@ export class ProfileMetadataService {
     const maxAttempts = 10
     const attemptInterval = 500 // 500ms between attempts
 
-    // Wait for the preview element to be ready
-    const waitForPreviewElement = async () => {
+    // Wait for the card content element to be ready
+    const waitForCardElement = async () => {
       for (let i = 0; i < maxAttempts; i++) {
-        const previewElement = document.getElementById('profile-preview')
-        if (previewElement) {
+        const cardElement = document.getElementById('profile-card-content')
+        if (cardElement?.dataset.ready === 'true') {
           // Add extra time for content to render
           await new Promise((resolve) => setTimeout(resolve, 1000))
-          return previewElement
+          return cardElement
         }
         await new Promise((resolve) => setTimeout(resolve, attemptInterval))
-        console.log(`Waiting for preview element... Attempt ${i + 1}/${maxAttempts}`)
+        console.log(`Waiting for card content element... Attempt ${i + 1}/${maxAttempts}`)
       }
       return null
     }
 
     // Set up progress tracking
-    this.updateProgress('preparing', 0, 'Preparing preview...')
+    this.updateProgress('preparing', 0, 'Preparing badge preview...')
 
     // Wait for element
-    const previewElement = await waitForPreviewElement()
-    if (!previewElement) {
-      throw new Error('Profile preview element not found. Please ensure the preview is open.')
+    const cardElement = await waitForCardElement()
+    if (!cardElement) {
+      throw new Error(
+        'Profile card content element not found or not ready. Please ensure the preview is open.'
+      )
     }
 
     try {
       // Update progress
-      this.updateProgress('capturing', 30, 'Capturing preview...')
+      this.updateProgress('capturing', 30, 'Capturing badge...')
 
       // Use html2canvas with a delay to ensure content is rendered
-      const canvas = await html2canvas(previewElement, {
+      const canvas = await html2canvas(cardElement, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
@@ -343,7 +320,7 @@ export class ProfileMetadataService {
       })
 
       // Update progress
-      this.updateProgress('processing', 60, 'Processing image...')
+      this.updateProgress('processing', 60, 'Processing badge image...')
 
       // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve) => {
@@ -353,15 +330,15 @@ export class ProfileMetadataService {
       })
 
       // Create file from blob
-      const file = new File([blob], 'preview.png', { type: 'image/png' })
+      const file = new File([blob], 'badge.png', { type: 'image/png' })
 
       // Complete progress
-      this.updateProgress('complete', 100, 'Preview generated successfully')
+      this.updateProgress('complete', 100, 'Badge generated successfully')
 
       return file
     } catch (error) {
-      console.error('Error generating preview:', error)
-      throw new Error('Failed to generate preview image')
+      console.error('Error generating badge:', error)
+      throw new Error('Failed to generate badge image')
     }
   }
 

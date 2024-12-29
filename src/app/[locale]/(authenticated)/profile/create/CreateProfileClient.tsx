@@ -37,6 +37,7 @@ import type { MintStatus } from '../services/client/contract.service'
 import { setHasProfileCookie } from '@/app/api/utils/cookies'
 import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 import { FormProvider, useForm } from 'react-hook-form'
+import { ProfileMint } from '../components/ui/ProfileMint'
 
 export function CreateProfileClient() {
   const t = useTranslations('profile')
@@ -92,6 +93,7 @@ export function CreateProfileClient() {
     showPopover: false,
   })
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false)
+  const [isMintOpen, setIsMintOpen] = useState<boolean>(false)
   const [isMinting, setIsMinting] = useState<boolean>(false)
   const [canMint, setCanMint] = useState<boolean>(false)
   const [mintStatus, setMintStatus] = useState<MintStatus | null>(null)
@@ -322,10 +324,11 @@ export function CreateProfileClient() {
                 isSaving={isSaving}
                 lastSaved={lastSaved}
                 canMint={canMint}
-                onPreview={handlePreviewGeneration}
-                onMint={handleMint}
+                onShowPreview={() => setIsPreviewOpen(true)}
+                onCreateBadge={() => setIsMintOpen(true)}
                 isPreviewOpen={isPreviewOpen}
                 isMinting={isMinting}
+                generationProgress={isGeneratingPreview ? { stage: 'preparing' } : undefined}
               />
               <div className='space-y-4'>{renderSection()}</div>
               <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
@@ -362,22 +365,26 @@ export function CreateProfileClient() {
 
         <ProfilePreview
           isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          tier={currentTier as unknown as ProfileTier}
+          formData={watch()}
+        />
+
+        <ProfileMint
+          isOpen={isMintOpen}
           onClose={() => {
-            setIsPreviewOpen(false)
+            setIsMintOpen(false)
             setPreviewData(null)
             previewMountedRef.current = false
           }}
           tier={currentTier as unknown as ProfileTier}
           formData={watch()}
-          onGeneratePreview={handlePreviewGeneration}
+          onComplete={async () => {
+            setIsMintOpen(false)
+            window.location.href = '/profile'
+          }}
           onMint={handleMint}
           canMint={canMint && !isGeneratingPreview}
-          generationProgress={
-            isGeneratingPreview
-              ? { stage: 'preparing', progress: 0, message: 'Generating preview...' }
-              : undefined
-          }
-          onReady={handlePreviewReady}
         />
 
         {mintStatus && <MintingStatus status={mintStatus} />}

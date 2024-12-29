@@ -6,6 +6,7 @@ import { ROUTES } from '@/app/api/routes/routes'
 import { Button } from '@/app/api/components/ui/button'
 import { DefaultAvatar } from '@/app/api/avatar/DefaultAvatar'
 import { COOKIE_NAMES } from '@/app/api/auth/constants'
+import { clearCookie } from '@/app/api/utils/client-cookies'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +30,10 @@ export function AuthButton() {
 
   const handleLogout = async () => {
     try {
-      // First clear cookies
-      document.cookie = `${COOKIE_NAMES.PRIVY_TOKEN}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
-      document.cookie = `${COOKIE_NAMES.HAS_PROFILE}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
-      document.cookie = `${COOKIE_NAMES.WALLET_ADDRESS}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      // First clear cookies with proper attributes
+      clearCookie('PRIVY_TOKEN')
+      clearCookie('HAS_PROFILE')
+      clearCookie('WALLET_ADDRESS')
 
       // Then perform the logout
       await logout()

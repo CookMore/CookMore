@@ -79,10 +79,10 @@ export function ProfileDisplay({ profile, isPublicView, hasProfile, onEdit }: Pr
                 <img
                   src={getImageUrl(profile.avatar)}
                   alt='Profile'
-                  className='w-32 h-32 rounded-lg object-cover border-2 border-white shadow-md'
+                  className='w-32 h-32 rounded-full object-cover border-2 border-white shadow-md'
                 />
               ) : (
-                <div className='w-32 h-32 rounded-lg bg-github-canvas-subtle border-2 border-white shadow-md flex items-center justify-center'>
+                <div className='w-32 h-32 rounded-full bg-github-canvas-subtle border-2 border-white shadow-md flex items-center justify-center'>
                   <IconUser className='w-16 h-16 text-github-fg-muted' />
                 </div>
               )}

@@ -93,7 +93,7 @@ const nextConfig = {
           },
           {
             key: 'Set-Cookie',
-            value: 'SameSite=None; Secure',
+            value: isDev ? 'SameSite=Lax' : 'SameSite=None; Secure',
           },
         ],
       },
