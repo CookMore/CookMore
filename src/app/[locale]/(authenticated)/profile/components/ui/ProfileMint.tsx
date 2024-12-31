@@ -15,8 +15,12 @@ import { tierInfo } from '@/app/api/tiers/tiers'
 import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
-import type { Abi } from 'viem'
+import { profileMetadataService } from '@/app/[locale]/(authenticated)/profile/services/client/metadata.service'
+import { contractService } from '@/app/[locale]/(authenticated)/profile/services/client/contract.service'
+import { toast } from 'sonner'
+import { usePrivy } from '@privy-io/react-auth'
 import Image from 'next/image'
+import { MetadataTransformer } from '@/app/[locale]/(authenticated)/profile/services/transformers/metadata.transformer'
 
 interface ProfileMintProps {
   isOpen: boolean
@@ -24,7 +28,6 @@ interface ProfileMintProps {
   tier: ProfileTier
   formData?: ProfileFormData
   onComplete?: () => Promise<void>
-  onMint?: () => Promise<{ eventLog: { topics: string[]; data: string }; abi: Abi }>
   canMint?: boolean
   embedded?: boolean
   showHeader?: boolean
@@ -102,7 +105,6 @@ export function ProfileMint({
     version: '1.0',
   },
   onComplete,
-  onMint,
   canMint,
   embedded,
   showHeader,
@@ -113,6 +115,7 @@ export function ProfileMint({
   const [canActuallyMint, setCanActuallyMint] = useState(false)
   const previewMountedRef = useRef(false)
   const previewRef = useRef<HTMLDivElement>(null)
+  const { connectWallet, authenticated } = usePrivy()
 
   // Handle preview mount
   useEffect(() => {
@@ -144,25 +147,65 @@ export function ProfileMint({
   }, [formData, canMint, isPreviewMounted])
 
   const handleMint = async () => {
-    if (!onMint || !isAuthenticated || !canActuallyMint) return
+    if (!isAuthenticated || !canActuallyMint) return
 
     setIsMinting(true)
     try {
-      const mintResult = await onMint()
-      if (!mintResult?.eventLog) {
-        throw new Error('No mint event log received')
+      if (!authenticated || !user?.wallet) {
+        console.log('User not authenticated or wallet not connected. Connecting wallet...')
+        await connectWallet()
       }
 
-      const decodedEvent = decodeProfileEvent(mintResult.eventLog, mintResult.abi)
-      console.log('Decoded Mint Event:', decodedEvent)
+      console.log('Data for IPFS upload:', formData)
 
-      if (!decodedEvent?.args) {
-        throw new Error('Failed to decode mint event')
+      // Simplified formData processing
+      const updatedFormData = {
+        ...formData,
+        businessOperations: {
+          ...formData.businessOperations,
+          serviceTypes: (formData.businessOperations?.serviceTypes || []).filter((type) =>
+            ['dine-in', 'takeout', 'delivery', 'catering', 'training'].includes(type)
+          ),
+        },
+        culinaryInfo: {
+          ...formData.culinaryInfo,
+          expertise: ['beginner', 'intermediate', 'advanced', 'professional'].includes(
+            formData.culinaryInfo?.expertise
+          )
+            ? formData.culinaryInfo.expertise
+            : 'beginner',
+        },
       }
 
-      const { wallet, profileId, metadataURI } = decodedEvent.args as any
-      if (wallet?.toLowerCase() !== user?.wallet?.address?.toLowerCase()) {
-        throw new Error('Minted profile wallet address mismatch')
+      // Use the updated formData for the generateStaticPreview function
+      const staticImage = await profileMetadataService.generateStaticPreview(updatedFormData)
+      const { cid: staticImageCID } = await ipfsService.uploadFile(staticImage)
+
+      // Use MetadataTransformer to handle all transformations
+      const nftMetadata = await MetadataTransformer.transformToNFTMetadata(
+        formData,
+        staticImageCID,
+        tier
+      )
+      console.log('Transformed NFT Metadata:', nftMetadata)
+
+      // Mint the NFT using the combined metadata
+      const metadataCID = await profileMetadataService.generateNFTMetadata(nftMetadata, staticImage)
+      console.log('Metadata CID generated:', metadataCID)
+
+      const result = await contractService.mintProfile(metadataCID)
+      console.log('Mint result:', result)
+
+      // Decode the ProfileCreated event
+      const profileCreatedEvent = decodeProfileEvent(result.logs, contractService.abi)
+      if (!profileCreatedEvent) {
+        throw new Error('ProfileCreated event not found in transaction receipt')
+      }
+
+      console.log('Decoded ProfileCreated event:', profileCreatedEvent)
+
+      if (!result.success) {
+        throw new Error('Failed to mint profile')
       }
 
       if (onComplete) {

@@ -152,7 +152,7 @@ export function ProfilePreview({
       <DialogContent className='fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] overflow-y-auto z-[200] bg-github-canvas-default rounded-lg max-w-6xl shadow-2xl'>
         <div className='flex items-stretch justify-center p-8'>
           {/* Left side: Profile Info */}
-          <div className='w-[400px] shrink-0'>
+          <div className='w-[400px] shrink-0' id='profile-info-content'>
             <h2 className='text-lg font-semibold mb-4'>Profile Information</h2>
             <div className='rounded-lg border border-github-border-default bg-github-canvas-default p-4'>
               <ProfileSections formData={formData} />
@@ -164,19 +164,17 @@ export function ProfilePreview({
 
           {/* Right side: Mint UI */}
           <div className='w-[400px] shrink-0'>
-            <div id='profile-card-content' data-ready={isPreviewMounted}>
-              <ProfileMint
-                isOpen={true}
-                onClose={() => {}}
-                tier={tier}
-                formData={formData}
-                onComplete={onComplete}
-                onMint={handleMint}
-                canMint={true}
-                embedded={true}
-                showHeader={true}
-              />
-            </div>
+            <ProfileMint
+              isOpen={true}
+              onClose={() => {}}
+              tier={tier}
+              formData={formData}
+              onComplete={onComplete}
+              onMint={handleMint}
+              canMint={true}
+              embedded={true}
+              showHeader={true}
+            />
           </div>
         </div>
       </DialogContent>

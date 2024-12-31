@@ -8,6 +8,32 @@ export interface OnChainMetadata {
   ipfsNotesCID: string // IPFS hash for extended data
 }
 
+export interface NFTMetadata extends IPFSMetadata {
+  properties: {
+    static_render: string
+    profile_data: ExtendedProfileData
+    tier_info: {
+      tier: string
+      tier_level: number
+      mint_date: string
+    }
+  }
+}
+
+/**
+ * Basic information structure
+ */
+interface BasicInfo {
+  name: string
+  bio?: string
+  avatar?: string
+  location?: string
+  social?: {
+    twitter?: string
+    website?: string
+  }
+}
+
 /**
  * Extended profile data stored in IPFS
  */
@@ -74,9 +100,48 @@ export interface CompleteProfileMetadata {
 }
 
 /**
+ * Profile metadata structure
+ */
+export interface ProfileMetadata {
+  basicInfo: BasicInfo
+  // ... other properties ...
+}
+
+/**
  * Metadata validation result
  */
 export interface MetadataValidationResult {
   valid: boolean
   errors?: string[]
+}
+
+export interface OGExtension {
+  ogBenefits: {
+    joinDate: string
+    memberNumber: number
+    customBranding: {
+      primaryColor: string
+      secondaryColor: string
+    }
+    apiAccess: {
+      enabled: boolean
+    }
+  }
+  showcase: {
+    featured: boolean
+    highlights: string[]
+    specialAccess: string[]
+  }
+  network: {
+    mentorship: {
+      available: boolean
+      specialties: string[]
+    }
+    collaborations: string[]
+    events: string[]
+  }
+  verificationStatus: {
+    verified: boolean
+    verificationLevel: string
+  }
 }

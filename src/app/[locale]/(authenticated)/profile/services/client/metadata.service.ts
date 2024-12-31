@@ -14,6 +14,8 @@ import { MetadataTransformer } from '../transformers/metadata.transformer'
 import html2canvas from 'html2canvas'
 import { contractService } from './contract.service'
 import type { MintStatus } from './contract.service'
+import { NFTMetadata } from '../../types/metadata'
+import { OGExtension } from '../../types/metadata'
 
 export type GenerationProgress = {
   stage: 'preparing' | 'loading-images' | 'capturing' | 'processing' | 'complete'
@@ -61,9 +63,13 @@ export class ProfileMetadataService {
     const baseMetadata = {
       version: CURRENT_PROFILE_VERSION,
       tier,
-      name: '',
-      bio: '',
-      avatar: '',
+      basicInfo: {
+        name: '',
+        bio: '',
+        avatar: '',
+        location: '',
+        social: { twitter: '', website: '' },
+      },
       social: { urls: [], labels: [] },
       preferences: {
         theme: 'system' as const,
@@ -78,6 +84,7 @@ export class ProfileMetadataService {
         cuisineTypes: [],
         techniques: [],
         equipment: [],
+        certifications: [],
       },
       achievements: {
         recipesCreated: 0,
@@ -135,6 +142,21 @@ export class ProfileMetadataService {
         operatingHours: [],
         serviceTypes: [],
         specializations: [],
+        capacity: {
+          seating: undefined,
+          eventSpace: undefined,
+          trainingCapacity: undefined,
+          maxOccupancy: undefined,
+        },
+      },
+      culinaryInfo: {
+        expertise: 'beginner' as const,
+        specialties: [],
+        dietaryPreferences: [],
+        cuisineTypes: [],
+        techniques: [],
+        equipment: [],
+        certifications: [],
       },
     }
 
@@ -211,18 +233,16 @@ export class ProfileMetadataService {
     const { tier } = metadata
     const publicData: Partial<ProfileMetadata> = {
       tier,
-      name: metadata.name,
-      bio: metadata.bio,
-      avatar: metadata.avatar,
+      basicInfo: metadata.basicInfo,
     }
 
-    if (tier === ProfileTier.PRO && 'experience' in metadata) {
+    if (tier === ProfileTier.PRO) {
       const proMetadata = metadata as ProProfileMetadata
       publicData.experience = {
         current: proMetadata.experience.current,
         history: proMetadata.experience.history,
       }
-    } else if (tier === ProfileTier.GROUP && 'organizationInfo' in metadata) {
+    } else if (tier === ProfileTier.GROUP) {
       const groupMetadata = metadata as GroupProfileMetadata
       publicData.organizationInfo = {
         type: groupMetadata.organizationInfo.type,
@@ -234,17 +254,21 @@ export class ProfileMetadataService {
     return publicData
   }
 
-  async generateNFTMetadata(profileData: ProfileMetadata, staticImage: File): Promise<string> {
+  async generateNFTMetadata(nftMetadata: NFTMetadata, staticImage: File): Promise<string> {
     try {
       // 1. Upload static image
       const { cid: staticImageCID } = await ipfsService.uploadFile(staticImage)
 
-      // 2. Transform metadata
-      const metadata = await MetadataTransformer.transformToNFTMetadata(profileData, staticImageCID)
+      // Log the metadata to be uploaded
+      console.log('NFT Metadata:', nftMetadata)
 
-      // 3. Upload metadata
-      const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+      // 3. Upload NFT metadata
+      const metadataBlob = new Blob([JSON.stringify(nftMetadata)], { type: 'application/json' })
       const metadataFile = new File([metadataBlob], 'metadata.json', { type: 'application/json' })
+
+      // Log the file details
+      console.log('Metadata File:', metadataFile)
+
       const { cid: metadataCID } = await ipfsService.uploadFile(metadataFile)
 
       return metadataCID
@@ -259,14 +283,10 @@ export class ProfileMetadataService {
       // 1. Generate static preview
       const staticPreview = await this.generateStaticPreview(profileData)
 
-      // 2. Generate dynamic renderer HTML
-      const dynamicRenderer = ipfsService.generateDynamicRenderer(profileData)
-
-      // 3. Generate and upload metadata
+      // 2. Generate and upload NFT metadata
       const metadataCID = await this.generateNFTMetadata(profileData, staticPreview)
 
-      // 4. Call contract to mint
-      // Note: This will be implemented when we integrate with the contract
+      // 3. Mint the profile using the metadata CID
       const tokenId = await this.mintWithMetadata(metadataCID)
 
       return { success: true, tokenId }
@@ -279,6 +299,9 @@ export class ProfileMetadataService {
   async generateStaticPreview(formData: Partial<GroupProfileMetadata>): Promise<File> {
     const maxAttempts = 10
     const attemptInterval = 500 // 500ms between attempts
+
+    // Example usage of formData
+    console.log('Generating preview for:', formData)
 
     // Wait for the card content element to be ready
     const waitForCardElement = async () => {

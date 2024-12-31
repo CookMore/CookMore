@@ -14,11 +14,11 @@ class ProfileClientService {
   async createProfile(metadata: ProfileMetadata) {
     try {
       // Try to create profile online
-      const result = await this.profileService.createProfile(metadata)
+      const result = await this.profileService.createProfile(metadata, {})
 
       // Cache the result
       if (result.success) {
-        await profileCacheService.cacheMetadata(result.address, metadata)
+        await profileCacheService.cacheMetadata(result.data.hash, metadata)
       }
 
       return result
@@ -32,11 +32,11 @@ class ProfileClientService {
   async updateProfile(metadata: ProfileMetadata) {
     try {
       // Try to update profile online
-      const result = await this.profileService.updateProfile(metadata)
+      const result = await this.profileService.updateProfile(metadata, {}, {})
 
       // Cache the result
       if (result.success) {
-        await profileCacheService.cacheMetadata(result.address, metadata)
+        await profileCacheService.cacheMetadata(result.data.hash, metadata)
       }
 
       return result
@@ -50,7 +50,7 @@ class ProfileClientService {
   async deleteProfile() {
     try {
       // Try to delete profile online
-      const result = await this.profileService.deleteProfile()
+      const result = await this.profileService.deleteProfile({}, {})
 
       // Clear cache if successful
       if (result.success) {

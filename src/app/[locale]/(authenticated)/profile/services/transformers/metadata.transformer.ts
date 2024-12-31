@@ -20,7 +20,8 @@ export class MetadataTransformer {
    */
   static async transformFormData(
     formData: ProfileFormData,
-    avatarCID?: string
+    avatarCID?: string,
+    ipfsNotesCID?: string
   ): Promise<{
     onChainMetadata: OnChainMetadata
     ipfsMetadata: IPFSMetadata
@@ -42,11 +43,17 @@ export class MetadataTransformer {
       name: formData.basicInfo.name,
       bio: formData.basicInfo?.bio || '',
       avatar: avatarCID || '',
-      ipfsNotesCID: '', // Will be set after IPFS upload
+      ipfsNotesCID: ipfsNotesCID || '',
     }
 
     // Ensure single ipfs:// prefix
-    const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+    const formatIpfsUrl = (cid: string) => {
+      if (typeof cid !== 'string' || cid === '0') {
+        console.warn('Invalid CID:', cid)
+        return '' // Return an empty string or handle the error as needed
+      }
+      return `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+    }
 
     // Extended data for IPFS storage
     const extendedData: ExtendedProfileData = {
@@ -58,13 +65,39 @@ export class MetadataTransformer {
       website: formData.basicInfo.social?.website,
 
       // Culinary Info
-      culinaryInfo: formData.culinaryInfo,
+      culinaryInfo: formData.culinaryInfo || {
+        expertise: 'beginner',
+        specialties: [],
+        dietaryPreferences: [],
+        cuisineTypes: [],
+        techniques: [],
+        equipment: [],
+      },
 
       // Achievements
-      achievements: formData.achievements,
+      achievements: formData.achievements || {
+        recipesCreated: 0,
+        recipesForked: 0,
+        totalLikes: 0,
+        badges: [],
+      },
 
       // Social Links
-      social: formData.socialLinks || {},
+      social: formData.socialLinks || { urls: [], labels: [] },
+
+      // Business Operations
+      businessOperations: formData.businessOperations || {
+        operatingHours: [],
+        serviceTypes: [],
+        capacity: {},
+        specializations: [],
+      },
+
+      // Certifications
+      certifications: formData.certifications || [],
+
+      // Media
+      media: formData.media || { gallery: [], documents: [] },
     }
 
     // Complete IPFS metadata structure
@@ -152,10 +185,16 @@ export class MetadataTransformer {
       )
 
       // Ensure single ipfs:// prefix
-      const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+      const formatIpfsUrl = (cid: string) => {
+        if (typeof cid !== 'string' || cid === '0') {
+          console.warn('Invalid CID:', cid)
+          return '' // Return an empty string or handle the error as needed
+        }
+        return `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+      }
 
-      // Get proper tier string and ensure it's never undefined
-      const tierString = ProfileTier[tier].toLowerCase()
+      // Check if tier is defined and provide a default if necessary
+      const tierString = ProfileTier[tier]?.toLowerCase() || 'free'
       const tierLevel = this.getTierLevel(tierString)
 
       // Create standardized NFT metadata

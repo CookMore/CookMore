@@ -22,7 +22,6 @@ import {
 import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useProfileStep } from '../ProfileStepContext'
-import { useFormContext } from 'react-hook-form'
 import { ProfileSidebar } from '../components/ui/ProfileSidebar'
 import { useProfileStorage } from '../components/hooks/core/useProfileStorage'
 import { cn } from '@/app/api/utils/utils'
@@ -31,13 +30,11 @@ import { ProfilePreview } from '../components/ui/ProfilePreview'
 import { MintingStatus } from '../components/ui/MintingStatus'
 import { profileMetadataService } from '../services/client/metadata.service'
 import { ipfsService } from '../services/ipfs/ipfs.service'
-import { contractService } from '../services/client/contract.service'
 import { toast } from 'sonner'
 import type { MintStatus } from '../services/client/contract.service'
-import { setHasProfileCookie } from '@/app/api/utils/cookies'
-import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ProfileMint } from '../components/ui/ProfileMint'
+import { usePrivy } from '@privy-io/react-auth'
 
 export function CreateProfileClient() {
   const t = useTranslations('profile')
@@ -180,84 +177,6 @@ export function CreateProfileClient() {
     }
   }
 
-  // Handle minting
-  const handleMint = async () => {
-    try {
-      console.log('Starting mint process...')
-      let currentPreviewData = previewData
-
-      if (!currentPreviewData) {
-        console.log('No preview data, generating...')
-        setIsGeneratingPreview(true)
-        currentPreviewData = await handlePreviewGeneration()
-        if (!currentPreviewData?.staticPreview || !currentPreviewData?.dynamicRenderer) {
-          throw new Error('Failed to generate complete preview')
-        }
-      }
-
-      console.log('Preview data ready:', currentPreviewData)
-      setIsMinting(true)
-
-      // Set up contract service callbacks
-      contractService.setStatusCallback(async (status) => {
-        console.log('Mint status update:', status)
-        setMintStatus(status)
-
-        if (status.status === 'complete' && status.transaction) {
-          // Wait for transaction confirmation
-          const receipt = await status.transaction.wait()
-          console.log('Transaction receipt:', receipt)
-
-          if (receipt.status === 1) {
-            // 1 means success
-            // Set HAS_PROFILE cookie after successful minting
-            await setHasProfileCookie(true)
-
-            toast.success('Profile NFT minted successfully!')
-            setIsPreviewOpen(false)
-
-            // Redirect to profile page
-            window.location.href = '/profile'
-          } else {
-            toast.error('Transaction failed')
-          }
-        } else if (status.status === 'error') {
-          toast.error(status.message || 'Failed to mint profile')
-        }
-      })
-
-      const formData = watch()
-      console.log('Form data for minting:', {
-        formData,
-        hasBasicInfo: !!formData.basicInfo,
-        basicInfoFields: formData.basicInfo,
-      })
-
-      // Add validation before proceeding
-      if (!formData.basicInfo?.name) {
-        throw new Error('Basic profile information is required')
-      }
-
-      const metadataCID = await profileMetadataService.generateNFTMetadata(
-        formData,
-        currentPreviewData.staticPreview,
-        currentPreviewData.dynamicRenderer
-      )
-
-      console.log('Metadata CID generated:', metadataCID)
-      const result = await contractService.mintProfile(metadataCID)
-      console.log('Mint result:', result)
-
-      if (!result.success) {
-        throw new Error('Failed to mint profile')
-      }
-    } catch (error) {
-      console.error('Error minting profile:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to mint profile')
-      setIsMinting(false)
-    }
-  }
-
   const renderSection = () => {
     const commonProps = {
       theme,
@@ -268,7 +187,7 @@ export function CreateProfileClient() {
 
     switch (currentStepData.id) {
       case 'basic-info':
-        return <BasicInfoSection {...commonProps} />
+        return <BasicInfoSection {...commonProps} onSubmit={handleBasicInfoSubmit} />
       case 'culinary-info':
         return <CulinaryInfoSection {...commonProps} />
       case 'social-links':
@@ -298,6 +217,24 @@ export function CreateProfileClient() {
     }
   }
 
+  // Define the handler functions
+  const handleExpandChange = (expanded: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, isExpanded: expanded }))
+  }
+
+  const handleVisibilityChange = (visible: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, isVisible: visible }))
+  }
+
+  const handlePopoverChange = (show: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, showPopover: show }))
+  }
+
+  const handleBasicInfoSubmit = (data: BasicInfoFormData) => {
+    // Handle form submission for basic info
+    console.log('Basic Info Submitted:', data)
+  }
+
   return (
     <FormProvider {...methods}>
       <div className='w-full'>
@@ -315,7 +252,12 @@ export function CreateProfileClient() {
           className='w-full'
         >
           <div className='w-full'>
-            <ProfileSessionWarning {...warningState} />
+            <ProfileSessionWarning
+              {...warningState}
+              onExpandChange={handleExpandChange}
+              onVisibilityChange={handleVisibilityChange}
+              onPopoverChange={handlePopoverChange}
+            />
             <div className='space-y-4 mt-3'>
               <ProfileCreationHeader
                 tier={currentTier as unknown as ProfileTier}
@@ -383,7 +325,6 @@ export function CreateProfileClient() {
             setIsMintOpen(false)
             window.location.href = '/profile'
           }}
-          onMint={handleMint}
           canMint={canMint && !isGeneratingPreview}
         />
 

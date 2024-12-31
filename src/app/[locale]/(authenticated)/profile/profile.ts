@@ -15,7 +15,7 @@ export enum ProfileTier {
 }
 
 // Base types used across tiers
-interface SocialLinks {
+export interface SocialLinks {
   urls: string[]
   labels: string[]
 }
@@ -359,7 +359,40 @@ export interface ProfileFormData {
   }
   tier: ProfileTier
   version: ProfileVersion
-  // ... other sections
+  culinaryInfo?: {
+    expertise: string
+    specialties: string[]
+    dietaryPreferences: string[]
+    cuisineTypes: string[]
+    techniques: string[]
+    equipment: string[]
+  }
+  achievements?: {
+    recipesCreated: number
+    recipesForked: number
+    totalLikes: number
+    badges: string[]
+  }
+  businessOperations?: {
+    operatingHours: Array<{
+      day: string
+      hours: string
+      type: 'regular' | 'holiday' | 'special'
+    }>
+    serviceTypes: string[]
+    deliveryRadius?: string
+    capacity?: {
+      seating: number
+      eventSpace: number
+    }
+    seasonalMenu: boolean
+    specializations: string[]
+  }
+  certifications?: string[]
+  media?: {
+    gallery: string[]
+    documents: string[]
+  }
 }
 
 // Service Response Types
@@ -481,3 +514,5 @@ interface OGExtension {
     verificationLevel: 'basic' | 'advanced' | 'expert'
   }
 }
+
+export { SocialLinks }
