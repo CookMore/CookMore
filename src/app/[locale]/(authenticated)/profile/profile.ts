@@ -15,7 +15,7 @@ export enum ProfileTier {
 }
 
 // Base types used across tiers
-interface SocialLinks {
+export interface SocialLinks {
   urls: string[]
   labels: string[]
 }
@@ -323,6 +323,19 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
   certifications?: string[]
 }
 
+interface GroupProfileMetadataWithBasicInfo extends GroupProfileMetadata {
+  basicInfo: {
+    name: string
+    bio?: string
+    avatar?: string
+    location?: string
+    social?: {
+      twitter?: string
+      website?: string
+    }
+  }
+}
+
 // The main type that represents all possible profiles
 export type ProfileMetadata = FreeProfileMetadata | ProProfileMetadata | GroupProfileMetadata
 
@@ -337,6 +350,7 @@ export interface Profile {
   exists?: boolean
   createdAt: number | Date
   updatedAt: number | Date
+  eventLog: { topics: string[]; data: string }
 }
 
 // Form Data Type
@@ -359,7 +373,40 @@ export interface ProfileFormData {
   }
   tier: ProfileTier
   version: ProfileVersion
-  // ... other sections
+  culinaryInfo?: {
+    expertise: string
+    specialties: string[]
+    dietaryPreferences: string[]
+    cuisineTypes: string[]
+    techniques: string[]
+    equipment: string[]
+  }
+  achievements?: {
+    recipesCreated: number
+    recipesForked: number
+    totalLikes: number
+    badges: string[]
+  }
+  businessOperations?: {
+    operatingHours: Array<{
+      day: string
+      hours: string
+      type: 'regular' | 'holiday' | 'special'
+    }>
+    serviceTypes: string[]
+    deliveryRadius?: string
+    capacity?: {
+      seating: number
+      eventSpace: number
+    }
+    seasonalMenu: boolean
+    specializations: string[]
+  }
+  certifications?: string[]
+  media?: {
+    gallery: string[]
+    documents: string[]
+  }
 }
 
 // Service Response Types
@@ -413,13 +460,6 @@ export interface Preferences {
 export interface ProfileValidation {
   success: boolean
   error?: Error
-}
-
-export interface ProfileVerification {
-  isOwner: boolean
-  hasValidTier: boolean
-  hasValidMetadata: boolean
-  isVerified: boolean
 }
 
 interface OGExtension {

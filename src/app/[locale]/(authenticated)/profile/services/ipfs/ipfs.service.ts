@@ -81,10 +81,10 @@ export class IPFSService {
     }
 
     if (!file) {
-      const error = new IPFSError('No file provided for upload')
-      toast.error(error.message)
-      throw error
+      console.error('File is missing before upload')
+      throw new IPFSError('No file provided for upload')
     }
+    console.log('Uploading file:', file.name)
 
     console.log('Starting file upload:', {
       name: file.name,
@@ -164,6 +164,8 @@ export class IPFSService {
 
   async uploadMetadata(metadata: IPFSMetadata): Promise<IpfsUploadResult> {
     try {
+      console.log('Uploading metadata:', metadata)
+
       const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
         method: 'POST',
         headers: {
@@ -226,6 +228,12 @@ export class IPFSService {
   }
 
   generateDynamicRenderer(profileData: ProfileMetadata): string {
+    if (!profileData.avatar) {
+      throw new Error('Avatar is required for rendering the profile.')
+    }
+
+    const avatarUrl = this.getHttpUrl(profileData.avatar)
+
     return `
 <!DOCTYPE html>
 <html>
@@ -249,7 +257,7 @@ export class IPFSService {
 <body>
   <div id="profile-renderer" data-profile-id="${profileData.profileId}" data-tier="${profileData.tier}">
     <div class="profile-card">
-      <img id="avatar" src="${this.getHttpUrl(profileData.avatar)}" alt="Profile" />
+      <img id="avatar" src="${avatarUrl}" alt="Profile" />
       <h1>${profileData.name}</h1>
       <p>${profileData.bio || ''}</p>
       <div id="dynamic-content"></div>

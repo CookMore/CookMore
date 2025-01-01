@@ -1,10 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { Control, useController } from 'react-hook-form'
 import { FormSection } from '@/app/api/form/FormSection'
 import { IconImage } from '@/app/api/icons'
-import { AvatarUploadPopover } from '../ui/AvatarUploadPopover'
-import { BannerContainer } from '../ui/BannerContainer'
 import type { FreeProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useIPFSUpload } from '../hooks/ipfs/useIPFS'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
@@ -15,18 +14,8 @@ interface CulinaryImagesSectionProps {
 }
 
 export function CulinaryImagesSection({ control }: CulinaryImagesSectionProps) {
-  const { field: avatarField } = useController({
-    name: 'avatar',
-    control,
-  })
-
-  const { field: bannerField } = useController({
-    name: 'banner',
-    control,
-  })
-
-  const { isUploading, uploadProgress, error, uploadAvatar, uploadBanner } = useIPFSUpload()
   const { hasGroup, hasPro, hasOG } = useNFTTiers()
+  const [images, setImages] = useState<string[]>([])
 
   // Determine current tier
   const currentTier = hasOG
@@ -37,57 +26,46 @@ export function CulinaryImagesSection({ control }: CulinaryImagesSectionProps) {
         ? ProfileTier.PRO
         : ProfileTier.FREE
 
-  const handleAvatarUpload = async (file: File) => {
+  // Function to handle image uploads
+  const handleImageUpload = async (file: File) => {
     try {
-      const cid = await uploadAvatar(file)
-      avatarField.onChange(`ipfs://${cid}`)
-      return `ipfs://${cid}`
+      const cid = await uploadImage(file) // Assume uploadImage is a function to upload images
+      setImages((prevImages) => [...prevImages, `ipfs://${cid}`])
     } catch (error) {
-      console.error('Failed to upload avatar:', error)
-      return null
+      console.error('Failed to upload image:', error)
     }
   }
 
-  const handleBannerUpload = async (file: File) => {
-    try {
-      const cid = await uploadBanner(file)
-      bannerField.onChange(`ipfs://${cid}`)
-      return `ipfs://${cid}`
-    } catch (error) {
-      console.error('Failed to upload banner:', error)
-      return null
-    }
+  // Function to remove an image
+  const handleImageRemove = (index: number) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index))
   }
 
   return (
     <FormSection
-      title='Profile Images'
-      description='Upload your profile picture and banner image'
+      title='Additional Profile Photos'
+      description='Upload additional photos for your profile'
       icon={IconImage}
     >
       <div className='space-y-6'>
+        {images.map((image, index) => (
+          <div key={index} className='flex items-center space-x-4'>
+            <img
+              src={image}
+              alt={`Profile Photo ${index + 1}`}
+              className='w-16 h-16 rounded-full'
+            />
+            <button onClick={() => handleImageRemove(index)} className='text-red-500'>
+              Remove
+            </button>
+          </div>
+        ))}
         <div className='flex flex-col items-center space-y-4'>
-          <AvatarUploadPopover
-            avatarUrl={avatarField.value}
-            onUpload={handleAvatarUpload}
-            onRemove={() => avatarField.onChange(null)}
-            isUploading={isUploading}
-            uploadProgress={uploadProgress}
-            error={error}
-            tier={currentTier}
+          <input
+            type='file'
+            onChange={(e) => e.target.files && handleImageUpload(e.target.files[0])}
           />
-          <span className='text-sm text-github-fg-muted'>Profile Picture</span>
-        </div>
-
-        <div className='space-y-4'>
-          <BannerContainer
-            imageUrl={bannerField.value}
-            onImageSelect={handleBannerUpload}
-            onImageRemove={() => bannerField.onChange(null)}
-            loading={isUploading}
-            uploadProgress={uploadProgress}
-          />
-          <span className='text-sm text-github-fg-muted'>Banner Image</span>
+          <span className='text-sm text-github-fg-muted'>Upload a new photo</span>
         </div>
       </div>
     </FormSection>

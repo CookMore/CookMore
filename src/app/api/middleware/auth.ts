@@ -94,6 +94,16 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
       })
     }
 
+    if (walletAddress) {
+      response.cookies.set(COOKIE_NAMES.WALLET_ADDRESS, walletAddress, {
+        httpOnly: false, // Allow client-side access
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 24 * 60 * 60, // 24 hours
+      })
+    }
+
     return response
   } catch (error) {
     console.error('Auth middleware error:', error)

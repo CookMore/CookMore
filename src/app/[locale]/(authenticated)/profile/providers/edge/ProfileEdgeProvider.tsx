@@ -31,10 +31,14 @@ export function ProfileEdgeProvider({
     setError(null)
 
     try {
-      const response = await fetch(`/api/profile/address/${address}`)
-      const data = await response.json()
+      const response = await fetch(`/api/profile/${address}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile')
+      }
+      const data: ProfileResponse = await response.json()
       setProfile(data)
     } catch (err) {
+      console.error('Error fetching profile:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch profile'))
     } finally {
       setIsLoading(false)

@@ -9,6 +9,8 @@ import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
 import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
 import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
+import { COOKIE_NAMES } from '@/app/api/auth/constants'
+import { setCookie, clearCookie } from '@/app/api/utils/client-cookies'
 
 interface ContractServiceResponse {
   success: boolean
@@ -93,6 +95,9 @@ export function useAuth(): UseAuthResult {
         setHasProfile(false)
         clearHasProfileCookie()
       }
+
+      // Set wallet address cookie
+      setCookie('WALLET_ADDRESS', user.wallet.address)
     } catch (error) {
       console.error('Error updating profile state:', error)
       setError(error as Error)
@@ -122,6 +127,7 @@ export function useAuth(): UseAuthResult {
         setIsAdmin(false)
         setIsLoading(false)
         clearHasProfileCookie()
+        clearCookie('WALLET_ADDRESS')
       }
     }
   }, [privyReady, authenticated, user?.wallet?.address, updateProfileState])
@@ -148,6 +154,7 @@ export function useAuth(): UseAuthResult {
       setCurrentTier(ProfileTier.FREE)
       setIsAdmin(false)
       clearHasProfileCookie()
+      clearCookie('WALLET_ADDRESS')
       router.push(ROUTES.MARKETING.HOME)
     } catch (error) {
       console.error('Logout error:', error)

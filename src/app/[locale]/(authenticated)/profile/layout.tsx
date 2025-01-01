@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation'
 import { usePrivy } from '@privy-io/react-auth'
 import { ProfileEdgeProvider } from './providers/edge/ProfileEdgeProvider'
 import { ProfileTier } from './profile'
+import React, { ReactElement } from 'react'
 
 interface ProfileLayoutProps {
   children: React.ReactNode
@@ -19,6 +20,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const { user } = usePrivy()
   const isCreatingProfile = pathname?.includes('/profile/create')
   const walletAddress = user?.wallet?.address
+  console.log('Wallet Address:', walletAddress)
 
   // Only use profile hook if not creating profile
   const { currentTier: tier } = !isCreatingProfile ? useProfile() : { currentTier: null }
@@ -61,9 +63,10 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
           }
           isLeftSidebarExpanded={isExpanded}
         >
-          {/* Main content area */}
           <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8'>
-            {children}
+            {React.isValidElement(children)
+              ? React.cloneElement(children as ReactElement<any>, { walletAddress })
+              : children}
           </div>
         </DualSidebarLayout>
       )}

@@ -1,11 +1,10 @@
 import type { ProfileFormData } from '../../profile'
 import type { OnChainMetadata, IPFSMetadata, ExtendedProfileData } from '../../types/metadata'
+import { ProfileTier } from '../../profile'
 
 interface NFTMetadata extends IPFSMetadata {
-  animation_url?: string
   properties: {
     static_render: string
-    dynamic_render: string
     profile_data: ExtendedProfileData
     tier_info: {
       tier: string
@@ -21,7 +20,8 @@ export class MetadataTransformer {
    */
   static async transformFormData(
     formData: ProfileFormData,
-    avatarCID?: string
+    avatarCID?: string,
+    ipfsNotesCID?: string
   ): Promise<{
     onChainMetadata: OnChainMetadata
     ipfsMetadata: IPFSMetadata
@@ -43,11 +43,17 @@ export class MetadataTransformer {
       name: formData.basicInfo.name,
       bio: formData.basicInfo?.bio || '',
       avatar: avatarCID || '',
-      ipfsNotesCID: '', // Will be set after IPFS upload
+      ipfsNotesCID: ipfsNotesCID || '',
     }
 
     // Ensure single ipfs:// prefix
-    const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+    const formatIpfsUrl = (cid: string) => {
+      if (typeof cid !== 'string' || cid === '0') {
+        console.warn('Invalid CID:', cid)
+        return '' // Return an empty string or handle the error as needed
+      }
+      return `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+    }
 
     // Extended data for IPFS storage
     const extendedData: ExtendedProfileData = {
@@ -59,13 +65,39 @@ export class MetadataTransformer {
       website: formData.basicInfo.social?.website,
 
       // Culinary Info
-      culinaryInfo: formData.culinaryInfo,
+      culinaryInfo: formData.culinaryInfo || {
+        expertise: 'beginner',
+        specialties: [],
+        dietaryPreferences: [],
+        cuisineTypes: [],
+        techniques: [],
+        equipment: [],
+      },
 
       // Achievements
-      achievements: formData.achievements,
+      achievements: formData.achievements || {
+        recipesCreated: 0,
+        recipesForked: 0,
+        totalLikes: 0,
+        badges: [],
+      },
 
       // Social Links
-      social: formData.socialLinks || {},
+      social: formData.socialLinks || { urls: [], labels: [] },
+
+      // Business Operations
+      businessOperations: formData.businessOperations || {
+        operatingHours: [],
+        serviceTypes: [],
+        capacity: {},
+        specializations: [],
+      },
+
+      // Certifications
+      certifications: formData.certifications || [],
+
+      // Media
+      media: formData.media || { gallery: [], documents: [] },
     }
 
     // Complete IPFS metadata structure
@@ -144,8 +176,7 @@ export class MetadataTransformer {
   static async transformToNFTMetadata(
     formData: ProfileFormData,
     staticImageCID: string,
-    dynamicRendererCID: string,
-    tier: string
+    tier: ProfileTier
   ): Promise<NFTMetadata> {
     try {
       const { onChainMetadata, ipfsMetadata } = await this.transformFormData(
@@ -154,27 +185,41 @@ export class MetadataTransformer {
       )
 
       // Ensure single ipfs:// prefix
-      const formatIpfsUrl = (cid: string) => `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+      const formatIpfsUrl = (cid: string) => {
+        if (typeof cid !== 'string' || cid === '0') {
+          console.warn('Invalid CID:', cid)
+          return '' // Return an empty string or handle the error as needed
+        }
+        return `ipfs://${cid.replace(/^ipfs:\/\//, '')}`
+      }
 
+      // Check if tier is defined and provide a default if necessary
+      const tierString = ProfileTier[tier]?.toLowerCase() || 'free'
+      const tierLevel = this.getTierLevel(tierString)
+
+      // Create standardized NFT metadata
       return {
         ...ipfsMetadata,
         name: `${formData.basicInfo.name}'s Chef Profile`,
-        description: formData.basicInfo.bio || '',
+        description: formData.basicInfo.bio || 'A CookMore Chef Profile',
         image: formatIpfsUrl(staticImageCID),
-        animation_url: formatIpfsUrl(dynamicRendererCID),
         attributes: [
-          { trait_type: 'Tier', value: tier },
+          { trait_type: 'Tier', value: tierString },
           { trait_type: 'Name', value: formData.basicInfo.name },
           { trait_type: 'Specialty', value: formData.culinaryInfo?.expertise || 'Beginner' },
-          // Add other relevant attributes
+          { trait_type: 'Level', value: tierLevel },
+          { trait_type: 'Creation Date', value: new Date().toISOString().split('T')[0] },
         ],
         properties: {
           static_render: formatIpfsUrl(staticImageCID),
-          dynamic_render: formatIpfsUrl(dynamicRendererCID),
-          profile_data: ipfsMetadata.attributes,
+          profile_data: {
+            ...ipfsMetadata.attributes,
+            tier: tierString,
+            tier_level: tierLevel,
+          },
           tier_info: {
-            tier,
-            tier_level: this.getTierLevel(tier),
+            tier: tierString,
+            tier_level: tierLevel,
             mint_date: new Date().toISOString(),
           },
         },
@@ -184,6 +229,7 @@ export class MetadataTransformer {
         error,
         formData,
         hasBasicInfo: !!formData.basicInfo,
+        tier,
       })
       throw error
     }

@@ -24,3 +24,6 @@ export const tierColorMap = {
     icon: 'text-github-open-emphasis',
   },
 }
+
+export const PROFILE_CREATED_SIGNATURE =
+  '0x02ed4ee0412e67bbc9ed1687f3ad6bb7134d359d45994f3bf5302e91d81cf61f'

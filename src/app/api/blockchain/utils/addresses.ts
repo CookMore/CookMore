@@ -8,7 +8,6 @@ export const TESTNET_ADDRESSES = {
 
   // Registry Contracts
   PROFILE_REGISTRY: '0x0C3897538e000dAdAEA1bb10D5757fC473972018' as Address,
-  REGISTRY: '0xBaaF41cd0A65868be2789026837098Fa9Af0ecd9' as Address,
 
   // Membership Tokens
   TIER_CONTRACT: '0x947b40801581E896C29dD73f9C7f5dd710877b64' as Address,

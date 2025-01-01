@@ -3,6 +3,7 @@
 import { ProfileApiService } from '@/app/api/edge'
 import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
 import type { ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 
 class ProfileClientService {
   private profileService: ProfileApiService
@@ -14,11 +15,21 @@ class ProfileClientService {
   async createProfile(metadata: ProfileMetadata) {
     try {
       // Try to create profile online
-      const result = await this.profileService.createProfile(metadata)
+      const result = await this.profileService.createProfile(metadata, {})
 
       // Cache the result
       if (result.success) {
-        await profileCacheService.cacheMetadata(result.address, metadata)
+        // Decode the event data
+        const decodedData = decodeProfileEvent(result.data)
+
+        // Log the decoded data to inspect its structure
+        console.log('Decoded Data:', decodedData)
+
+        // Check if decodedData is not null before using it
+        if (decodedData) {
+          // Cache the decoded data if necessary
+          await profileCacheService.cacheMetadata(decodedData.correctProperty, metadata)
+        }
       }
 
       return result
@@ -32,11 +43,12 @@ class ProfileClientService {
   async updateProfile(metadata: ProfileMetadata) {
     try {
       // Try to update profile online
-      const result = await this.profileService.updateProfile(metadata)
+      const profileId = metadata.id // Ensure 'id' is a string field in ProfileMetadata
+      const result = await this.profileService.updateProfile(profileId, {}, {})
 
       // Cache the result
       if (result.success) {
-        await profileCacheService.cacheMetadata(result.address, metadata)
+        await profileCacheService.cacheMetadata(result.data.hash, metadata)
       }
 
       return result
@@ -50,7 +62,7 @@ class ProfileClientService {
   async deleteProfile() {
     try {
       // Try to delete profile online
-      const result = await this.profileService.deleteProfile()
+      const result = await this.profileService.deleteProfile({}, {})
 
       // Clear cache if successful
       if (result.success) {

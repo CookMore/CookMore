@@ -22,7 +22,6 @@ import {
 import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useProfileStep } from '../ProfileStepContext'
-import { useFormContext } from 'react-hook-form'
 import { ProfileSidebar } from '../components/ui/ProfileSidebar'
 import { useProfileStorage } from '../components/hooks/core/useProfileStorage'
 import { cn } from '@/app/api/utils/utils'
@@ -31,14 +30,14 @@ import { ProfilePreview } from '../components/ui/ProfilePreview'
 import { MintingStatus } from '../components/ui/MintingStatus'
 import { profileMetadataService } from '../services/client/metadata.service'
 import { ipfsService } from '../services/ipfs/ipfs.service'
-import { contractService } from '../services/client/contract.service'
 import { toast } from 'sonner'
 import type { MintStatus } from '../services/client/contract.service'
-import { setHasProfileCookie } from '@/app/api/utils/cookies'
-import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 import { FormProvider, useForm } from 'react-hook-form'
+import { ProfileMint } from '../components/ui/ProfileMint'
+import { usePrivy } from '@privy-io/react-auth'
+import { getProfile } from '../services/server/profile.service'
 
-export function CreateProfileClient() {
+export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' }) {
   const t = useTranslations('profile')
   const { theme } = useTheme()
   const {
@@ -52,27 +51,15 @@ export function CreateProfileClient() {
     canGoNext: isLastStep,
   } = useProfileStep()
 
-  const methods = useForm<ProfileFormData>({
-    defaultValues: {
-      basicInfo: {
-        name: '',
-        bio: '',
-        avatar: '',
-        banner: '',
-        location: '',
-        social: {
-          twitter: '',
-          website: '',
-        },
-      },
-      socialLinks: {
-        twitter: '',
-        website: '',
-      },
-      tier: undefined,
-      version: '1.0',
-    },
-  })
+  const methods = useForm<ProfileFormData>()
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = mode === 'edit' ? await fetchExistingProfileData() : getDefaultValues()
+      methods.reset(data)
+    }
+    fetchData()
+  }, [mode, methods])
 
   const {
     control,
@@ -92,6 +79,7 @@ export function CreateProfileClient() {
     showPopover: false,
   })
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false)
+  const [isMintOpen, setIsMintOpen] = useState<boolean>(false)
   const [isMinting, setIsMinting] = useState<boolean>(false)
   const [canMint, setCanMint] = useState<boolean>(false)
   const [mintStatus, setMintStatus] = useState<MintStatus | null>(null)
@@ -178,84 +166,6 @@ export function CreateProfileClient() {
     }
   }
 
-  // Handle minting
-  const handleMint = async () => {
-    try {
-      console.log('Starting mint process...')
-      let currentPreviewData = previewData
-
-      if (!currentPreviewData) {
-        console.log('No preview data, generating...')
-        setIsGeneratingPreview(true)
-        currentPreviewData = await handlePreviewGeneration()
-        if (!currentPreviewData?.staticPreview || !currentPreviewData?.dynamicRenderer) {
-          throw new Error('Failed to generate complete preview')
-        }
-      }
-
-      console.log('Preview data ready:', currentPreviewData)
-      setIsMinting(true)
-
-      // Set up contract service callbacks
-      contractService.setStatusCallback(async (status) => {
-        console.log('Mint status update:', status)
-        setMintStatus(status)
-
-        if (status.status === 'complete' && status.transaction) {
-          // Wait for transaction confirmation
-          const receipt = await status.transaction.wait()
-          console.log('Transaction receipt:', receipt)
-
-          if (receipt.status === 1) {
-            // 1 means success
-            // Set HAS_PROFILE cookie after successful minting
-            await setHasProfileCookie(true)
-
-            toast.success('Profile NFT minted successfully!')
-            setIsPreviewOpen(false)
-
-            // Redirect to profile page
-            window.location.href = '/profile'
-          } else {
-            toast.error('Transaction failed')
-          }
-        } else if (status.status === 'error') {
-          toast.error(status.message || 'Failed to mint profile')
-        }
-      })
-
-      const formData = watch()
-      console.log('Form data for minting:', {
-        formData,
-        hasBasicInfo: !!formData.basicInfo,
-        basicInfoFields: formData.basicInfo,
-      })
-
-      // Add validation before proceeding
-      if (!formData.basicInfo?.name) {
-        throw new Error('Basic profile information is required')
-      }
-
-      const metadataCID = await profileMetadataService.generateNFTMetadata(
-        formData,
-        currentPreviewData.staticPreview,
-        currentPreviewData.dynamicRenderer
-      )
-
-      console.log('Metadata CID generated:', metadataCID)
-      const result = await contractService.mintProfile(metadataCID)
-      console.log('Mint result:', result)
-
-      if (!result.success) {
-        throw new Error('Failed to mint profile')
-      }
-    } catch (error) {
-      console.error('Error minting profile:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to mint profile')
-      setIsMinting(false)
-    }
-  }
-
   const renderSection = () => {
     const commonProps = {
       theme,
@@ -266,7 +176,7 @@ export function CreateProfileClient() {
 
     switch (currentStepData.id) {
       case 'basic-info':
-        return <BasicInfoSection {...commonProps} />
+        return <BasicInfoSection {...commonProps} onSubmit={handleBasicInfoSubmit} />
       case 'culinary-info':
         return <CulinaryInfoSection {...commonProps} />
       case 'social-links':
@@ -296,6 +206,24 @@ export function CreateProfileClient() {
     }
   }
 
+  // Define the handler functions
+  const handleExpandChange = (expanded: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, isExpanded: expanded }))
+  }
+
+  const handleVisibilityChange = (visible: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, isVisible: visible }))
+  }
+
+  const handlePopoverChange = (show: boolean) => {
+    setWarningState((prevState) => ({ ...prevState, showPopover: show }))
+  }
+
+  const handleBasicInfoSubmit = (data: BasicInfoFormData) => {
+    // Handle form submission for basic info
+    console.log('Basic Info Submitted:', data)
+  }
+
   return (
     <FormProvider {...methods}>
       <div className='w-full'>
@@ -313,7 +241,12 @@ export function CreateProfileClient() {
           className='w-full'
         >
           <div className='w-full'>
-            <ProfileSessionWarning {...warningState} />
+            <ProfileSessionWarning
+              {...warningState}
+              onExpandChange={handleExpandChange}
+              onVisibilityChange={handleVisibilityChange}
+              onPopoverChange={handlePopoverChange}
+            />
             <div className='space-y-4 mt-3'>
               <ProfileCreationHeader
                 tier={currentTier as unknown as ProfileTier}
@@ -322,10 +255,11 @@ export function CreateProfileClient() {
                 isSaving={isSaving}
                 lastSaved={lastSaved}
                 canMint={canMint}
-                onPreview={handlePreviewGeneration}
-                onMint={handleMint}
+                onShowPreview={() => setIsPreviewOpen(true)}
+                onCreateBadge={() => setIsMintOpen(true)}
                 isPreviewOpen={isPreviewOpen}
                 isMinting={isMinting}
+                generationProgress={isGeneratingPreview ? { stage: 'preparing' } : undefined}
               />
               <div className='space-y-4'>{renderSection()}</div>
               <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
@@ -362,26 +296,90 @@ export function CreateProfileClient() {
 
         <ProfilePreview
           isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          tier={currentTier as unknown as ProfileTier}
+          formData={watch()}
+        />
+
+        <ProfileMint
+          isOpen={isMintOpen}
           onClose={() => {
-            setIsPreviewOpen(false)
+            setIsMintOpen(false)
             setPreviewData(null)
             previewMountedRef.current = false
           }}
           tier={currentTier as unknown as ProfileTier}
           formData={watch()}
-          onGeneratePreview={handlePreviewGeneration}
-          onMint={handleMint}
+          onComplete={async () => {
+            setIsMintOpen(false)
+            window.location.href = '/profile'
+          }}
           canMint={canMint && !isGeneratingPreview}
-          generationProgress={
-            isGeneratingPreview
-              ? { stage: 'preparing', progress: 0, message: 'Generating preview...' }
-              : undefined
-          }
-          onReady={handlePreviewReady}
         />
 
         {mintStatus && <MintingStatus status={mintStatus} />}
       </div>
     </FormProvider>
   )
+}
+
+// Function to fetch existing profile data for edit mode
+async function fetchExistingProfileData(): Promise<ProfileFormData> {
+  const { user } = usePrivy()
+  const address = user?.walletAddress // Adjust based on how you access the wallet address
+
+  if (!address) {
+    throw new Error('User wallet address is not available')
+  }
+
+  const profileResponse = await getProfile(address)
+
+  if (!profileResponse.success || !profileResponse.data) {
+    throw new Error('Failed to fetch existing profile data')
+  }
+
+  const { data } = profileResponse
+
+  return {
+    basicInfo: {
+      name: data.metadata.name,
+      bio: data.metadata.description,
+      avatar: data.metadataUri, // Adjust based on your data structure
+      banner: '', // Add if applicable
+      location: '', // Add if applicable
+      social: {
+        twitter: '', // Add if applicable
+        website: '', // Add if applicable
+      },
+    },
+    socialLinks: {
+      twitter: '', // Add if applicable
+      website: '', // Add if applicable
+    },
+    tier: data.tier,
+    version: '1.0',
+  }
+}
+
+// Function to get default values for create mode
+function getDefaultValues(): ProfileFormData {
+  return {
+    basicInfo: {
+      name: '',
+      bio: '',
+      avatar: '',
+      banner: '',
+      location: '',
+      social: {
+        twitter: '',
+        website: '',
+      },
+    },
+    socialLinks: {
+      twitter: '',
+      website: '',
+    },
+    tier: undefined,
+    version: '1.0',
+  }
 }

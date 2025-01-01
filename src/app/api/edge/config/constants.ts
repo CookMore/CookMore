@@ -12,7 +12,7 @@ export const EDGE_CACHE_KEYS = {
 
 export const EDGE_CONFIG = {
   API_VERSION: 'v1',
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  BASE_URL: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost'}:${process.env.NEXT_PUBLIC_API_PORT || '3000'}`,
   ENDPOINTS: {
     PROFILE: '/api/profile',
     KITCHEN: '/api/kitchen',
