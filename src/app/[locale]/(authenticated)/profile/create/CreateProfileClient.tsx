@@ -35,8 +35,9 @@ import type { MintStatus } from '../services/client/contract.service'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ProfileMint } from '../components/ui/ProfileMint'
 import { usePrivy } from '@privy-io/react-auth'
+import { getProfile } from '../services/server/profile.service'
 
-export function CreateProfileClient() {
+export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' }) {
   const t = useTranslations('profile')
   const { theme } = useTheme()
   const {
@@ -50,27 +51,15 @@ export function CreateProfileClient() {
     canGoNext: isLastStep,
   } = useProfileStep()
 
-  const methods = useForm<ProfileFormData>({
-    defaultValues: {
-      basicInfo: {
-        name: '',
-        bio: '',
-        avatar: '',
-        banner: '',
-        location: '',
-        social: {
-          twitter: '',
-          website: '',
-        },
-      },
-      socialLinks: {
-        twitter: '',
-        website: '',
-      },
-      tier: undefined,
-      version: '1.0',
-    },
-  })
+  const methods = useForm<ProfileFormData>()
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = mode === 'edit' ? await fetchExistingProfileData() : getDefaultValues()
+      methods.reset(data)
+    }
+    fetchData()
+  }, [mode, methods])
 
   const {
     control,
@@ -332,4 +321,65 @@ export function CreateProfileClient() {
       </div>
     </FormProvider>
   )
+}
+
+// Function to fetch existing profile data for edit mode
+async function fetchExistingProfileData(): Promise<ProfileFormData> {
+  const { user } = usePrivy()
+  const address = user?.walletAddress // Adjust based on how you access the wallet address
+
+  if (!address) {
+    throw new Error('User wallet address is not available')
+  }
+
+  const profileResponse = await getProfile(address)
+
+  if (!profileResponse.success || !profileResponse.data) {
+    throw new Error('Failed to fetch existing profile data')
+  }
+
+  const { data } = profileResponse
+
+  return {
+    basicInfo: {
+      name: data.metadata.name,
+      bio: data.metadata.description,
+      avatar: data.metadataUri, // Adjust based on your data structure
+      banner: '', // Add if applicable
+      location: '', // Add if applicable
+      social: {
+        twitter: '', // Add if applicable
+        website: '', // Add if applicable
+      },
+    },
+    socialLinks: {
+      twitter: '', // Add if applicable
+      website: '', // Add if applicable
+    },
+    tier: data.tier,
+    version: '1.0',
+  }
+}
+
+// Function to get default values for create mode
+function getDefaultValues(): ProfileFormData {
+  return {
+    basicInfo: {
+      name: '',
+      bio: '',
+      avatar: '',
+      banner: '',
+      location: '',
+      social: {
+        twitter: '',
+        website: '',
+      },
+    },
+    socialLinks: {
+      twitter: '',
+      website: '',
+    },
+    tier: undefined,
+    version: '1.0',
+  }
 }

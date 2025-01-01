@@ -1,5 +1,5 @@
 import { unstable_setRequestLocale } from 'next-intl/server'
-import { CreateProfileClient } from './CreateProfileClient'
+import CreateProfileClient from './CreateProfileClient'
 import { ProfileStepProvider } from '../ProfileStepContext'
 
 interface CreateProfilePageProps {
@@ -13,9 +13,12 @@ export default async function CreateProfilePage({ params }: CreateProfilePagePro
   // Ensure locale is handled asynchronously
   await unstable_setRequestLocale(locale)
 
+  // Determine the mode (e.g., based on some condition)
+  const mode: 'create' | 'edit' = 'create' // or "edit" based on your logic
+
   return (
     <ProfileStepProvider>
-      <CreateProfileClient />
+      <CreateProfileClient mode={mode} />
     </ProfileStepProvider>
   )
 }

@@ -323,6 +323,19 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
   certifications?: string[]
 }
 
+interface GroupProfileMetadataWithBasicInfo extends GroupProfileMetadata {
+  basicInfo: {
+    name: string
+    bio?: string
+    avatar?: string
+    location?: string
+    social?: {
+      twitter?: string
+      website?: string
+    }
+  }
+}
+
 // The main type that represents all possible profiles
 export type ProfileMetadata = FreeProfileMetadata | ProProfileMetadata | GroupProfileMetadata
 
@@ -337,6 +350,7 @@ export interface Profile {
   exists?: boolean
   createdAt: number | Date
   updatedAt: number | Date
+  eventLog: { topics: string[]; data: string }
 }
 
 // Form Data Type
@@ -448,13 +462,6 @@ export interface ProfileValidation {
   error?: Error
 }
 
-export interface ProfileVerification {
-  isOwner: boolean
-  hasValidTier: boolean
-  hasValidMetadata: boolean
-  isVerified: boolean
-}
-
 interface OGExtension {
   ogBenefits: {
     // Core OG benefits
@@ -514,5 +521,3 @@ interface OGExtension {
     verificationLevel: 'basic' | 'advanced' | 'expert'
   }
 }
-
-export { SocialLinks }

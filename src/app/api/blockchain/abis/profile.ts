@@ -135,13 +135,46 @@ export const profileABI = [
     name: 'Unpaused',
     type: 'event',
   },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
+      { indexed: true, internalType: 'address', name: 'account', type: 'address' },
+      { indexed: true, internalType: 'address', name: 'sender', type: 'address' },
+    ],
+    name: 'RoleGranted',
+    type: 'event',
+  },
 ] as const
 
+// Define the type for the log parameter
+interface Log {
+  data: string
+  topics: string[]
+}
+
 // Function to decode logs using the profileABI
-export function decodeProfileLog(log) {
+export function decodeProfileLog(log: Log) {
+  // Ensure data and topics are in the correct format
+  const formattedData = log.data.startsWith('0x')
+    ? (log.data as `0x${string}`)
+    : (`0x${log.data}` as `0x${string}`)
+
+  // Ensure the first topic is the event signature
+  const formattedTopics: [`0x${string}`, ...`0x${string}`[]] = [
+    log.topics[0].startsWith('0x')
+      ? (log.topics[0] as `0x${string}`)
+      : (`0x${log.topics[0]}` as `0x${string}`),
+    ...log.topics
+      .slice(1)
+      .map((topic) =>
+        topic.startsWith('0x') ? (topic as `0x${string}`) : (`0x${topic}` as `0x${string}`)
+      ),
+  ]
+
   return decodeEventLog({
     abi: profileABI,
-    data: log.data,
-    topics: log.topics,
+    data: formattedData,
+    topics: formattedTopics,
   })
 }

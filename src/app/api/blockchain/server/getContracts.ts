@@ -1,4 +1,4 @@
-import { getContract, type Address, type PublicClient, type Abi } from 'viem'
+import { getContract, type Address, type Abi } from 'viem'
 import { publicClient } from '../config/client'
 import { profileABI } from '../abis/profile'
 import { tierABI } from '../abis/tier'
@@ -40,7 +40,7 @@ export async function getServerContract<TAbi extends Abi>({
       contractInstances[key] = getContract({
         address,
         abi,
-        publicClient,
+        client: publicClient,
       })
       console.log('Contract instance created for key:', key)
     } else {

@@ -1,12 +1,10 @@
-'use client'
-
 import { IconUser, IconBook, IconChefHat } from '@/app/api/icons'
-import type { GroupProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
+import type { ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 import { cn } from '@/app/api/utils/utils'
 import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 
 interface ProfileCardProps {
-  profile: Partial<GroupProfileMetadata>
+  profile: Partial<ProfileMetadata>
 }
 
 export function ProfileCard({ profile }: ProfileCardProps) {
@@ -18,7 +16,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       if (url.startsWith('blob:')) return url
       if (url.startsWith('ipfs:')) return ipfsService.getHttpUrl(url)
       if (url.startsWith('http:') || url.startsWith('https:')) return url
-      // If it's just a CID, treat it as IPFS
       return ipfsService.getHttpUrl(`ipfs://${url}`)
     } catch (error) {
       console.error('Error processing image URL:', error)

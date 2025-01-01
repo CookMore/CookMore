@@ -8,6 +8,7 @@ import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
+import { useProfileContract } from '@/app/[locale]/(authenticated)/profile/components/hooks/contracts/useProfileContract'
 
 const tierColorMap: Record<
   ProfileTier,
@@ -58,27 +59,6 @@ interface ProfileSidebarProps {
   tier: ProfileTier
 }
 
-// Add skeleton component
-function StepSkeleton({ isExpanded }: { isExpanded: boolean }) {
-  return (
-    <div
-      className={cn(
-        'flex w-full items-center rounded-lg p-3 text-left border',
-        isExpanded ? 'space-x-3' : 'justify-center',
-        'bg-github-canvas-subtle border-github-border-default animate-pulse'
-      )}
-    >
-      <div className='h-5 w-5 rounded-full bg-github-border-default' />
-      {isExpanded && (
-        <div className='min-w-0 flex-1 space-y-2'>
-          <div className='h-4 w-24 bg-github-border-default rounded' />
-          <div className='h-3 w-32 bg-github-border-default rounded opacity-70' />
-        </div>
-      )}
-    </div>
-  )
-}
-
 export function ProfileSidebar({
   steps,
   currentStep,
@@ -90,6 +70,7 @@ export function ProfileSidebar({
   const t = useTranslations('profile')
   const { isLoading: profileLoading } = useProfile()
   const { currentTier } = useAuth()
+  const { isLoading, error, getProfile } = useProfileContract()
   const [hydrated, setHydrated] = useState(false)
 
   const tier = currentTier || propTier
@@ -115,7 +96,7 @@ export function ProfileSidebar({
         case ProfileTier.PRO:
           return [ProfileTier.PRO, ProfileTier.FREE].includes(step.tier)
         default:
-          return step.tier === ProfileTier.FREE
+          return [ProfileTier.FREE].includes(step.tier)
       }
     },
     [hydrated, tier]
@@ -194,12 +175,8 @@ export function ProfileSidebar({
 
     const navContent = (
       <nav className='flex-1 space-y-2 p-2 overflow-y-auto'>
-        {profileLoading ? (
-          <div className='space-y-2'>
-            {[...Array(5)].map((_, i) => (
-              <StepSkeleton key={`skeleton-${i}`} isExpanded={isExpanded} />
-            ))}
-          </div>
+        {profileLoading || isLoading ? (
+          <div>Loading...</div>
         ) : (
           steps.map((step, index) => {
             if (!step.icon) {

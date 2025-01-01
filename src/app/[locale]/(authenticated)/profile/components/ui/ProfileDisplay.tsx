@@ -1,5 +1,3 @@
-'use client'
-
 import { User } from '@privy-io/react-auth'
 import { useState, useEffect } from 'react'
 import { Button } from '@/app/api/components/ui/button'
@@ -7,26 +5,52 @@ import { ProfileCard } from './ProfileCard'
 import { cn } from '@/app/api/utils/utils'
 import { IconUser, IconEye, IconEdit, IconCertificate } from '@/app/api/icons'
 import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
+import { useProfileContract } from '@/app/[locale]/(authenticated)/profile/components/hooks/contracts/useProfileContract'
+import { ProfileTier, ProfileMetadata } from '../../profile'
 
 interface ProfileDisplayProps {
-  profile: User & {
+  profile: ProfileMetadata & {
     name?: string
     avatar?: string
     bio?: string
   }
+  metadata?: any
   isPublicView?: boolean
   hasProfile: boolean | null
   onEdit?: () => void
+  currentTier: ProfileTier
 }
 
-export function ProfileDisplay({ profile, isPublicView, hasProfile, onEdit }: ProfileDisplayProps) {
+export function ProfileDisplay({
+  profile,
+  metadata,
+  isPublicView,
+  hasProfile,
+  onEdit,
+  currentTier,
+}: ProfileDisplayProps) {
   const [mounted, setMounted] = useState(false)
+  const { isLoading, error, getProfile } = useProfileContract()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  if (!profile || !mounted) return null
+  if (!mounted) return null
+
+  if (isLoading) {
+    return <div>Loading profile data...</div>
+  }
+
+  if (error) {
+    console.error('Error fetching profile data:', error)
+    return <div>Error: Unable to load profile data</div>
+  }
+
+  if (!profile) {
+    console.error('Profile data is missing')
+    return <div>Error: Profile data is unavailable</div>
+  }
 
   const getImageUrl = (url?: string | null) => {
     if (!url) return ''
@@ -93,6 +117,20 @@ export function ProfileDisplay({ profile, isPublicView, hasProfile, onEdit }: Pr
               <p className='text-sm text-github-fg-default line-clamp-3'>
                 {profile.bio || 'No bio yet'}
               </p>
+            </div>
+
+            {/* Metadata Display */}
+            {metadata && (
+              <div className='text-center'>
+                <p className='text-sm text-github-fg-default'>
+                  {metadata.description || 'No additional details'}
+                </p>
+              </div>
+            )}
+
+            {/* Current Tier Display */}
+            <div className='text-center'>
+              <p className='text-sm text-github-fg-default'>Current Tier: {currentTier}</p>
             </div>
           </div>
         </div>

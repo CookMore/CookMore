@@ -353,7 +353,11 @@ export class ProfileMetadataService {
       })
 
       // Create file from blob
-      const file = new File([blob], 'badge.png', { type: 'image/png' })
+      const file = new File(
+        [blob],
+        `${(formData as any).basicInfo.name.replace(/\s+/g, '_')}_badge.png`,
+        { type: 'image/png' }
+      )
 
       // Complete progress
       this.updateProgress('complete', 100, 'Badge generated successfully')

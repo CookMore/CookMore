@@ -5,6 +5,7 @@ import { cn } from '@/app/api/utils/utils'
 interface DualSidebarLayoutProps {
   children: React.ReactNode
   leftSidebar?: React.ReactNode
+  isLeftSidebarExpanded: boolean
   rightSidebar?: React.ReactNode
   className?: string
 }
