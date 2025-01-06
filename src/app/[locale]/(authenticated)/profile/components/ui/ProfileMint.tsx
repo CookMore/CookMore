@@ -40,7 +40,7 @@ function BadgePreview({
   tier: ProfileTier
   formData: ProfileFormData
 }) {
-  const { avatar, name } = formData.basicInfo || {}
+  const { avatar, name, bio } = formData.basicInfo || {}
   const info = tierInfo[tier] || tierInfo[ProfileTier.FREE]
 
   const transformedAvatarUrl = avatar
@@ -87,6 +87,12 @@ function BadgePreview({
                 <span>Verification:</span>
                 <span className='font-medium'>On-Chain</span>
               </div>
+              {bio && (
+                <div className='mt-4'>
+                  <h4 className='text-sm font-semibold'>Bio:</h4>
+                  <p className='text-sm text-github-fg-muted'>{bio}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -55,11 +55,34 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
 
   useEffect(() => {
     async function fetchData() {
-      const data = mode === 'edit' ? await fetchExistingProfileData() : getDefaultValues()
-      methods.reset(data)
+      try {
+        const data = mode === 'edit' ? await fetchExistingProfileData() : getDefaultValues()
+        methods.reset(data)
+      } catch (error) {
+        console.error('Error fetching profile data:', error)
+      }
     }
     fetchData()
   }, [mode, methods])
+
+  async function fetchExistingProfileData() {
+    try {
+      const response = await getProfile(userAddress)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching existing profile data:', error)
+      return {} // Return an empty object or handle the error as needed
+    }
+  }
+
+  function getDefaultValues() {
+    return {
+      name: '',
+      bio: '',
+      avatar: '',
+      // Add other default fields as needed
+    }
+  }
 
   const {
     control,
@@ -96,16 +119,6 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
   const handlePreviewReady = useCallback(() => {
     previewMountedRef.current = true
   }, [])
-
-  // Effects
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Early return for hydration
-  if (!mounted) {
-    return null
-  }
 
   const currentStepData = availableSteps[currentStep]
   if (!currentStepData) {
@@ -224,9 +237,23 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
     console.log('Basic Info Submitted:', data)
   }
 
+  const handleSubmit = async () => {
+    const formData = methods.getValues()
+    if (mode === 'edit') {
+      // Call updateMetadata function
+      await updateMetadata(formData)
+    } else {
+      // Call mint function
+      await mintProfile(formData)
+    }
+  }
+
   return (
     <FormProvider {...methods}>
       <div className='w-full'>
+        {mode === 'edit' && (
+          <div className='bg-yellow-100 text-yellow-800 p-4 rounded mb-4'>You are in Edit Mode</div>
+        )}
         <DualSidebarLayout
           leftSidebar={
             <ProfileSidebar
@@ -238,6 +265,7 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
               tier={currentTier as unknown as ProfileTier}
             />
           }
+          isLeftSidebarExpanded={true}
           className='w-full'
         >
           <div className='w-full'>
@@ -260,6 +288,7 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
                 isPreviewOpen={isPreviewOpen}
                 isMinting={isMinting}
                 generationProgress={isGeneratingPreview ? { stage: 'preparing' } : undefined}
+                mode={mode}
               />
               <div className='space-y-4'>{renderSection()}</div>
               <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
@@ -277,17 +306,14 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
                   {t('previous')}
                 </button>
                 <button
-                  onClick={nextStep}
-                  disabled={isLastStep}
+                  onClick={handleSubmit}
                   className={cn(
                     'px-4 py-2 rounded-md font-medium',
                     'transition-colors duration-200',
-                    !isLastStep
-                      ? 'bg-github-accent-emphasis text-github-fg-onEmphasis hover:bg-github-accent-muted'
-                      : 'bg-github-canvas-subtle text-github-fg-muted cursor-not-allowed'
+                    'bg-github-accent-emphasis text-github-fg-onEmphasis hover:bg-github-accent-muted'
                   )}
                 >
-                  {t('next')}
+                  {mode === 'edit' ? t('update') : t('mint')}
                 </button>
               </div>
             </div>
@@ -321,65 +347,4 @@ export default function CreateProfileClient({ mode }: { mode: 'create' | 'edit' 
       </div>
     </FormProvider>
   )
-}
-
-// Function to fetch existing profile data for edit mode
-async function fetchExistingProfileData(): Promise<ProfileFormData> {
-  const { user } = usePrivy()
-  const address = user?.walletAddress // Adjust based on how you access the wallet address
-
-  if (!address) {
-    throw new Error('User wallet address is not available')
-  }
-
-  const profileResponse = await getProfile(address)
-
-  if (!profileResponse.success || !profileResponse.data) {
-    throw new Error('Failed to fetch existing profile data')
-  }
-
-  const { data } = profileResponse
-
-  return {
-    basicInfo: {
-      name: data.metadata.name,
-      bio: data.metadata.description,
-      avatar: data.metadataUri, // Adjust based on your data structure
-      banner: '', // Add if applicable
-      location: '', // Add if applicable
-      social: {
-        twitter: '', // Add if applicable
-        website: '', // Add if applicable
-      },
-    },
-    socialLinks: {
-      twitter: '', // Add if applicable
-      website: '', // Add if applicable
-    },
-    tier: data.tier,
-    version: '1.0',
-  }
-}
-
-// Function to get default values for create mode
-function getDefaultValues(): ProfileFormData {
-  return {
-    basicInfo: {
-      name: '',
-      bio: '',
-      avatar: '',
-      banner: '',
-      location: '',
-      social: {
-        twitter: '',
-        website: '',
-      },
-    },
-    socialLinks: {
-      twitter: '',
-      website: '',
-    },
-    tier: undefined,
-    version: '1.0',
-  }
 }

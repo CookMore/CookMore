@@ -23,35 +23,27 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
       path,
       isAuthenticated,
       hasProfile: !!hasProfileCookie,
-      hasProfileCookie: !!hasProfileCookie,
       currentLocale: options.currentLocale,
       requireProfile: options.requireProfile,
       privyTokenExists: !!privyToken,
       walletAddress,
-      cookies: Object.fromEntries(
-        Array.from(request.cookies.getAll()).map((cookie) => [cookie.name, cookie.value])
-      ),
     })
 
-    // If not authenticated, redirect to home
+    // Redirect to home if not authenticated
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL(`/${options.currentLocale}`, request.url))
     }
 
-    // For authenticated users, verify profile on chain if we have the wallet address
+    // Verify profile on chain if required
     if (options.requireProfile && walletAddress) {
       try {
         const contractExists = await verifyProfileOnChain(walletAddress)
 
-        // Update cookie to match blockchain state
         if (contractExists) {
           cookieStore.set(COOKIE_NAMES.HAS_PROFILE, 'true')
+          return NextResponse.redirect(new URL(`/${options.currentLocale}/dashboard`, request.url))
         } else {
           cookieStore.delete(COOKIE_NAMES.HAS_PROFILE)
-        }
-
-        // Redirect to profile creation if needed
-        if (!contractExists) {
           const pathWithoutLocale = path.replace(new RegExp(`^/${options.currentLocale}`), '')
           if (pathWithoutLocale !== '/profile/create') {
             return NextResponse.redirect(
@@ -61,7 +53,6 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
         }
       } catch (error) {
         console.error('Error verifying profile:', error)
-        // On verification error, assume no profile exists
         cookieStore.delete(COOKIE_NAMES.HAS_PROFILE)
         return NextResponse.redirect(
           new URL(`/${options.currentLocale}/profile/create`, request.url)
@@ -69,13 +60,10 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
       }
     }
 
-    // If we reach here, either:
-    // 1. We don't require a profile
-    // 2. User has a profile
-    // 3. User is on the profile creation page
+    // Default response for authenticated users
     const response = NextResponse.next()
 
-    // Ensure cookies are properly set in the response
+    // Set cookies in the response
     if (privyToken) {
       response.cookies.set(COOKIE_NAMES.PRIVY_TOKEN, privyToken.value, {
         httpOnly: true,
@@ -96,18 +84,17 @@ export async function withAuth(request: NextRequest, options: AuthOptions) {
 
     if (walletAddress) {
       response.cookies.set(COOKIE_NAMES.WALLET_ADDRESS, walletAddress, {
-        httpOnly: false, // Allow client-side access
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 24 * 60 * 60, // 24 hours
+        maxAge: 24 * 60 * 60,
       })
     }
 
     return response
   } catch (error) {
     console.error('Auth middleware error:', error)
-    // On error, redirect to home page
-    return NextResponse.redirect(new URL(`/${options.currentLocale}`, request.url))
+    return NextResponse.redirect(new URL(`/${options.currentLocale}/dashboard`, request.url))
   }
 }

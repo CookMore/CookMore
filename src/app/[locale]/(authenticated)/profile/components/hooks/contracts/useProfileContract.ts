@@ -14,6 +14,7 @@ interface UseProfileContract {
   isLoading: boolean
   error: string | null
   logs: any[]
+  fetchAllLogs: () => Promise<void>
   createProfile: (
     formData: ProfileFormData,
     tier: ProfileTier,
@@ -249,6 +250,7 @@ export function useProfileContract(): UseProfileContract {
     isLoading,
     error,
     logs,
+    fetchAllLogs,
     createProfile,
     updateProfile,
     getProfile,

@@ -132,6 +132,7 @@
     "loading": "Loading profile...",
     "loaded": "Profile loaded successfully",
     "error": "Error loading profile",
+    "update": "Update Profile",
     "updating": "Updating profile...",
     "updated": "Profile updated successfully",
     "updateError": "Error updating profile",
@@ -139,6 +140,11 @@
     "upgraded": "Profile upgraded successfully",
     "upgradeError": "Error upgrading profile"
   },
+
+  "profile": {
+    "update": "Update Profile"
+  },
+
   "tier": {
     "checking": "Checking tier status...",
     "checked": "Tier status checked",

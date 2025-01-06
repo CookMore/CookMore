@@ -128,13 +128,19 @@ export function decodeCreateProfileEvent(
 }
 
 // Function to parse metadataURI
-function parseMetadataURI(metadataURI: string): OnChainMetadata {
-  // Example parsing logic, assuming metadataURI is a JSON string stored on IPFS
-  const metadata = JSON.parse(atob(metadataURI.split('ipfs://')[1]))
-  return {
-    name: metadata.name,
-    bio: metadata.bio,
-    avatar: metadata.avatar,
-    ipfsNotesCID: metadata.ipfsNotesCID,
+function parseMetadataURI(metadataURI: string): OnChainMetadata | null {
+  try {
+    // Example parsing logic, assuming metadataURI is a JSON string stored on IPFS
+    const metadata = JSON.parse(atob(metadataURI.split('ipfs://')[1]))
+    console.log('Parsed Metadata:', metadata)
+    return {
+      name: metadata.name,
+      bio: metadata.bio,
+      avatar: metadata.avatar,
+      ipfsNotesCID: metadata.ipfsNotesCID,
+    }
+  } catch (error) {
+    console.error('Error parsing metadataURI:', error)
+    return null
   }
 }

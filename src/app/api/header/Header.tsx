@@ -5,20 +5,20 @@ import Link from 'next/link'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { ROUTES } from '@/app/api/routes/routes'
 import { NavigationLinks } from '@/app/api/navigation/NavigationLinks'
-import { TierBadge } from '@/app/[locale]/(authenticated)/tier/components/TierBadge'
-import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
-import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { LoadingSkeleton } from '@/app/api/loading/LoadingSkeleton'
 import { MobileMenu } from './MobileMenu'
-import { MarketingAuthButton } from './marketing/MarketingAuthButton'
+import { AuthButton } from '@/app/api/auth/AuthButton'
 import { AdminButton } from '@/app/[locale]/(authenticated)/admin/components/AdminButton'
 import { IconMenu } from '@/app/api/icons'
 
-export function Header() {
+interface HeaderProps {
+  showAuthButton: boolean
+}
+
+export function Header({ showAuthButton }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isAuthenticated, hasProfile } = useAuth()
-  const { hasGroup, hasPro, isLoading: tiersLoading } = useNFTTiers()
-  const currentTier = hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
+
+  console.log('isAuthenticated:', isAuthenticated)
 
   return (
     <header className='sticky top-0 z-[99] w-full border-b border-github-border-default bg-github-canvas-default'>
@@ -28,7 +28,7 @@ export function Header() {
             href={
               isAuthenticated
                 ? hasProfile
-                  ? ROUTES.AUTH.PROFILE.HOME
+                  ? ROUTES.AUTH.DASHBOARD
                   : ROUTES.AUTH.PROFILE.CREATE
                 : ROUTES.MARKETING.HOME
             }
@@ -56,20 +56,7 @@ export function Header() {
             <AdminButton />
           </div>
 
-          {isAuthenticated && !tiersLoading && (
-            <Link href={ROUTES.AUTH.TIER} className='hidden sm:block'>
-              <TierBadge tier={currentTier} size='sm' hasProfile={hasProfile} />
-            </Link>
-          )}
-          {isAuthenticated && tiersLoading && (
-            <div className='hidden sm:block'>
-              <LoadingSkeleton className='h-6 w-20' />
-            </div>
-          )}
-
-          <div className='hidden lg:block'>
-            <MarketingAuthButton />
-          </div>
+          <div>{showAuthButton && <AuthButton />}</div>
         </div>
       </div>
 
@@ -77,19 +64,8 @@ export function Header() {
         <div className='block sm:hidden'>
           <AdminButton />
         </div>
-        {isAuthenticated && !tiersLoading && (
-          <Link href={ROUTES.AUTH.TIER} className='block sm:hidden'>
-            <TierBadge tier={currentTier} size='sm' hasProfile={hasProfile} />
-          </Link>
-        )}
-        {isAuthenticated && tiersLoading && (
-          <div className='block sm:hidden'>
-            <LoadingSkeleton className='h-6 w-20' />
-          </div>
-        )}
-        <div className='lg:hidden'>
-          <MarketingAuthButton />
-        </div>
+
+        <div className='lg:hidden'>{showAuthButton && <AuthButton />}</div>
       </MobileMenu>
     </header>
   )

@@ -1,82 +1,24 @@
-'use client'
-
-import { IconUser, IconSettings } from '@/app/api/icons'
-import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
-import { ProfileSidebar } from '@/app/[locale]/(authenticated)/profile/components/ui/ProfileSidebar'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { usePrivy } from '@privy-io/react-auth'
+import { unstable_setRequestLocale } from 'next-intl/server'
 import { ProfileEdgeProvider } from './providers/edge/ProfileEdgeProvider'
-import { ProfileTier } from './profile'
-import React, { ReactElement } from 'react'
+import { DualSidebarLayout } from '@/app/api/layouts/DualSidebarLayout'
+import React from 'react'
 
 interface ProfileLayoutProps {
   children: React.ReactNode
+  params: Promise<{ walletAddress: string; locale: string }>
 }
 
-export default function ProfileLayout({ children }: ProfileLayoutProps) {
-  const pathname = usePathname()
-  const { user } = usePrivy()
-  const isCreatingProfile = pathname?.includes('/profile/create')
-  const walletAddress = user?.wallet?.address
-  console.log('Wallet Address:', walletAddress)
+export default async function ProfileLayout({ children, params }: ProfileLayoutProps) {
+  const { walletAddress, locale } = await params
+  await unstable_setRequestLocale(locale)
 
-  // Only use profile hook if not creating profile
-  const { currentTier: tier } = !isCreatingProfile ? useProfile() : { currentTier: null }
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isExpanded, setIsExpanded] = useState(true)
-
-  const steps = [
-    {
-      id: 'profile',
-      label: 'Profile',
-      icon: IconUser,
-      tier: ProfileTier.FREE,
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: IconSettings,
-      tier: ProfileTier.FREE,
-    },
-  ]
-
-  // Wrap all content with ProfileEdgeProvider if we have a wallet address
-  const content = walletAddress ? (
+  return (
     <ProfileEdgeProvider address={walletAddress}>
-      {isCreatingProfile ? (
+      <DualSidebarLayout isLeftSidebarExpanded={true}>
         <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8'>
           {children}
         </div>
-      ) : (
-        <DualSidebarLayout
-          leftSidebar={
-            <ProfileSidebar
-              steps={steps}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              isExpanded={isExpanded}
-              setIsExpanded={setIsExpanded}
-              tier={tier || ProfileTier.FREE}
-            />
-          }
-          isLeftSidebarExpanded={isExpanded}
-        >
-          <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8'>
-            {React.isValidElement(children)
-              ? React.cloneElement(children as ReactElement<any>, { walletAddress })
-              : children}
-          </div>
-        </DualSidebarLayout>
-      )}
+      </DualSidebarLayout>
     </ProfileEdgeProvider>
-  ) : (
-    // Loading state or error state when no wallet address is available
-    <div className='min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto px-6 py-8 flex items-center justify-center'>
-      <p>Loading wallet...</p>
-    </div>
   )
-
-  return content
 }

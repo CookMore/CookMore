@@ -1,20 +1,12 @@
-import { User } from '@privy-io/react-auth'
-import { useState, useEffect } from 'react'
 import { Button } from '@/app/api/components/ui/button'
 import { ProfileCard } from './ProfileCard'
 import { cn } from '@/app/api/utils/utils'
 import { IconUser, IconEye, IconEdit, IconCertificate } from '@/app/api/icons'
 import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
-import { useProfileContract } from '@/app/[locale]/(authenticated)/profile/components/hooks/contracts/useProfileContract'
 import { ProfileTier, ProfileMetadata } from '../../profile'
 
 interface ProfileDisplayProps {
-  profile: ProfileMetadata & {
-    name?: string
-    avatar?: string
-    bio?: string
-  }
-  metadata?: any
+  profile: ProfileMetadata
   isPublicView?: boolean
   hasProfile: boolean | null
   onEdit?: () => void
@@ -23,42 +15,20 @@ interface ProfileDisplayProps {
 
 export function ProfileDisplay({
   profile,
-  metadata,
   isPublicView,
   hasProfile,
   onEdit,
   currentTier,
 }: ProfileDisplayProps) {
-  const [mounted, setMounted] = useState(false)
-  const { isLoading, error, getProfile } = useProfileContract()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
-  if (isLoading) {
-    return <div>Loading profile data...</div>
-  }
-
-  if (error) {
-    console.error('Error fetching profile data:', error)
-    return <div>Error: Unable to load profile data</div>
-  }
-
-  if (!profile) {
-    console.error('Profile data is missing')
-    return <div>Error: Profile data is unavailable</div>
-  }
-
   const getImageUrl = (url?: string | null) => {
     if (!url) return ''
     try {
       if (url.startsWith('blob:')) return url
       if (url.startsWith('ipfs:')) return ipfsService.getHttpUrl(url)
       if (url.startsWith('http:') || url.startsWith('https:')) return url
-      return ipfsService.getHttpUrl(`ipfs://${url}`)
+      const finalUrl = ipfsService.getHttpUrl(`ipfs://${url}`)
+      console.log('Final avatar URL:', finalUrl)
+      return finalUrl
     } catch (error) {
       console.error('Error processing image URL:', error)
       return ''
@@ -115,15 +85,15 @@ export function ProfileDisplay({
             {/* Bio */}
             <div className='text-center'>
               <p className='text-sm text-github-fg-default line-clamp-3'>
-                {profile.bio || 'No bio yet'}
+                {profile.bio || 'No bio yet - test'}
               </p>
             </div>
 
             {/* Metadata Display */}
-            {metadata && (
+            {profile.description && (
               <div className='text-center'>
                 <p className='text-sm text-github-fg-default'>
-                  {metadata.description || 'No additional details'}
+                  {profile.description || 'No additional details'}
                 </p>
               </div>
             )}
