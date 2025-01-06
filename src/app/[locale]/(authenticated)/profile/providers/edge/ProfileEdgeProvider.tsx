@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import type { Profile, ProfileResponse } from '../../profile'
+import type { ProfileResponse } from '../../profile'
 
 interface ProfileEdgeContextValue {
   profile: ProfileResponse | null
@@ -31,7 +31,7 @@ export function ProfileEdgeProvider({
     setError(null)
 
     try {
-      const response = await fetch(`/api/profile/${address}`)
+      const response = await fetch(`/api/profile/address/${address}`)
       if (!response.ok) {
         throw new Error('Failed to fetch profile')
       }

@@ -6,7 +6,11 @@ import { ROUTES } from '@/app/api/routes/routes'
 import { NavigationLinks } from '@/app/api/navigation/NavigationLinks'
 import { MarketingAuthButton } from './MarketingAuthButton'
 
-export function MarketingHeader() {
+interface MarketingHeaderProps {
+  showAuthButton: boolean
+}
+
+export function MarketingHeader({ showAuthButton }: MarketingHeaderProps) {
   return (
     <header className='sticky top-0 z-[99] w-full border-b border-github-border-default bg-github-canvas-default'>
       <div className='flex h-16 items-center justify-between'>
@@ -24,9 +28,7 @@ export function MarketingHeader() {
         </div>
 
         <div className='flex items-center pr-4'>
-          <div className='hidden lg:block'>
-            <MarketingAuthButton />
-          </div>
+          <div>{showAuthButton && <MarketingAuthButton />}</div>
         </div>
       </div>
     </header>

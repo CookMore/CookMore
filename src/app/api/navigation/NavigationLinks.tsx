@@ -26,6 +26,12 @@ export function NavigationLinks() {
       { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
       { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
       { href: ROUTES.AUTH.TIER, label: 'Tier', requiresProfile: true },
+      {
+        href: ROUTES.AUTH.RECIPE,
+        label: 'New',
+        requiresProfile: true,
+        className: 'bg-green-500 text-white font-bold hover:bg-green-600',
+      },
       ...(isAdmin
         ? [
             {

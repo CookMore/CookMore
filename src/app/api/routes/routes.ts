@@ -22,7 +22,9 @@ export const ROUTES = {
       CREATE: '/profile/create',
       EDIT: '/profile/edit',
     },
+    RECIPE: '/recipe',
     ADMIN: '/admin',
+    DASHBOARD: '/dashboard',
   },
 }
 
@@ -40,6 +42,8 @@ export const routeConfig = {
     ROUTES.AUTH.EXPLORE,
     ROUTES.AUTH.CALENDAR,
     ROUTES.AUTH.TIER,
+    ROUTES.AUTH.RECIPE,
+    ROUTES.AUTH.DASHBOARD,
   ],
 
   // Admin only routes

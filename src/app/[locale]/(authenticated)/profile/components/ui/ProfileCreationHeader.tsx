@@ -66,7 +66,8 @@ export function ProfileCreationHeader({
   isPreviewOpen,
   isMinting,
   generationProgress,
-}: ProfileCreationHeaderProps) {
+  mode,
+}: ProfileCreationHeaderProps & { mode: 'create' | 'edit' }) {
   const t = useTranslations('profile')
   const progress = (currentStep / totalSteps) * 100
 
@@ -94,32 +95,56 @@ export function ProfileCreationHeader({
               <IconEye className='w-4 h-4' />
               Preview
             </Button>
-            <Button
-              onClick={onCreateBadge}
-              disabled={!canMint || isMinting}
-              className={cn(
-                'flex items-center gap-2 transition-colors',
-                canMint
-                  ? 'bg-github-success-emphasis hover:bg-github-success-emphasis/90'
-                  : 'bg-github-canvas-subtle'
-              )}
-            >
-              {isMinting ? (
-                <>
-                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
-                  {/* Show different states during the minting process */}
-                  {generationProgress?.stage === 'preparing' && 'Creating Ownership Badge...'}
-                  {generationProgress?.stage === 'capturing' && 'Generating Badge...'}
-                  {generationProgress?.stage === 'processing' && 'Storing Verification Data...'}
-                  {!generationProgress && 'Minting Ownership Badge...'}
-                </>
-              ) : (
-                <>
-                  <IconCurrencyEthereum className='w-4 h-4' />
-                  Mint
-                </>
-              )}
-            </Button>
+            {mode === 'edit' ? (
+              <Button
+                onClick={onCreateBadge}
+                disabled={!canMint || isMinting}
+                className={cn(
+                  'flex items-center gap-2 transition-colors',
+                  canMint
+                    ? 'bg-github-success-emphasis hover:bg-github-success-emphasis/90'
+                    : 'bg-github-canvas-subtle'
+                )}
+              >
+                {isMinting ? (
+                  <>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
+                    {generationProgress?.stage === 'preparing' && 'Updating Profile...'}
+                    {generationProgress?.stage === 'capturing' && 'Processing Update...'}
+                    {generationProgress?.stage === 'processing' && 'Finalizing Update...'}
+                    {!generationProgress && 'Updating Profile...'}
+                  </>
+                ) : (
+                  'Update'
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={onCreateBadge}
+                disabled={!canMint || isMinting}
+                className={cn(
+                  'flex items-center gap-2 transition-colors',
+                  canMint
+                    ? 'bg-github-success-emphasis hover:bg-github-success-emphasis/90'
+                    : 'bg-github-canvas-subtle'
+                )}
+              >
+                {isMinting ? (
+                  <>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white' />
+                    {generationProgress?.stage === 'preparing' && 'Creating Ownership Badge...'}
+                    {generationProgress?.stage === 'capturing' && 'Generating Badge...'}
+                    {generationProgress?.stage === 'processing' && 'Storing Verification Data...'}
+                    {!generationProgress && 'Minting Ownership Badge...'}
+                  </>
+                ) : (
+                  <>
+                    <IconCurrencyEthereum className='w-4 h-4' />
+                    Mint
+                  </>
+                )}
+              </Button>
+            )}
           </div>
           {/* Tier Badge */}
           <motion.div

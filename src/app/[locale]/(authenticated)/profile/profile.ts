@@ -34,7 +34,7 @@ export interface TransactionResponse {
 
 export interface ProfileResponse {
   success: boolean
-  data: Profile | null
+  data: ProfileMetadata | null
   error?: string
   tierStatus: {
     hasGroup: boolean
