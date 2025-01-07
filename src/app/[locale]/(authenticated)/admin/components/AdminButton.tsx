@@ -16,26 +16,13 @@ export function AdminButton() {
   const [isNavigating, setIsNavigating] = useState(false)
 
   useEffect(() => {
-    console.log('Profile in AdminButton:', profile)
-    console.log('Profile owner:', profile?.owner)
-
     if (profile?.owner) {
-      hasRequiredRole(profile.owner, ROLES.ADMIN).then((result) => {
-        console.log('Has admin role:', result)
-        setHasAccess(result)
-      })
+      hasRequiredRole(profile.owner, ROLES.ADMIN).then(setHasAccess)
     }
   }, [profile?.owner])
 
-  // Don't render if no access
-  if (!hasAccess) {
-    console.log('AdminButton not rendering: no access')
-    return null
-  }
-
-  // If we're already on an admin page, don't show the button
-  if (pathname?.startsWith('/admin')) {
-    console.log('AdminButton not rendering: already on admin page')
+  // Don't render if no access or already on an admin page
+  if (!hasAccess || pathname?.startsWith('/admin')) {
     return null
   }
 
@@ -49,12 +36,10 @@ export function AdminButton() {
       setIsNavigating(true)
       await router.push('/admin')
     } finally {
-      // Reset navigation state after a delay
       setTimeout(() => setIsNavigating(false), 1000)
     }
   }
 
-  console.log('AdminButton rendering')
   return (
     <Button
       variant='outline'

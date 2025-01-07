@@ -11,24 +11,17 @@ import { ProfileTier } from '../profile'
 import { ProfileEdgeProvider } from './edge/ProfileEdgeProvider'
 
 interface ProfileContextValue {
-  // Profile data
-  profile: Profile | null
+  profile: ProfileMetadata | null
   hasProfile: boolean
   isLoading: boolean
   error: Error | null
-
-  // Profile operations
   createProfile: (metadata: ProfileMetadata) => Promise<string>
   updateProfile: (metadata: ProfileMetadata) => Promise<string>
   deleteProfile: () => Promise<void>
-
-  // Tier information
   currentTier: ProfileTier
   tiersLoading: boolean
   hasPro: boolean
   hasGroup: boolean
-
-  // Utility functions
   refreshProfile: () => Promise<void>
   validateMetadata: (metadata: ProfileMetadata) => Promise<boolean>
   clearCache: () => Promise<void>
@@ -39,7 +32,6 @@ const ProfileContext = createContext<ProfileContextValue | null>(null)
 function ProfileProviderInner({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
-  // Get profile data from edge provider
   const {
     profile: edgeProfile,
     isLoading: edgeLoading,
@@ -48,19 +40,18 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
     clearProfileCache,
   } = useProfileEdge()
 
-  const hasProfile = !!edgeProfile?.data
+  const hasProfile = !!edgeProfile
 
-  // Profile operations using client service
   const createProfile = async (metadata: ProfileMetadata) => {
     const result = await profileClientService.createProfile(metadata)
     await refreshEdgeProfile()
-    return result.hash
+    return result.data?.hash
   }
 
   const updateProfile = async (metadata: ProfileMetadata) => {
     const result = await profileClientService.updateProfile(metadata)
     await refreshEdgeProfile()
-    return result.hash
+    return result.data?.hash
   }
 
   const deleteProfile = async () => {
@@ -68,37 +59,34 @@ function ProfileProviderInner({ children }: { children: React.ReactNode }) {
     await refreshEdgeProfile()
   }
 
-  // Metadata validation
-  const validateMetadata = async (metadata: ProfileMetadata) => {
-    return profileMetadataService.validateMetadata(metadata)
+  const validateMetadata = async (metadata: ProfileMetadata): Promise<boolean> => {
+    const isValid = await profileMetadataService.validateMetadata(metadata)
+    return isValid !== null && isValid !== ''
   }
 
-  // Cache management
   const clearCache = async () => {
     await clearProfileCache()
     await profileCacheService.clearCache()
   }
 
-  // Handle client-side mounting
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Don't render anything until mounted
   if (!mounted) return null
 
   const value: ProfileContextValue = {
-    profile: edgeProfile?.data || null,
+    profile: edgeProfile,
     hasProfile,
     isLoading: edgeLoading,
     error: edgeError,
     createProfile,
     updateProfile,
     deleteProfile,
-    currentTier: edgeProfile?.tierStatus?.currentTier || ProfileTier.FREE,
+    currentTier: ProfileTier.FREE,
     tiersLoading: edgeLoading,
-    hasPro: edgeProfile?.tierStatus?.hasPro || false,
-    hasGroup: edgeProfile?.tierStatus?.hasGroup || false,
+    hasPro: false,
+    hasGroup: false,
     refreshProfile: refreshEdgeProfile,
     validateMetadata,
     clearCache,
@@ -113,9 +101,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   if (!isConnected) {
     return children
   }
-
   return (
-    <ProfileEdgeProvider address={address}>
+    <ProfileEdgeProvider address={address!.toLowerCase()}>
       <ProfileProviderInner>{children}</ProfileProviderInner>
     </ProfileEdgeProvider>
   )
@@ -129,5 +116,4 @@ export function useProfile(): ProfileContextValue {
   return context
 }
 
-// Re-export types
 export type { ProfileContextValue }

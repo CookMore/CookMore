@@ -22,7 +22,7 @@ export function NavigationLinks() {
   const links = useMemo(() => {
     // Define authenticated links with proper access control
     const authenticatedLinks: NavLink[] = [
-      { href: ROUTES.AUTH.KITCHEN.HOME, label: 'Kitchen', requiresProfile: true },
+      { href: ROUTES.AUTH.KITCHEN, label: 'Kitchen', requiresProfile: true },
       { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
       { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
       { href: ROUTES.AUTH.TIER, label: 'Tier', requiresProfile: true },

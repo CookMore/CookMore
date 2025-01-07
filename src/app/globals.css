@@ -525,3 +525,26 @@
 
   /* ... existing component styles ... */
 }
+
+.widget {
+  max-width: 68vw;
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 75vw;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+.react-resizable-handle {
+  width: 20px;
+  height: 20px;
+  background-color: #58a6ff;
+  border-radius: 30%;
+  cursor: se-resize;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 10;
+}

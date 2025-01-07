@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import type { ProfileResponse } from '../../profile'
+import type { ProfileMetadata } from '../../profile'
 
 interface ProfileEdgeContextValue {
-  profile: ProfileResponse | null
+  profile: ProfileMetadata | null
   isLoading: boolean
   error: Error | null
   refreshProfile: () => Promise<void>
@@ -20,7 +20,7 @@ export function ProfileEdgeProvider({
   children: React.ReactNode
   address: string
 }) {
-  const [profile, setProfile] = React.useState<ProfileResponse | null>(null)
+  const [profile, setProfile] = React.useState<ProfileMetadata | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<Error | null>(null)
 
@@ -35,7 +35,7 @@ export function ProfileEdgeProvider({
       if (!response.ok) {
         throw new Error('Failed to fetch profile')
       }
-      const data: ProfileResponse = await response.json()
+      const data: ProfileMetadata = await response.json()
       setProfile(data)
     } catch (err) {
       console.error('Error fetching profile:', err)

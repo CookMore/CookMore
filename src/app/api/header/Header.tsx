@@ -9,6 +9,7 @@ import { MobileMenu } from './MobileMenu'
 import { AuthButton } from '@/app/api/auth/AuthButton'
 import { AdminButton } from '@/app/[locale]/(authenticated)/admin/components/AdminButton'
 import { IconMenu } from '@/app/api/icons'
+import { IconMembers } from '@/app/api/icons/IconMembers'
 
 interface HeaderProps {
   showAuthButton: boolean
@@ -43,6 +44,13 @@ export function Header({ showAuthButton }: HeaderProps) {
         </div>
 
         <div className='flex items-center space-x-4 pr-4'>
+          <Link
+            href={ROUTES.AUTH.MEMBERS}
+            className='text-github-fg-default hover:text-github-fg-muted transition-colors'
+          >
+            <IconMembers className='h-6 w-6' />
+          </Link>
+
           <button
             type='button'
             className='lg:hidden inline-flex items-center justify-center rounded-md p-2 text-github-fg-default hover:text-github-fg-muted hover:bg-github-canvas-subtle transition-colors'
