@@ -6,7 +6,15 @@ import { withAuth } from './auth'
 const ROUTES = {
   public: ['/api/health', '/api/i18n'],
   requiresAuth: ['/api/profile', '/api/recipes'],
-  requiresProfile: ['/api/kitchen', '/api/recipes/create'],
+  requiresProfile: [
+    '/api/kitchen',
+    '/api/recipes/create',
+    '/api/calendar',
+    '/api/explore',
+    '/api/tier',
+    '/api/recipe',
+    '/api/dashboard',
+  ],
   adminOnly: ['/api/admin'],
 } as const
 

@@ -11,9 +11,7 @@ export const ROUTES = {
 
   // Authenticated routes
   AUTH: {
-    KITCHEN: {
-      HOME: '/kitchen',
-    },
+    KITCHEN: '/kitchen',
     CALENDAR: '/calendar',
     EXPLORE: '/explore',
     TIER: '/tier',
@@ -25,6 +23,7 @@ export const ROUTES = {
     RECIPE: '/recipe',
     ADMIN: '/admin',
     DASHBOARD: '/dashboard',
+    MEMBERS: '/members',
   },
 }
 
@@ -38,12 +37,13 @@ export const routeConfig = {
 
   // Routes that require profile
   requiresProfile: [
-    ROUTES.AUTH.KITCHEN.HOME,
+    ROUTES.AUTH.KITCHEN,
     ROUTES.AUTH.EXPLORE,
     ROUTES.AUTH.CALENDAR,
     ROUTES.AUTH.TIER,
     ROUTES.AUTH.RECIPE,
     ROUTES.AUTH.DASHBOARD,
+    ROUTES.AUTH.MEMBERS,
   ],
 
   // Admin only routes

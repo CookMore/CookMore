@@ -25,7 +25,7 @@ export function AuthButton() {
     if (!hasProfile) {
       router.push(ROUTES.AUTH.PROFILE.CREATE)
     } else {
-      router.push(ROUTES.AUTH.DASHBOARD)
+      router.push(ROUTES.AUTH.PROFILE.HOME)
     }
   }
 

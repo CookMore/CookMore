@@ -1,32 +1,13 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { usePrivy, User } from '@privy-io/react-auth'
-import { useEffect, useCallback, useRef, useState } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { ROUTES } from '@/app/api/routes/routes'
 import { contractService } from '@/app/[locale]/(authenticated)/profile/services/client/contract.service'
 import { setHasProfileCookie, clearHasProfileCookie } from '@/app/api/utils/cookies'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
-import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
-import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
-import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
 import { COOKIE_NAMES } from '@/app/api/auth/constants'
 import { setCookie, clearCookie } from '@/app/api/utils/client-cookies'
-
-interface ContractServiceResponse {
-  success: boolean
-  data?: any
-  tierStatus?: {
-    actualTier: ProfileTier
-  }
-}
-
-// Define public routes that don't require auth
-const PUBLIC_ROUTES = [
-  ROUTES.MARKETING.HOME,
-  ROUTES.MARKETING.FEATURES,
-  ROUTES.MARKETING.DISCOVER,
-  ROUTES.MARKETING.PRICING,
-]
 
 interface UseAuthResult {
   isLoading: boolean
@@ -59,12 +40,11 @@ export function useAuth(): UseAuthResult {
   const [error, setError] = useState<Error | null>(null)
   const [currentTier, setCurrentTier] = useState<ProfileTier>(ProfileTier.FREE)
   const [isAdmin, setIsAdmin] = useState(false)
-  const mountedRef = useRef(false)
 
-  // Function to check profile existence
   const checkProfileExists = useCallback(async (address: string) => {
     try {
       const exists = await contractService.checkProfileExists(address)
+      console.log('Profile exists:', exists)
       return exists
     } catch (error) {
       console.error('Error checking profile:', error)
@@ -72,54 +52,40 @@ export function useAuth(): UseAuthResult {
     }
   }, [])
 
-  // Function to update profile state
   const updateProfileState = useCallback(async () => {
-    if (!user?.wallet?.address || !mountedRef.current) return
+    if (!user?.wallet?.address) return
 
     try {
       setIsLoading(true)
+      console.log('Updating profile state for address:', user.wallet.address)
       const exists = await checkProfileExists(user.wallet.address)
 
       if (exists) {
         setHasProfile(true)
         setHasProfileCookie(true)
-
-        // Get cached profile data
-        const cachedProfile = await profileCacheService.getCachedProfile(user.wallet.address)
-        if (cachedProfile) {
-          setCurrentTier(cachedProfile.tier || ProfileTier.FREE)
-          const adminStatus = await hasRequiredRole(user.wallet.address, ROLES.ADMIN)
-          setIsAdmin(adminStatus)
-        }
+        setCurrentTier(ProfileTier.FREE)
+        setIsAdmin(false)
+        console.log('Profile found, setting state.')
       } else {
         setHasProfile(false)
         clearHasProfileCookie()
+        console.log('Profile not found, clearing state.')
       }
 
-      // Set wallet address cookie
       setCookie('WALLET_ADDRESS', user.wallet.address)
     } catch (error) {
       console.error('Error updating profile state:', error)
       setError(error as Error)
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false)
-      }
+      setIsLoading(false)
     }
   }, [user?.wallet?.address, checkProfileExists])
 
-  // Effect to initialize state
-  useEffect(() => {
-    mountedRef.current = true
-    return () => {
-      mountedRef.current = false
-    }
-  }, [])
-
-  // Effect to handle authentication changes
   useEffect(() => {
     if (privyReady) {
+      console.log('Privy ready:', privyReady)
       if (authenticated && user?.wallet?.address) {
+        console.log('User authenticated:', authenticated)
         updateProfileState()
       } else {
         setHasProfile(null)
@@ -127,7 +93,8 @@ export function useAuth(): UseAuthResult {
         setIsAdmin(false)
         setIsLoading(false)
         clearHasProfileCookie()
-        clearCookie('WALLET_ADDRESS')
+        clearCookie(COOKIE_NAMES.WALLET_ADDRESS as 'WALLET_ADDRESS')
+        console.log('User not authenticated, clearing state.')
       }
     }
   }, [privyReady, authenticated, user?.wallet?.address, updateProfileState])
@@ -154,11 +121,10 @@ export function useAuth(): UseAuthResult {
       setCurrentTier(ProfileTier.FREE)
       setIsAdmin(false)
       clearHasProfileCookie()
-      clearCookie('WALLET_ADDRESS')
+      clearCookie(COOKIE_NAMES.WALLET_ADDRESS as 'WALLET_ADDRESS')
       router.push(ROUTES.MARKETING.HOME)
     } catch (error) {
       console.error('Logout error:', error)
-      // Force navigation even if logout fails
       router.push(ROUTES.MARKETING.HOME)
     }
   }, [privyLogout, router])

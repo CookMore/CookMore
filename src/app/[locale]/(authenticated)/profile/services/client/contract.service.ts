@@ -87,6 +87,7 @@ export class ContractService {
     this.contract = getContract({
       address: contractAddress as `0x${string}`,
       abi: profileABI,
+      client: this.publicClient,
     })
 
     return this.contract

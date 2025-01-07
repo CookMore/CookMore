@@ -1,4 +1,5 @@
 import { decodeEventLog, Abi } from 'viem'
+import type { ProfileMetadata, ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 
 // Example function to decode an event
 export const PROFILE_CREATED_SIGNATURE =
@@ -85,11 +86,11 @@ interface OnChainMetadata {
 export function decodeCreateProfileEvent(
   eventLog: { topics: string[]; data: string },
   abi: Abi
-): OnChainMetadata | null {
+): ProfileMetadata | null {
   try {
     // Ensure topics are in the correct format
     const formattedTopics = [
-      CREATE_PROFILE_SIGNATURE, // Use the correct event signature
+      PROFILE_CREATED_SIGNATURE, // Use the correct event signature
       ...eventLog.topics.slice(1).map((topic) => {
         return topic.startsWith('0x') ? topic : `0x${topic}`
       }),
@@ -111,9 +112,77 @@ export function decodeCreateProfileEvent(
       console.log('Metadata URI:', metadataURI)
 
       // Use the parseMetadataURI function
-      const metadata = parseMetadataURI(metadataURI)
+      const metadata = parseMetadataURI(metadataURI) || {}
       console.log('Decoded OnChainMetadata:', metadata)
-      return metadata
+
+      // Ensure all required properties are present
+      return {
+        profileId: profileId,
+        version: '1.0', // Default version
+        tier: ProfileTier.FREE, // Default tier
+        name: metadata.name || 'Unknown',
+        bio: metadata.bio || '',
+        description: 'User profile',
+        avatar: metadata.avatar || '',
+        image: '',
+        banner: '',
+        location: '',
+        social: {
+          urls: [],
+          labels: [],
+        },
+        preferences: {
+          theme: 'light',
+          notifications: true,
+          displayEmail: true,
+          displayLocation: true,
+        },
+        attributes: {
+          version: '1.0',
+          tier: ProfileTier.FREE,
+          timestamp: Date.now(),
+          ipfsNotesCID: metadata.ipfsNotesCID || '',
+        },
+        baseName: 'Default Base Name',
+        organizationInfo: {
+          type: 'other',
+          establishedYear: '2023',
+          size: 'small',
+          team: [],
+        },
+        compliance: {
+          certifications: [],
+          licenses: [],
+        },
+        businessOperations: {
+          operatingHours: [],
+          serviceTypes: [],
+          capacity: {},
+          specializations: [],
+        },
+        experience: {
+          current: {
+            title: '',
+            company: '',
+            startDate: '',
+          },
+          history: [],
+        },
+        culinaryInfo: {
+          expertise: 'beginner',
+          specialties: [],
+          dietaryPreferences: [],
+          cuisineTypes: [],
+          techniques: [],
+          equipment: [],
+        },
+        achievements: {
+          recipesCreated: 0,
+          recipesForked: 0,
+          totalLikes: 0,
+          badges: [],
+        },
+      } as ProfileMetadata
     } else {
       console.warn('Failed to decode event:', eventLog)
       return null

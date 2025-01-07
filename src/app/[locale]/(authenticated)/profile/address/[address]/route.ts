@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProfile } from '@/app/[locale]/(authenticated)/profile/services/server/profile.service'
 
-export async function GET(request: NextRequest, { params }: { params: { address: string } }) {
+export async function GET(request: NextRequest, context: { params: { address: string } }) {
   try {
-    const { address } = params
+    const { address } = context.params
+
     console.log('Profile route request:', {
       address,
       headers: Object.fromEntries(request.headers.entries()),
@@ -17,24 +18,18 @@ export async function GET(request: NextRequest, { params }: { params: { address:
     }
 
     console.log('Fetching profile for address:', address)
-    const result = await getProfile(address.toLowerCase())
+    const profileMetadata = await getProfile(address.toLowerCase(), 'sepolia')
 
-    console.log('Profile fetch result:', {
-      success: result.success,
-      hasData: !!result.data,
-      error: result.error,
-      tierStatus: result.tierStatus,
-    })
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Failed to fetch profile', walletAddress: address },
-        { status: result.error ? 500 : 404 }
-      )
+    if (!profileMetadata) {
+      console.log('No profile creation event found for address:', address)
+      return NextResponse.json({ error: 'No profile creation event found' }, { status: 404 })
     }
 
+    console.log('Profile Metadata:', profileMetadata)
+
     return NextResponse.json({
-      ...result,
+      success: true,
+      data: profileMetadata,
       walletAddress: address,
     })
   } catch (error) {

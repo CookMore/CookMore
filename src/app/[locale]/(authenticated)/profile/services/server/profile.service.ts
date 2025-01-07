@@ -6,14 +6,11 @@ import { profileABI } from '@/app/api/blockchain/abis'
 import { cache } from 'react'
 import { Profile } from '../../profile'
 import { ProfileTier } from '../../profile'
-import type { TierStatus } from '../../profile'
+import type { TierStatus, ProfileMetadata } from '../../profile'
 import { getContractAddress } from '@/app/api/blockchain/utils/addresses'
-import { checkRoleAccess } from '../../utils/role-utils'
-import { getCookieNames } from '@/app/api/utils/cookies'
 import { getTierStatus as getTierStatusFromContract } from '@/app/api/tiers/tiers'
-import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
-import { PROFILE_CREATED_SIGNATURE } from '@/app/[locale]/(authenticated)/profile/constants/constants'
-import type { ProfileMetadata } from '../../profile'
+import { decodeCreateProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
+import type { Abi } from 'viem'
 
 // Log environment variables to ensure they are set correctly
 console.log('NEXT_PUBLIC_BASE_MAINNET_RPC_URL:', process.env.NEXT_PUBLIC_BASE_MAINNET_RPC_URL)
@@ -27,26 +24,18 @@ const sepoliaProvider = new ethers.providers.JsonRpcProvider(
   process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL
 )
 
-const providers = [mainnetProvider, sepoliaProvider]
+const providers = {
+  mainnet: mainnetProvider,
+  sepolia: sepoliaProvider,
+}
 
-providers.forEach((provider, index) => {
-  try {
-    const url =
-      index === 0
-        ? process.env.NEXT_PUBLIC_BASE_MAINNET_RPC_URL
-        : process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL
-    if (url) {
-      console.log(`Provider ${index} initialized with URL: ${url}`)
-    } else {
-      throw new Error(`Provider ${index} failed to initialize`)
-    }
-  } catch (error) {
-    console.error(`Error initializing provider ${index}:`, error)
-  }
-})
+// Function to select the appropriate provider
+function getProvider(network: 'mainnet' | 'sepolia'): ethers.providers.JsonRpcProvider {
+  return providers[network]
+}
 
 // Define the ABI for the ProfileCreated event
-const profileCreatedAbi = [
+const profileCreatedAbi: Abi = [
   {
     type: 'event',
     name: 'ProfileCreated',
@@ -57,16 +46,6 @@ const profileCreatedAbi = [
     ],
   },
 ]
-
-export interface ProfileResponse {
-  success: boolean
-  data: Profile | null
-  error?: string
-  tierStatus: TierStatus
-  isAdmin?: boolean
-  canManageProfiles?: boolean
-  canManageMetadata?: boolean
-}
 
 // Helper function to get tier status
 async function getTierStatus(address: string): Promise<TierStatus> {
@@ -102,94 +81,48 @@ function hexZeroPad(value: string | undefined, length: number): string {
 }
 
 // Base implementation for server-side profile fetching
-export async function getProfile(address: string): Promise<ProfileResponse> {
-  console.log('Starting getProfile for address:', address)
+export async function getProfile(
+  address: string,
+  network: 'mainnet' | 'sepolia'
+): Promise<ProfileMetadata | null> {
+  console.log(`Starting getProfile for address: ${address} on ${network}`)
 
   try {
     const contractAddress = getContractAddress('PROFILE_REGISTRY')
     console.log('Contract address:', contractAddress)
 
-    const logs = await fetchLogsWithFallback(address)
-
-    console.log('Number of logs fetched:', logs.length)
+    // Fetch logs using ethers.js
+    const provider = getProvider(network)
+    const logs = await provider.getLogs({
+      address: contractAddress,
+      topics: [null, hexZeroPad(address, 32)], // Use null for the event signature
+    })
 
     if (logs.length === 0) {
-      console.log('No profile creation event found for address:', address)
-      return {
-        success: true,
-        data: null,
-        tierStatus: {
-          hasGroup: false,
-          hasPro: false,
-          hasOG: false,
-          currentTier: 0,
-        },
-      }
+      console.error('No logs found for the address')
+      return null
     }
 
-    const decodedEvent = decodeProfileEvent(logs[0], profileCreatedAbi as any)
-    console.log('Decoded event:', decodedEvent)
-
-    const profileId = decodedEvent?.args?.[1]
-    const metadataUri = decodedEvent?.args?.[2] as string
-
-    if (!profileId || typeof metadataUri !== 'string') {
+    const decodedMetadata = decodeCreateProfileEvent(logs[0], profileCreatedAbi as any)
+    if (!decodedMetadata) {
       console.error('Failed to decode profile creation event')
-      return {
-        success: true,
-        data: null,
-        tierStatus: {
-          hasGroup: false,
-          hasPro: false,
-          hasOG: false,
-          currentTier: 0,
-        },
-      }
+      return null
     }
 
-    const tierStatus = await getTierStatus(address)
-    console.log('Tier status:', tierStatus)
-
-    return {
-      success: true,
-      data: {
-        exists: true,
-        metadataUri: metadataUri,
-        tier: 0,
-        tokenId: profileId.toString(),
-        owner: address,
-        metadata: {
-          name: 'Default Name',
-          description: 'Default Description',
-        } as ProfileMetadata,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        eventLog: {
-          topics: Array.from(logs[0].topics),
-          data: logs[0].data,
-        },
-      },
-      tierStatus,
-    }
+    console.log('Decoded Metadata:', decodedMetadata)
+    return decodedMetadata
   } catch (error) {
     console.error('Error in getProfile:', error)
-    return {
-      success: false,
-      data: null,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      tierStatus: {
-        hasGroup: false,
-        hasPro: false,
-        hasOG: false,
-        currentTier: 0,
-      },
-    }
+    return null
   }
 }
 
 // Cached version for repeated calls
-export async function getCachedProfile(address: string): Promise<ProfileResponse> {
-  const cachedFn = cache(getProfile)
+export async function getCachedProfile(
+  address: string,
+  network: 'mainnet' | 'sepolia'
+): Promise<ProfileMetadata | null> {
+  const cachedFn = cache((addr: string) => getProfile(addr, network))
   return cachedFn(address)
 }
 
@@ -237,32 +170,4 @@ export async function deleteProfile() {
     console.error('Error deleting profile:', error)
     return { success: false, error: 'Failed to delete profile' }
   }
-}
-
-async function fetchLogsWithFallback(address: string): Promise<any[]> {
-  if (!address) {
-    throw new Error('Address is undefined')
-  }
-
-  for (const [index, provider] of providers.entries()) {
-    try {
-      const contractAddress = getContractAddress('PROFILE_REGISTRY')
-      const logs = await provider.getLogs({
-        address: contractAddress,
-        topics: [PROFILE_CREATED_SIGNATURE, null, hexZeroPad(address, 32)],
-        fromBlock: 0,
-        toBlock: 'latest',
-      })
-      return logs
-    } catch (error) {
-      console.error(
-        'Error fetching logs with provider:',
-        index === 0
-          ? process.env.NEXT_PUBLIC_BASE_MAINNET_RPC_URL
-          : process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL,
-        error
-      )
-    }
-  }
-  throw new Error('All providers failed to fetch logs')
 }

@@ -6,7 +6,7 @@ import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTie
 import { useProfileRegistry } from '@/app/[locale]/(authenticated)/profile/components/hooks'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { profileABI } from '@/app/api/blockchain/abis/profile'
-import { TIER_CONTRACT_ABI } from '../contracts/abis'
+import { tierABI } from '@/app/api/blockchain/abis'
 
 interface ProfileContextType {
   address?: string

@@ -14,6 +14,7 @@ const privyClient = new PrivyClient(
 )
 
 interface VerifiedUser extends AuthTokenClaims {
+  sub: string
   wallet?: {
     address: string
   } | null
@@ -59,11 +60,11 @@ export async function getToken(token: string) {
     }
   } catch (error) {
     console.error('Token verification error:', {
-      error,
-      message: error.message,
+      error: String(error),
+      message: error instanceof Error ? error.message : String(error),
       tokenLength: token?.length,
       tokenStart: token?.substring(0, 10),
     })
-    throw new Error('Invalid token: ' + error.message)
+    throw new Error('Invalid token: ' + (error instanceof Error ? error.message : String(error)))
   }
 }
