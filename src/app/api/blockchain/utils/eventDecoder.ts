@@ -1,34 +1,29 @@
 import { decodeEventLog, Abi } from 'viem'
-import type { ProfileMetadata, ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
+import { ProfileTier, ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
 
-// Example function to decode an event
 export const PROFILE_CREATED_SIGNATURE =
   '0x02ed4ee0412e67bbc9ed1687f3ad6bb7134d359d45994f3bf5302e91d81cf61f' as const
 
+export const ANOTHER_EVENT_SIGNATURE =
+  '0x236eb7515b00733d8ade7456155d53d63c2fa66bec6437ddff6ab3fc71e1e324' as const
+
+export const PROFILE_DELETED_SIGNATURE = '0x1234567890abcdef...' as const
+
 export function decodeProfileEvent(eventLog: { topics: string[]; data: string }, abi: Abi) {
   try {
-    // Ensure topics are in the correct format
-    const formattedTopics = [
-      PROFILE_CREATED_SIGNATURE, // Hardcoded event signature
-      ...eventLog.topics.slice(1).map((topic) => {
-        return topic.startsWith('0x') ? topic : `0x${topic}`
-      }),
-    ] as [`0x${string}`, ...`0x${string}`[]]
+    const eventSignature = eventLog.topics[0]
 
-    // Ensure data is in the correct format
-    const formattedData = eventLog.data.startsWith('0x') ? eventLog.data : `0x${eventLog.data}`
-
-    console.log('Formatted Topics:', formattedTopics)
-    console.log('Formatted Data:', formattedData)
-
-    const decodedEvent = decodeEventLog({
-      abi,
-      data: formattedData as `0x${string}`,
-      topics: formattedTopics,
-    })
-
-    console.log('Decoded Event:', decodedEvent)
-    return decodedEvent
+    switch (eventSignature) {
+      case PROFILE_CREATED_SIGNATURE:
+        return decodeProfileCreatedEvent(eventLog, abi)
+      case ANOTHER_EVENT_SIGNATURE:
+        return decodeAnotherEvent(eventLog, abi)
+      case PROFILE_DELETED_SIGNATURE:
+        return decodeProfileDeletedEvent(eventLog, abi)
+      default:
+        console.warn('Unexpected event signature:', eventSignature)
+        return null
+    }
   } catch (error) {
     console.error('Error decoding event:', error, {
       topics: eventLog.topics,
@@ -38,66 +33,19 @@ export function decodeProfileEvent(eventLog: { topics: string[]; data: string },
   }
 }
 
-export function handleCreateProfileEvent(eventLog: { topics: string[]; data: string }, abi: Abi) {
+function decodeProfileCreatedEvent(eventLog: { topics: string[]; data: string }, abi: Abi) {
   try {
-    // Ensure topics are in the correct format
     const formattedTopics = [
-      PROFILE_CREATED_SIGNATURE, // Use the createProfile event signature
-      ...eventLog.topics.slice(1).map((topic) => {
-        return topic.startsWith('0x') ? topic : `0x${topic}`
-      }),
+      PROFILE_CREATED_SIGNATURE,
+      ...eventLog.topics.slice(1).map((topic) => (topic.startsWith('0x') ? topic : `0x${topic}`)),
     ] as [`0x${string}`, ...`0x${string}`[]]
 
-    // Ensure data is in the correct format
     const formattedData = eventLog.data.startsWith('0x') ? eventLog.data : `0x${eventLog.data}`
 
-    console.log('Formatted Topics for CreateProfile:', formattedTopics)
-    console.log('Formatted Data for CreateProfile:', formattedData)
-
-    const decodedEvent = decodeEventLog({
-      abi,
-      data: formattedData as `0x${string}`,
-      topics: formattedTopics,
-    })
-
-    console.log('Decoded CreateProfile Event:', decodedEvent)
-    return decodedEvent
-  } catch (error) {
-    console.error('Error decoding CreateProfile event:', error, {
-      topics: eventLog.topics,
-      data: eventLog.data,
-    })
-    return null
-  }
-}
-
-// Correct event signature for createProfile
-export const CREATE_PROFILE_SIGNATURE =
-  '0x02ed4ee0412e67bbc9ed1687f3ad6bb7134d359d45994f3bf5302e91d81cf61f' as const
-
-interface OnChainMetadata {
-  [x: string]: any
-  name: string
-  bio: string
-  avatar: string // IPFS hash
-  ipfsNotesCID: string // IPFS hash for extended data
-}
-
-export function decodeCreateProfileEvent(
-  eventLog: { topics: string[]; data: string },
-  abi: Abi
-): ProfileMetadata | null {
-  try {
-    // Ensure topics are in the correct format
-    const formattedTopics = [
-      PROFILE_CREATED_SIGNATURE, // Use the correct event signature
-      ...eventLog.topics.slice(1).map((topic) => {
-        return topic.startsWith('0x') ? topic : `0x${topic}`
-      }),
-    ] as [`0x${string}`, ...`0x${string}`[]]
-
-    // Ensure data is in the correct format
-    const formattedData = eventLog.data.startsWith('0x') ? eventLog.data : `0x${eventLog.data}`
+    if (formattedData.length < 128) {
+      console.warn('Data size is too small for non-indexed event parameters:', eventLog)
+      return null
+    }
 
     const decodedEvent = decodeEventLog({
       abi,
@@ -106,89 +54,33 @@ export function decodeCreateProfileEvent(
     })
 
     if (decodedEvent && decodedEvent.args) {
-      const [wallet, profileId, metadataURI] = decodedEvent.args as [string, string, string]
-      console.log('Wallet:', wallet)
-      console.log('Profile ID:', profileId)
-      console.log('Metadata URI:', metadataURI)
+      if (
+        typeof decodedEvent.args === 'object' &&
+        'wallet' in decodedEvent.args &&
+        'profileId' in decodedEvent.args &&
+        'metadataURI' in decodedEvent.args
+      ) {
+        const { wallet, profileId, metadataURI } = decodedEvent.args as {
+          wallet: string
+          profileId: string
+          metadataURI: string
+        }
 
-      // Use the parseMetadataURI function
-      const metadata = parseMetadataURI(metadataURI) || {}
-      console.log('Decoded OnChainMetadata:', metadata)
-
-      // Ensure all required properties are present
-      return {
-        profileId: profileId,
-        version: '1.0', // Default version
-        tier: ProfileTier.FREE, // Default tier
-        name: metadata.name || 'Unknown',
-        bio: metadata.bio || '',
-        description: 'User profile',
-        avatar: metadata.avatar || '',
-        image: '',
-        banner: '',
-        location: '',
-        social: {
-          urls: [],
-          labels: [],
-        },
-        preferences: {
-          theme: 'light',
-          notifications: true,
-          displayEmail: true,
-          displayLocation: true,
-        },
-        attributes: {
-          version: '1.0',
-          tier: ProfileTier.FREE,
-          timestamp: Date.now(),
-          ipfsNotesCID: metadata.ipfsNotesCID || '',
-        },
-        baseName: 'Default Base Name',
-        organizationInfo: {
-          type: 'other',
-          establishedYear: '2023',
-          size: 'small',
-          team: [],
-        },
-        compliance: {
-          certifications: [],
-          licenses: [],
-        },
-        businessOperations: {
-          operatingHours: [],
-          serviceTypes: [],
-          capacity: {},
-          specializations: [],
-        },
-        experience: {
-          current: {
-            title: '',
-            company: '',
-            startDate: '',
-          },
-          history: [],
-        },
-        culinaryInfo: {
-          expertise: 'beginner',
-          specialties: [],
-          dietaryPreferences: [],
-          cuisineTypes: [],
-          techniques: [],
-          equipment: [],
-        },
-        achievements: {
-          recipesCreated: 0,
-          recipesForked: 0,
-          totalLikes: 0,
-          badges: [],
-        },
-      } as ProfileMetadata
+        return {
+          wallet: wallet || 'Unknown',
+          profileId: profileId || '0',
+          metadataURI: metadataURI || '',
+        }
+      } else {
+        console.warn('Decoded event args are missing expected parameters:', decodedEvent.args)
+        return null
+      }
     } else {
       console.warn('Failed to decode event:', eventLog)
       return null
     }
   } catch (error) {
-    console.error('Error decoding createProfile event:', error, {
+    console.error('Error decoding event:', error, {
       topics: eventLog.topics,
       data: eventLog.data,
     })
@@ -196,20 +88,46 @@ export function decodeCreateProfileEvent(
   }
 }
 
-// Function to parse metadataURI
-function parseMetadataURI(metadataURI: string): OnChainMetadata | null {
+function decodeAnotherEvent(eventLog: { topics: string[]; data: string }, abi: Abi) {
+  // Logic for decoding ANOTHER_EVENT_SIGNATURE
+}
+
+function decodeProfileDeletedEvent(eventLog: { topics: string[]; data: string }, abi: Abi) {
   try {
-    // Example parsing logic, assuming metadataURI is a JSON string stored on IPFS
-    const metadata = JSON.parse(atob(metadataURI.split('ipfs://')[1]))
-    console.log('Parsed Metadata:', metadata)
-    return {
-      name: metadata.name,
-      bio: metadata.bio,
-      avatar: metadata.avatar,
-      ipfsNotesCID: metadata.ipfsNotesCID,
+    const formattedTopics = [
+      PROFILE_DELETED_SIGNATURE,
+      ...eventLog.topics.slice(1).map((topic) => (topic.startsWith('0x') ? topic : `0x${topic}`)),
+    ] as [`0x${string}`, ...`0x${string}`[]]
+
+    const formattedData = eventLog.data.startsWith('0x') ? eventLog.data : `0x${eventLog.data}`
+
+    if (formattedData.length < 64) {
+      console.warn('Data size is too small for non-indexed event parameters:', eventLog)
+      return null
+    }
+
+    const decodedEvent = decodeEventLog({
+      abi,
+      data: formattedData as `0x${string}`,
+      topics: formattedTopics,
+    })
+
+    if (decodedEvent && decodedEvent.args) {
+      const [wallet, profileId] = decodedEvent.args as [string, string]
+
+      return {
+        wallet: wallet || 'Unknown',
+        profileId: profileId || '0',
+      }
+    } else {
+      console.warn('Failed to decode event:', eventLog)
+      return null
     }
   } catch (error) {
-    console.error('Error parsing metadataURI:', error)
+    console.error('Error decoding event:', error, {
+      topics: eventLog.topics,
+      data: eventLog.data,
+    })
     return null
   }
 }

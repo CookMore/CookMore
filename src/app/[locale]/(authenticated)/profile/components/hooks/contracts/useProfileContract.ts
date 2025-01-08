@@ -4,16 +4,17 @@ import { useState, useCallback, useEffect } from 'react'
 import { useProfileMetadata } from '../core/useProfileMetadata'
 import { contracts } from '@/app/api/blockchain/config/contracts'
 import { profileABI } from '@/app/api/blockchain/abis/profile'
-import { decodeCreateProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
-import type { ProfileFormData, ProfileTier } from '../../../profile'
-import type { OnChainMetadata } from '../../../types/metadata'
+import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
+import type { ProfileFormData, ProfileTier, Profile } from '../../../profile'
 import { usePrivy } from '@privy-io/react-auth'
 import { ethers } from 'ethers'
+import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 
 interface UseProfileContract {
   isLoading: boolean
   error: string | null
-  logs: any[]
+  logs: Profile[]
+  profileData: Profile | null
   fetchAllLogs: () => Promise<void>
   createProfile: (
     formData: ProfileFormData,
@@ -31,21 +32,14 @@ interface UseProfileContract {
   ) => Promise<{
     transactionHash: string
   }>
-  getProfile: (walletAddress: string) => Promise<{
-    profileId: string
-    metadataURI: string
-  } | null>
-}
-
-interface DecodedEvent {
-  profileId: string
-  metadataURI: string
+  getProfile: (walletAddress: string) => Promise<Profile | null>
 }
 
 export function useProfileContract(): UseProfileContract {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [logs, setLogs] = useState<any[]>([])
+  const [logs, setLogs] = useState<Profile[]>([])
+  const [profileData, setProfileData] = useState<Profile | null>(null)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const { processFormData } = useProfileMetadata()
   const { user, authenticated } = usePrivy()
@@ -87,17 +81,52 @@ export function useProfileContract(): UseProfileContract {
 
       const decodedEvents = logs
         .map((log) => {
-          const decodedEvent = decodeCreateProfileEvent(log, profileABI)
+          const decodedEvent = decodeProfileEvent(log, profileABI)
           console.log('Decoded Event:', decodedEvent)
           return decodedEvent
         })
-        .filter(Boolean)
+        .filter(Boolean) as Profile[]
 
       setLogs(decodedEvents)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch and decode logs')
     }
   }, [contract])
+
+  const fetchProfileData = useCallback(async (walletAddress: string, currentTier: ProfileTier) => {
+    if (!walletAddress) return
+
+    try {
+      const sepoliaProvider = new ethers.providers.JsonRpcProvider(
+        process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL
+      )
+      const contract = new ethers.Contract(
+        '0x0C3897538e000dAdAEA1bb10D5757fC473972018',
+        profileABI,
+        sepoliaProvider
+      )
+
+      const profile = await contract.getProfile(walletAddress)
+      const profileId = profile.profileId
+      console.log('Profile ID:', profileId.toString())
+
+      // Fetch metadata from IPFS
+      const metadataResponse = await fetch(ipfsService.getHttpUrl(profile.metadataURI))
+      const metadataJson = await metadataResponse.json()
+
+      // Ensure metadataJson matches ProfileMetadata type
+      const parsedProfile: Profile = {
+        ...profile,
+        metadata: metadataJson,
+        tokenId: profileId.toString(),
+        tier: currentTier,
+      }
+
+      setProfileData(parsedProfile)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }, [])
 
   useEffect(() => {
     if (!authenticated || !user || !user.wallet) {
@@ -207,12 +236,7 @@ export function useProfileContract(): UseProfileContract {
   )
 
   const getProfile = useCallback(
-    async (
-      walletAddress: string
-    ): Promise<{
-      profileId: string
-      metadataURI: string
-    } | null> => {
+    async (walletAddress: string): Promise<Profile | null> => {
       if (!contract) {
         throw new Error('Contract is not initialized')
       }
@@ -222,21 +246,15 @@ export function useProfileContract(): UseProfileContract {
         const logs = await contract.queryFilter(filter, 19358516, 'latest')
 
         const decodedEvents = logs
-          .map((log) => decodeCreateProfileEvent(log, profileABI))
-          .filter(Boolean)
+          .map((log) => decodeProfileEvent(log, profileABI))
+          .filter(Boolean) as Profile[]
 
         if (decodedEvents.length === 0) {
           return null
         }
 
         const latestEvent = decodedEvents[decodedEvents.length - 1]
-        if (!latestEvent) {
-          return null
-        }
-        return {
-          profileId: latestEvent.args?.profileId,
-          metadataURI: latestEvent.args?.metadataURI,
-        }
+        return latestEvent || null
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to fetch profile'
         setError(message)
@@ -250,6 +268,7 @@ export function useProfileContract(): UseProfileContract {
     isLoading,
     error,
     logs,
+    profileData,
     fetchAllLogs,
     createProfile,
     updateProfile,

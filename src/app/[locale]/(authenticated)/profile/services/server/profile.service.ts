@@ -4,12 +4,10 @@ import { ethers } from 'ethers'
 import { getServerContract } from '@/app/api/blockchain/server/getContracts'
 import { profileABI } from '@/app/api/blockchain/abis'
 import { cache } from 'react'
-import { Profile } from '../../profile'
-import { ProfileTier } from '../../profile'
-import type { TierStatus, ProfileMetadata } from '../../profile'
+import { Profile, ProfileTier, ProfileMetadata, ProfileFormData, TierStatus } from '../../profile'
 import { getContractAddress } from '@/app/api/blockchain/utils/addresses'
 import { getTierStatus as getTierStatusFromContract } from '@/app/api/tiers/tiers'
-import { decodeCreateProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
+import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 import type { Abi } from 'viem'
 
 // Log environment variables to ensure they are set correctly
@@ -40,9 +38,9 @@ const profileCreatedAbi: Abi = [
     type: 'event',
     name: 'ProfileCreated',
     inputs: [
-      { indexed: true, name: 'user', type: 'address' },
-      { indexed: true, name: 'tokenId', type: 'uint256' },
-      { indexed: false, name: 'uri', type: 'string' },
+      { indexed: true, name: 'wallet', type: 'address' },
+      { indexed: true, name: 'profileId', type: 'uint256' },
+      { indexed: false, name: 'metadataURI', type: 'string' },
     ],
   },
 ]
@@ -80,11 +78,19 @@ function hexZeroPad(value: string | undefined, length: number): string {
   return '0x' + strippedValue.padStart(length * 2, '0')
 }
 
+// Define a composite return type
+type ProfileData = {
+  profileMetadata: ProfileMetadata | null
+  profile: Profile | null
+  profileTier: ProfileTier | null
+  profileFormData: ProfileFormData | null
+}
+
 // Base implementation for server-side profile fetching
 export async function getProfile(
   address: string,
   network: 'mainnet' | 'sepolia'
-): Promise<ProfileMetadata | null> {
+): Promise<ProfileData> {
   console.log(`Starting getProfile for address: ${address} on ${network}`)
 
   try {
@@ -93,27 +99,51 @@ export async function getProfile(
 
     // Fetch logs using ethers.js
     const provider = getProvider(network)
+    const eventSignatureHash = ethers.utils.id('ProfileCreated(address,uint256,string)')
     const logs = await provider.getLogs({
       address: contractAddress,
-      topics: [null, hexZeroPad(address, 32)], // Use null for the event signature
+      topics: [eventSignatureHash, hexZeroPad(address, 32)], // Use the correct event signature hash
     })
 
     if (logs.length === 0) {
       console.error('No logs found for the address')
-      return null
+      return { profileMetadata: null, profile: null, profileTier: null, profileFormData: null }
     }
 
-    const decodedMetadata = decodeCreateProfileEvent(logs[0], profileCreatedAbi as any)
+    const decodedMetadata = decodeProfileEvent(logs[0], profileCreatedAbi as any)
     if (!decodedMetadata) {
       console.error('Failed to decode profile creation event')
-      return null
+      return { profileMetadata: null, profile: null, profileTier: null, profileFormData: null }
     }
 
     console.log('Decoded Metadata:', decodedMetadata)
-    return decodedMetadata
+
+    // Extract and log additional data
+    const profileMetadata = decodedMetadata.metadata as ProfileMetadata
+    const profile = decodedMetadata as Profile
+    const profileTier = decodedMetadata.tier as ProfileTier
+    const profileFormData = {
+      basicInfo: {
+        name: profileMetadata.name || '',
+        bio: profileMetadata.bio || '',
+        avatar: profileMetadata.avatar || '',
+        banner: '',
+        location: '',
+        social: {},
+      },
+      tier: profileTier,
+      version: '1.0',
+    } as ProfileFormData
+
+    console.log('Profile Metadata:', profileMetadata)
+    console.log('Profile:', profile)
+    console.log('Profile Tier:', profileTier)
+    console.log('Profile Form Data:', profileFormData)
+
+    return { profileMetadata, profile, profileTier, profileFormData }
   } catch (error) {
     console.error('Error in getProfile:', error)
-    return null
+    return { profileMetadata: null, profile: null, profileTier: null, profileFormData: null }
   }
 }
 
@@ -121,7 +151,7 @@ export async function getProfile(
 export async function getCachedProfile(
   address: string,
   network: 'mainnet' | 'sepolia'
-): Promise<ProfileMetadata | null> {
+): Promise<ProfileData | null> {
   const cachedFn = cache((addr: string) => getProfile(addr, network))
   return cachedFn(address)
 }

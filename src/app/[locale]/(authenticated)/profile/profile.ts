@@ -20,42 +20,17 @@ export interface SocialLinks {
   labels: string[]
 }
 
-// Contract and Web3 Response Types
-export interface TransactionResponse {
-  success: boolean
-  hash?: string
-  error?: string
-  wait(): Promise<{
-    tokenId?: string
-    hash: string
-    blockNumber: number
-  }>
+// Preferences Type
+export interface Preferences {
+  theme: 'light' | 'dark' | 'system'
+  notifications: boolean
+  displayEmail: boolean
+  displayLocation: boolean
+  email?: string
 }
 
-export interface ProfileResponse {
-  success: boolean
-  data: ProfileMetadata | null
-  error?: string
-  tierStatus: {
-    hasGroup: boolean
-    hasPro: boolean
-    hasOG: boolean
-    currentTier: number
-  }
-}
-
-// Event Types
-export interface ProfileEvent {
-  owner: string
-  tokenId: bigint | string
-  blockNumber?: number
-  transactionHash?: string
-  eventType?: 'created' | 'updated' | 'deleted'
-  timestamp?: number
-}
-
-// Base Profile Interface
-interface BaseProfileMetadata {
+// Base Profile Metadata Interface
+export interface BaseProfileMetadata {
   profileId?: string
   version: ProfileVersion
   tier: ProfileTier
@@ -106,18 +81,10 @@ interface BaseProfileMetadata {
 // Free Tier - Basic Profile
 export interface FreeProfileMetadata extends BaseProfileMetadata {}
 
-// Base business info type
-interface BaseBusinessInfo {
-  businessHours?: string
-  services?: string[]
-  serviceAreas?: string[]
-}
-
 // Pro Tier - Professional Chef Profile
-export interface ProProfileMetadata extends FreeProfileMetadata {
+export interface ProProfileMetadata extends BaseProfileMetadata {
   title?: string
   company?: string
-
   experience: {
     current?: {
       title: string
@@ -131,11 +98,10 @@ export interface ProProfileMetadata extends FreeProfileMetadata {
       company: string
       location?: string
       startDate: string
-      endDate: string
+      endDate?: string
       description?: string
     }>
   }
-
   education?: Array<{
     institution: string
     degree?: string
@@ -144,7 +110,6 @@ export interface ProProfileMetadata extends FreeProfileMetadata {
     endYear?: string
     location?: string
   }>
-
   awards?: Array<{
     name: string
     issuer: string
@@ -152,7 +117,6 @@ export interface ProProfileMetadata extends FreeProfileMetadata {
     description?: string
     link?: string
   }>
-
   culinaryInfo: FreeProfileMetadata['culinaryInfo'] & {
     certifications: Array<{
       name: string
@@ -164,19 +128,16 @@ export interface ProProfileMetadata extends FreeProfileMetadata {
     techniques: string[]
     equipment: string[]
   }
-
   languages?: Array<{
     language: string
     proficiency: 'basic' | 'intermediate' | 'fluent' | 'native'
   }>
-
   availability?: {
     forHire: boolean
     consulting: boolean
     collaborations: boolean
     teaching: boolean
   }
-
   businessInfo?: BaseBusinessInfo & {
     rates?: {
       hourly?: string
@@ -187,9 +148,8 @@ export interface ProProfileMetadata extends FreeProfileMetadata {
 }
 
 // Group Tier - Restaurant/Organization Profile
-export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'businessInfo'> {
+export interface GroupProfileMetadata extends BaseProfileMetadata {
   baseName: string
-
   organizationInfo: {
     type: 'restaurant' | 'culinary-school' | 'catering' | 'food-service' | 'other'
     establishedYear: string
@@ -210,7 +170,6 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
       requirements?: string[]
     }>
   }
-
   facilities?: Array<{
     type: 'kitchen' | 'dining' | 'training' | 'storage' | 'other'
     capacity: number
@@ -223,7 +182,6 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
       responsible?: string
     }>
   }>
-
   compliance: {
     certifications: Array<{
       type: string
@@ -254,7 +212,6 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
       validUntil: string
     }>
   }
-
   businessOperations: {
     operatingHours: Array<{
       day: string
@@ -275,7 +232,6 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
     deliveryRadius?: number
     reservationPolicy?: string
   }
-
   marketing?: {
     brandColors?: string[]
     tagline?: string
@@ -299,14 +255,12 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
       terms?: string
     }>
   }
-
   businessInfo?: BaseBusinessInfo & {
     taxId?: string
     billingAddress?: string
     paymentMethods?: string[]
     invoicingEmail?: string
   }
-
   suppliers?: Array<{
     name: string
     type: string[]
@@ -319,25 +273,68 @@ export interface GroupProfileMetadata extends Omit<ProProfileMetadata, 'business
     preferredStatus?: boolean
     lastOrderDate?: string
   }>
-
   certifications?: string[]
 }
 
-interface GroupProfileMetadataWithBasicInfo extends GroupProfileMetadata {
-  basicInfo: {
-    name: string
-    bio?: string
-    avatar?: string
-    location?: string
-    social?: {
-      twitter?: string
-      website?: string
+// OG Extension Interface
+interface OGExtension {
+  ogBenefits: {
+    joinDate: string
+    memberNumber: number
+    customBranding: {
+      primaryColor: string
+      secondaryColor: string
     }
+    apiAccess: {
+      enabled: boolean
+      key?: string
+      permissions?: string[]
+    }
+  }
+  showcase: {
+    featured: boolean
+    highlights: Array<{
+      title: string
+      description: string
+      date: string
+      media?: string
+    }>
+    specialAccess: string[]
+  }
+  network: {
+    mentorship: {
+      available: boolean
+      specialties: string[]
+      maxMentees?: number
+    }
+    collaborations: Array<{
+      type: string
+      description: string
+      status: 'active' | 'completed' | 'planned'
+    }>
+    events: Array<{
+      name: string
+      date: string
+      type: 'workshop' | 'masterclass' | 'collaboration'
+      capacity: number
+    }>
+  }
+  verificationStatus: {
+    verified: boolean
+    verifiedDate?: string
+    verificationLevel: 'basic' | 'advanced' | 'expert'
   }
 }
 
+// OG Tier - Special Profile
+export interface OGProfileMetadata extends BaseProfileMetadata, OGExtension {}
+
 // The main type that represents all possible profiles
-export type ProfileMetadata = FreeProfileMetadata | ProProfileMetadata | GroupProfileMetadata
+export type ProfileMetadata =
+  | FreeProfileMetadata
+  | ProProfileMetadata
+  | GroupProfileMetadata
+  | OGProfileMetadata
 
 // Core Profile Type
 export interface Profile {
@@ -346,11 +343,19 @@ export interface Profile {
   owner: string | Address
   metadata: ProfileMetadata
   metadataUri?: string
+  ipfsNotesCID?: string
   tier: ProfileTier
   exists?: boolean
   createdAt: number | Date
   updatedAt: number | Date
   eventLog: { topics: string[]; data: string }
+}
+
+// Base business info type
+interface BaseBusinessInfo {
+  businessHours?: string
+  services?: string[]
+  serviceAreas?: string[]
 }
 
 // Form Data Type
@@ -446,78 +451,3 @@ interface BaseProfileFormProps<T extends ProfileMetadata = ProfileMetadata> {
 export interface FreeProfileFormProps extends BaseProfileFormProps<FreeProfileMetadata> {}
 export interface ProProfileFormProps extends BaseProfileFormProps<ProProfileMetadata> {}
 export interface GroupProfileFormProps extends BaseProfileFormProps<GroupProfileMetadata> {}
-
-// Preferences Type
-export interface Preferences {
-  theme: 'light' | 'dark' | 'system'
-  notifications: boolean
-  displayEmail: boolean
-  displayLocation: boolean
-  email?: string
-}
-
-// Additional Web3 Types
-export interface ProfileValidation {
-  success: boolean
-  error?: Error
-}
-
-interface OGExtension {
-  ogBenefits: {
-    // Core OG benefits
-    joinDate: string
-    memberNumber: number
-
-    // Custom branding options
-    customBranding: {
-      primaryColor: string
-      secondaryColor: string
-    }
-
-    // API access for integrations
-    apiAccess: {
-      enabled: boolean
-      key?: string
-      permissions?: string[]
-    }
-  }
-
-  // Showcase their special status/achievements
-  showcase: {
-    featured: boolean
-    highlights: Array<{
-      title: string
-      description: string
-      date: string
-      media?: string
-    }>
-    specialAccess: string[]
-  }
-
-  // Network and collaboration
-  network: {
-    mentorship: {
-      available: boolean
-      specialties: string[]
-      maxMentees?: number
-    }
-    collaborations: Array<{
-      type: string
-      description: string
-      status: 'active' | 'completed' | 'planned'
-    }>
-    events: Array<{
-      name: string
-      date: string
-      type: 'workshop' | 'masterclass' | 'collaboration'
-      capacity: number
-    }>
-  }
-
-  // Verification and status
-  verificationStatus: {
-    verified: boolean
-    verifiedDate?: string
-    verificationLevel: 'basic' | 'advanced' | 'expert'
-  }
-}
