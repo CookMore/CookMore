@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { usePrivy, User } from '@privy-io/react-auth'
@@ -9,6 +9,7 @@ import { ProfileSkeleton } from '../../components/ui/ProfileSkeleton'
 import { PanelContainer } from '@/app/api/panels/PanelContainer'
 import { PageHeader } from '@/app/api/header/PageHeader'
 import ProfilePage from '../../page'
+import { getProfile } from '@/app/[locale]/(authenticated)/profile/services/server/profile.service'
 import type {
   ProfileMetadata,
   ProfileVersion,
@@ -19,14 +20,37 @@ import type {
 
 export default function PublicProfilePage() {
   const params = useParams()
-  console.log('Params:', params)
   const { address } = params
-  console.log('Address from Params:', address)
+  const [profileMetadata, setProfileMetadata] = useState<ProfileMetadata | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const { user } = usePrivy()
   const walletAddress = user?.wallet?.address || address
 
   const { hasProfile, currentTier } = useAuth()
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        if (!walletAddress || !walletAddress.startsWith('0x')) {
+          setError('Invalid address format')
+          return
+        }
+
+        const profileData = await getProfile(walletAddress.toLowerCase(), 'sepolia')
+        if (!profileData) {
+          setError('No profile creation event found')
+          return
+        }
+
+        setProfileMetadata(profileData.profileMetadata)
+      } catch (err) {
+        setError('Failed to fetch profile')
+      }
+    }
+
+    fetchProfile()
+  }, [walletAddress])
 
   function mapUserToProfileMetadata(user: User): ProfileMetadata {
     return {
@@ -107,13 +131,14 @@ export default function PublicProfilePage() {
           {walletAddress && <ProfilePage address={String(walletAddress)} />}
           {user && (
             <ProfileDisplay
-              profile={mapUserToProfileMetadata(user)}
+              profile={profileMetadata || mapUserToProfileMetadata(user)}
               currentTier={currentTier}
               isPublicView
               hasProfile={hasProfile}
             />
           )}
         </Suspense>
+        {error && <div className='text-red-500'>{error}</div>}
         <button className='mt-4 px-4 py-2 bg-blue-500 text-white rounded'>Test</button>
       </PanelContainer>
     </div>

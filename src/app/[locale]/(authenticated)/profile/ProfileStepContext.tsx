@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { getTierValidation } from './validations/profile'
 import type { ProfileFormData } from './profile'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
+import { useProfileContract } from './components/hooks/contracts/useProfileContract'
 
 interface ProfileStepContextType {
   currentStep: number
@@ -42,6 +43,9 @@ export function ProfileStepProvider({
   const [hasProfile, setHasProfile] = useState(false)
   const [isProfileChecked, setIsProfileChecked] = useState(false)
 
+  // Use the useProfileContract hook
+  const { getProfile } = useProfileContract()
+
   // Check profile existence
   useEffect(() => {
     let isMounted = true
@@ -50,12 +54,11 @@ export function ProfileStepProvider({
       if (!ready || !user?.wallet?.address) return
 
       try {
-        const profileResponse = await fetch(`/api/profile/${user.wallet.address}`)
-        const profileData = await profileResponse.json()
+        const profile = await getProfile(user.wallet.address)
 
         if (isMounted) {
-          console.log('Profile check:', profileData)
-          setHasProfile(!!profileData?.data?.exists)
+          console.log('Profile check:', profile)
+          setHasProfile(!!profile?.exists)
           setIsProfileChecked(true)
         }
       } catch (error) {
@@ -75,7 +78,7 @@ export function ProfileStepProvider({
     return () => {
       isMounted = false
     }
-  }, [ready, user?.wallet?.address])
+  }, [ready, user?.wallet?.address, getProfile])
 
   // Reset data if wallet changes
   useEffect(() => {
