@@ -101,6 +101,17 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false }
+    config.module.rules.push({
+      test: /\.(mp3|aac|wav)$/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          outputPath: 'static/sounds/',
+          publicPath: '/_next/static/sounds/',
+        },
+      },
+    })
     return config
   },
   // Next.js 15 specific options

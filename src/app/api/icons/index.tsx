@@ -1108,3 +1108,97 @@ export function IconUtensils(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function CustomCloseIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+    </svg>
+  )
+}
+
+export function IconWine(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M12 2C10.343 2 9 3.343 9 5s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 4c-.552 0-1-.448-1-1s.448-1 1-1 1 .448 1 1-.448 1-1 1zM7 10v10h2v-4h6v4h2V10H7z' />
+    </svg>
+  )
+}
+
+export function IconBeer(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M9 2v2H5v2h4v2H5v2h4v2H5v2h14v-2h-4v-2h4v-2h-4v-2h4V8h-4V6h4V4h-4V2H9z' />
+    </svg>
+  )
+}
+
+export function IconCheese(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M2 12l10-8 10 8v10H2V12zm2 2v6h16v-6H4z' />
+    </svg>
+  )
+}
+
+export function IconCaviar(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <circle cx='12' cy='12' r='10' />
+      <circle cx='12' cy='12' r='4' />
+    </svg>
+  )
+}
+
+export function IconWater(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M12 2C8.686 2 6 4.686 6 8c0 3.314 6 12 6 12s6-8.686 6-12c0-3.314-2.686-6-6-6z' />
+    </svg>
+  )
+}
+
+export function IconSpirit(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M12 2C9.243 2 7 4.243 7 7v10c0 2.757 2.243 5 5 5s5-2.243 5-5V7c0-2.757-2.243-5-5-5z' />
+    </svg>
+  )
+}
+
+export function IconCocktail(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M4 2h16l-8 8-8-8zm0 20h16v-2H4v2z' />
+    </svg>
+  )
+}
+
+export function IconOther(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <circle cx='12' cy='12' r='10' />
+      <path d='M12 6v6l4 2' />
+    </svg>
+  )
+}
+
+// Document Icon
+export function IconDocument(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M12 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z' />
+      <path d='M12 2v6h6' />
+    </svg>
+  )
+}
+
+// Folder Icon
+export function IconFolder(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' {...props}>
+      <path d='M3 7h18a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z' />
+      <path d='M3 7l3-3h6l3 3' />
+    </svg>
+  )
+}

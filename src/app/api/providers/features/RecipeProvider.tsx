@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState } from 'react'
-import { RecipeData } from '@/app/api/types/recipe'
+import { RecipeData } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 interface RecipeContextType {
   recipeData: RecipeData

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
-import { useNFTTiers } from '@/lib/web3/hooks/useNFTTiers'
-import { useProfileData } from '@/lib/auth/hooks/useProfile'
-import { aiService } from '@/lib/services/ai-service'
+import { useNFTTiers } from '@/app/[locale]/(authenticated)/tier/hooks/useNFTTiers'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/core/useProfile'
+import { aiService } from '@/app/api/services/ai-service'
 import { toast } from 'sonner'
 import type { AIMessage } from '@/app/api/types/ai'
 import { usePrivy } from '@privy-io/react-auth'
@@ -11,7 +11,7 @@ export function useRecipeAI() {
   const [isLoading, setIsLoading] = useState(false)
   const { hasGroup, hasPro } = useNFTTiers()
   const { user } = usePrivy()
-  const { profile } = useProfileData(user?.wallet?.address)
+  const { profile } = useProfile(user?.wallet?.address)
 
   const currentMessageRef = useRef<string>('')
 
@@ -24,17 +24,16 @@ export function useRecipeAI() {
 
       setIsLoading(true)
       try {
-        // Add user message
         const userMessage: AIMessage = {
           role: 'user',
           content,
           timestamp: Date.now(),
           metadata: {
             tier: hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE,
+            userMetadata: profile, // Include user metadata here
           },
         }
 
-        // Create assistant message placeholder
         const assistantMessage: AIMessage = {
           role: 'assistant',
           content: '',
@@ -47,10 +46,10 @@ export function useRecipeAI() {
         setMessages((prev) => [...prev, userMessage, assistantMessage])
         currentMessageRef.current = ''
 
-        // Get streaming response
         const stream = await aiService.processMessage(
           content,
-          hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE
+          hasGroup ? ProfileTier.GROUP : hasPro ? ProfileTier.PRO : ProfileTier.FREE,
+          profile // Pass user metadata to the AI service
         )
         const reader = stream.getReader()
 
@@ -58,11 +57,9 @@ export function useRecipeAI() {
           const { done, value } = await reader.read()
           if (done) break
 
-          // Accumulate the assistant's response
           if (value.choices[0]?.delta?.content) {
             currentMessageRef.current += value.choices[0].delta.content
 
-            // Update the last message with accumulated content
             setMessages((prev) => {
               const newMessages = [...prev]
               newMessages[newMessages.length - 1] = {
@@ -81,7 +78,6 @@ export function useRecipeAI() {
             : 'Failed to send message to AI assistant'
         )
 
-        // Add error message to chat
         setMessages((prev) => [
           ...prev,
           {
@@ -97,7 +93,7 @@ export function useRecipeAI() {
         setIsLoading(false)
       }
     },
-    [hasGroup, hasPro, toast]
+    [hasGroup, hasPro, toast, profile] // Ensure profile is included in dependencies
   )
 
   return {

@@ -22,7 +22,7 @@ import {
   IconGear,
   IconBuilding,
 } from '@/components/ui/icons'
-import type { ProfileStep } from './steps'
+import type { ProfileStep } from '../../../recipe/steps/steps'
 import type {
   ProfileMetadata,
   FreeProfileMetadata,

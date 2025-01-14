@@ -3,7 +3,11 @@
 import React, { useCallback } from 'react'
 import { BaseEdgeProvider, useEdgeContext } from './BaseEdgeProvider'
 import { kitchenEdgeService } from '@/app/api/services/kitchen-edge.service'
-import type { Recipe, ServiceResponse, RecipeVersion } from '@/app/api/types/recipe'
+import type {
+  Recipe,
+  ServiceResponse,
+  RecipeVersion,
+} from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 interface KitchenEdgeContextValue {
   recipe: ServiceResponse<Recipe> | null

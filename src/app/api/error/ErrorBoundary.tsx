@@ -1,7 +1,7 @@
 'use client'
 
 import React, { Component, ErrorInfo } from 'react'
-import { cn } from '@/lib/utils/utils'
+import { cn } from '@/app/api/utils/utils'
 
 interface Props {
   children: React.ReactNode

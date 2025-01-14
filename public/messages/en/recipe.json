@@ -1,0 +1,150 @@
+{
+  "title": "Recipe",
+  "createRecipe": "Create Recipe",
+  "recipeCreated": "Recipe Created",
+  "redirectingToRecipe": "Redirecting to your recipe...",
+  "errorCreatingRecipe": "Error Creating Recipe",
+  "pleaseTryAgain": "Please try again",
+  "creating": "Creating...",
+  "previous": "Previous",
+  "next": "Next",
+  "navigation": "Navigation",
+  "localStorageNote": "Changes stored in browser until recipe is minted",
+  "autosave": {
+    "saving": "Saving draft locally...",
+    "saved": "Draft saved at {time}",
+    "storageNote": "Changes stored in browser until recipe is minted",
+    "error": "Error saving draft"
+  },
+  "steps": {
+    "title-description": {
+      "title": "Title & Description",
+      "description": "Provide a title and description for your recipe"
+    },
+    "basic-info": {
+      "title": "Basic Information",
+      "description": "Your recipe's name, description, and image"
+    },
+    "version-control": {
+      "title": "Version Control",
+      "description": "Manage different versions of your recipe"
+    },
+    "privacy-settings": {
+      "title": "Privacy Settings",
+      "description": "Set privacy preferences for your recipe"
+    },
+    "inspiration": {
+      "title": "Inspiration",
+      "description": "Share the inspiration behind your recipe"
+    },
+    "necessary-skills": {
+      "title": "Required Skills",
+      "description": "List the skills needed to prepare this recipe"
+    },
+    "equipment": {
+      "title": "Equipment & Tools",
+      "description": "Specify the equipment and tools required"
+    },
+    "haccp-plan": {
+      "title": "HACCP Plan",
+      "description": "Outline the HACCP plan for food safety"
+    },
+    "ingredients": {
+      "title": "Ingredients",
+      "description": "List all ingredients required for your recipe"
+    },
+    "method-production": {
+      "title": "Method & Production",
+      "description": "Detail the method and production steps"
+    },
+    "serving-plating": {
+      "title": "Serving & Plating",
+      "description": "Instructions for serving and plating"
+    },
+    "pairings": {
+      "title": "Pairings",
+      "description": "Suggest pairings for your recipe"
+    },
+    "change-log": {
+      "title": "Change Log",
+      "description": "Track changes made to the recipe"
+    },
+    "specialty-ingredients": {
+      "title": "Specialty Ingredients",
+      "description": "List any specialty ingredients used"
+    },
+    "pre-production": {
+      "title": "Pre-Production",
+      "description": "Steps to prepare before production"
+    },
+    "tags": {
+      "title": "Tags",
+      "description": "Categorize your recipe with relevant tags"
+    },
+    "final-image": {
+      "title": "Final Image",
+      "description": "Upload the final image of your recipe"
+    },
+    "finishing-touch": {
+      "title": "Finishing Touch",
+      "description": "Add the finishing touches to your recipe"
+    },
+    "review": {
+      "title": "Digital Signature",
+      "description": "Sign off on the final version of your recipe"
+    },
+    "mint": {
+      "title": "Mint Recipe NFT",
+      "description": "Mint your recipe as an NFT"
+    }
+  },
+  "basicInfo": {
+    "title": "Basic Information",
+    "description": "Provide the essential details about your recipe",
+    "name": {
+      "label": "Recipe Name",
+      "placeholder": "Enter your recipe name",
+      "required": "Recipe name is required",
+      "tooShort": "Recipe name must be at least 2 characters",
+      "tooLong": "Recipe name must be less than 100 characters"
+    },
+    "image": {
+      "label": "Image",
+      "placeholder": "Upload an image of your recipe"
+    }
+  },
+  "form": {
+    "navigation": {
+      "next": "Next",
+      "previous": "Previous",
+      "back": "Back",
+      "save": "Save Recipe",
+      "update": "Update Recipe"
+    }
+  },
+  "service": {
+    "loading": "Loading recipe...",
+    "loaded": "Recipe loaded successfully",
+    "error": "Error loading recipe",
+    "update": "Update Recipe",
+    "updating": "Updating recipe...",
+    "updated": "Recipe updated successfully",
+    "updateError": "Error updating recipe"
+  },
+  "recipe": {
+    "title": "Recipe Title",
+    "description": "Recipe Description",
+    "mint": "Mint Recipe",
+    "preview": "Preview Recipe",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "title": "Recipe Creation",
+  "step": "Step",
+  "of": "of",
+  "lastSaved": "Last saved",
+  "preview": "Preview",
+  "minting": "Minting",
+  "createBadge": "Create Badge",
+  "mint": "Mint"
+}

@@ -3,7 +3,6 @@
 import React from 'react'
 import { PrivyProvider as Privy } from '@privy-io/react-auth'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 import { baseSepolia } from 'wagmi/chains'
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
@@ -17,21 +16,10 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'dark',
           accentColor: '#1f6feb',
-          showWalletLoginFirst: true,
         },
         defaultChain: baseSepolia,
-        supportedChains: [baseSepolia],
+        SupportedChains: [baseSepolia],
         walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-      }}
-      onSuccess={() => {
-        toast.success(t('success'))
-      }}
-      onError={(error) => {
-        // Only log in development
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Privy error:', error)
-        }
-        toast.error(t('error'))
       }}
     >
       {children}

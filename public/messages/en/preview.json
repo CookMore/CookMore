@@ -1,0 +1,10 @@
+{
+  "preview": {
+    "title": "Preview Recipe",
+    "description": "This is a preview of your recipe.",
+    "loading": "Loading preview...",
+    "error": "Error loading preview",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}

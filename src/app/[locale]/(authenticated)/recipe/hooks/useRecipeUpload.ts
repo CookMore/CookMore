@@ -1,43 +1,29 @@
 import { useState } from 'react'
-import { useContractWrite } from 'wagmi'
-import { RECIPE_NFT_ABI, RECIPE_NFT_ADDRESS } from '@/lib/web3/addresses'
-import { ipfsService } from '@/lib/services/ipfs-service'
-import { useUploadThing } from '@/lib/utils/uploadthing'
+import { useRecipe } from '@/app/[locale]/(authenticated)/recipe/context/RecipeContext'
 
 export function useRecipeUpload() {
   const [isUploading, setIsUploading] = useState(false)
-  const { startUpload } = useUploadThing('recipeImage')
+  const { state } = useRecipe()
+  const { contract, ipfsService } = state
 
-  const { write: createRecipe } = useContractWrite({
-    address: RECIPE_NFT_ADDRESS,
-    abi: RECIPE_NFT_ABI,
-    functionName: 'createRecipe',
-  })
-
-  const uploadRecipe = async (
-    image: File,
-    recipeData: any // Your recipe metadata type
-  ) => {
+  const uploadRecipe = async (recipeData: any) => {
     try {
-      setIsUploading(true)
-
-      // 1. Upload image using UploadThing
-      const [imageResult] = await startUpload([image])
-      if (!imageResult) throw new Error('Failed to upload image')
-
-      // 2. Create full recipe metadata
-      const recipeMetadata = {
-        ...recipeData,
-        image: imageResult.url,
-        imageCid: imageResult.metadataCid,
+      if (!contract) {
+        throw new Error('Contract not initialized')
       }
 
-      // 3. Upload recipe metadata to IPFS
+      setIsUploading(true)
+
+      // Create full recipe metadata
+      const recipeMetadata = { ...recipeData }
+
+      // Upload recipe metadata to IPFS
       const metadataCid = await ipfsService.uploadMetadata(recipeMetadata)
 
-      // 4. Mint NFT with metadata CID
+      // Mint NFT with metadata CID
       const metadataUri = `ipfs://${metadataCid}`
-      await createRecipe({ args: [metadataUri] })
+      const tx = await contract.createRecipe(metadataUri)
+      await tx.wait()
 
       return metadataUri
     } catch (error) {

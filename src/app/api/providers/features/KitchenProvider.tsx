@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { toast } from 'sonner'
-import { Recipe } from '../../types/recipe'
+import { Recipe } from '../../../[locale]/(authenticated)/recipe/types/recipe'
 
 interface KitchenContextType {
   recipes: any[]

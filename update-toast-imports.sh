@@ -15,7 +15,6 @@ files=(
     "src/components/ui/TierBadge.tsx"
     "src/components/ui/toaster.tsx"
     "src/components/dapps/tier/TierMintDapp.tsx"
-    "src/components/ErrorBoundary.tsx"
     "src/lib/auth/hooks/useAccessControl.ts"
     "src/lib/auth/hooks/useProfile.ts"
     "src/lib/web3/hooks/useProfileRegistry.ts"

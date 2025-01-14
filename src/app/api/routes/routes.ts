@@ -20,10 +20,14 @@ export const ROUTES = {
       CREATE: '/profile/create',
       EDIT: '/profile/edit',
     },
-    RECIPE: '/recipe',
+    RECIPE: {
+      CREATE: '/recipe/create',
+      EDIT: '/recipe/edit',
+    },
     ADMIN: '/admin',
     DASHBOARD: '/dashboard',
     MEMBERS: '/members',
+    WIKI: '/wiki',
   },
 }
 

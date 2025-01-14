@@ -32,7 +32,7 @@ export default function PublicProfilePage() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        if (!walletAddress || !walletAddress.startsWith('0x')) {
+        if (typeof walletAddress !== 'string' || !walletAddress.startsWith('0x')) {
           setError('Invalid address format')
           return
         }

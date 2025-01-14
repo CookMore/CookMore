@@ -228,7 +228,6 @@ export function useProfileStep() {
   }
   return context
 }
-
 export function useProfileForm() {
   const context = useContext(ProfileStepContext)
   if (context === undefined) {

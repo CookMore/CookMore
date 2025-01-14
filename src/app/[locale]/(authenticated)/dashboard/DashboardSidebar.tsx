@@ -82,14 +82,14 @@ export default function DashboardSidebar({ setActiveWidgets }: DashboardSidebarP
         <ul className='space-y-2'>
           {widgetOptions.map((widget) => (
             <li key={widget.id}>
-              <label className='flex items-center'>
+              <label className='flex items-center p-2 bg-github-canvas-default border border-github-border-default rounded-md shadow-sm hover:shadow-md transition-shadow duration-200'>
                 <input
                   type='checkbox'
                   checked={selectedWidgets.includes(widget.id)}
                   onChange={() => toggleWidget(widget.id)}
-                  className='mr-2'
+                  className='mr-2 accent-github-accent-emphasis'
                 />
-                {isExpanded && widget.name}
+                {isExpanded && <span className='text-github-fg-default'>{widget.name}</span>}
               </label>
             </li>
           ))}

@@ -1,6 +1,4 @@
-import { useContract } from '@/lib/web3/hooks/useContract'
-import { PRIVACY_SETTINGS_ABI } from '@/lib/web3/abis'
-import { PRIVACY_SETTINGS_ADDRESS } from '@/lib/web3/addresses'
+import { useRecipe } from '@/app/[locale]/(authenticated)/recipe/context/RecipeContext'
 import { Contract } from 'ethers'
 
 // Define the contract interface
@@ -16,10 +14,8 @@ export interface PrivacySettingsHook {
 }
 
 export function usePrivacySettings(): PrivacySettingsHook {
-  const contract = useContract(
-    PRIVACY_SETTINGS_ADDRESS,
-    PRIVACY_SETTINGS_ABI
-  ) as PrivacySettingsContract
+  const { state } = useRecipe()
+  const contract = state.contract as PrivacySettingsContract
 
   const setPrivacy = async (recipeId: string, privacyType: number): Promise<void> => {
     try {

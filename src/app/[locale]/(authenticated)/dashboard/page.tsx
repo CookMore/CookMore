@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import GridLayout, { Layout } from 'react-grid-layout'
+import React, { useState } from 'react'
+import { Responsive as ResponsiveGridLayout, Layout } from 'react-grid-layout'
 import FeedWidget from '@/app/api/components/widgets/FeedWidget'
 import RecipeWidget from '@/app/api/components/widgets/RecipeWidget'
 import TimerWidget from '@/app/api/components/widgets/TimerWidget'
@@ -14,6 +14,8 @@ import 'react-resizable/css/styles.css'
 interface CustomLayout extends Layout {
   minW: number
   minH: number
+  maxW: number
+  maxH: number
 }
 
 export default function AuthenticatedPage() {
@@ -24,11 +26,54 @@ export default function AuthenticatedPage() {
     'conversion',
   ])
 
+  const defaultWidth = 2 // Default width based on TimerWidget
+  const defaultHeight = 7 // Default height based on TimerWidget
+
   const [layout, setLayout] = useState<CustomLayout[]>([
-    { i: 'feed', x: 0, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
-    { i: 'recipe', x: 4, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
-    { i: 'timer', x: 8, y: 0, w: 4, h: 3, minW: 4, minH: 3 },
-    { i: 'conversion', x: 0, y: 3, w: 4, h: 3, minW: 4, minH: 3 },
+    {
+      i: 'feed',
+      x: 0,
+      y: 0,
+      w: defaultWidth,
+      h: defaultHeight,
+      minW: 2,
+      minH: 7,
+      maxW: 7,
+      maxH: 7,
+    },
+    {
+      i: 'recipe',
+      x: 2,
+      y: 0,
+      w: defaultWidth,
+      h: defaultHeight,
+      minW: 2,
+      minH: 7,
+      maxW: 7,
+      maxH: 7,
+    },
+    {
+      i: 'timer',
+      x: 0,
+      y: 1,
+      w: defaultWidth,
+      h: defaultHeight,
+      minW: 2,
+      minH: 7,
+      maxW: 7,
+      maxH: 7,
+    },
+    {
+      i: 'conversion',
+      x: 2,
+      y: 1,
+      w: defaultWidth,
+      h: defaultHeight,
+      minW: 2,
+      minH: 7,
+      maxW: 7,
+      maxH: 7,
+    },
   ])
 
   const onLayoutChange = (newLayout: Layout[]) => {
@@ -38,64 +83,42 @@ export default function AuthenticatedPage() {
   }
 
   const renderWidgets = () => {
-    return activeWidgets.map((widget) => {
-      switch (widget) {
-        case 'feed':
-          return (
-            <div
-              key='feed'
-              className='widget border border-github-border-default shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer'
-            >
-              <FeedWidget />
-            </div>
-          )
-        case 'recipe':
-          return (
-            <div
-              key='recipe'
-              className='widget border border-github-border-default shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer'
-            >
-              <RecipeWidget />
-            </div>
-          )
-        case 'timer':
-          return (
-            <div
-              key='timer'
-              className='widget border border-github-border-default shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer'
-            >
-              <TimerWidget />
-            </div>
-          )
-        case 'conversion':
-          return (
-            <div
-              key='conversion'
-              className='widget border border-github-border-default shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer'
-            >
-              <ConversionWidget />
-            </div>
-          )
-        default:
-          return null
-      }
-    })
+    return activeWidgets.map((widget) => (
+      <div
+        key={widget}
+        className='widget border border-github-border-default shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer min-h-[150px] flex flex-col'
+      >
+        <div className='widget-header cursor-move bg-github-canvas-subtle p-4 rounded-t-md'>
+          <h3 className='text-github-fg-default font-bold text-center'>
+            {widget.charAt(0).toUpperCase() + widget.slice(1)} Widget
+          </h3>
+        </div>
+        {widget === 'feed' && <FeedWidget />}
+        {widget === 'recipe' && <RecipeWidget />}
+        {widget === 'timer' && <TimerWidget />}
+        {widget === 'conversion' && <ConversionWidget />}
+      </div>
+    ))
   }
 
   return (
     <DualSidebarLayout isLeftSidebarExpanded={true}>
       <DashboardSidebar setActiveWidgets={setActiveWidgets} />
-      <div className='container'>
-        <GridLayout
+      <div className='container overflow-x-hidden'>
+        <ResponsiveGridLayout
           className='layout'
-          layout={layout}
+          layouts={{ lg: layout, md: layout, sm: layout.map((item) => ({ ...item, w: 1 })) }}
           onLayoutChange={onLayoutChange}
-          cols={1}
+          cols={{ lg: 6, md: 3, sm: 1 }}
           rowHeight={80}
           width={window.innerWidth - 32}
+          draggableHandle='.widget-header'
+          isResizable={true}
+          isDraggable={true}
+          preventCollision={true}
         >
           {renderWidgets()}
-        </GridLayout>
+        </ResponsiveGridLayout>
       </div>
     </DualSidebarLayout>
   )

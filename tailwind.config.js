@@ -99,6 +99,9 @@ export default {
       boxShadow: {
         neo: 'var(--neo-shadow)',
         wooden: 'var(--wood-shadow)',
+        inset: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)',
+        'github-canvas-inset':
+          'inset 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 2px 3px rgba(0, 0, 0, 0.06)',
       },
       keyframes: {
         'slide-left': {

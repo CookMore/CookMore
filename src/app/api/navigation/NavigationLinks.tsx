@@ -26,9 +26,10 @@ export function NavigationLinks() {
       { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
       { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
       { href: ROUTES.AUTH.TIER, label: 'Tier', requiresProfile: true },
+      { href: ROUTES.AUTH.WIKI, label: 'Wiki', requiresProfile: true },
       {
-        href: ROUTES.AUTH.RECIPE,
-        label: 'New',
+        href: ROUTES.AUTH.RECIPE.CREATE,
+        label: 'New Recipe',
         requiresProfile: true,
         className: 'bg-green-500 text-white font-bold hover:bg-green-600',
       },

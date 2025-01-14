@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { RecipeData } from '@/app/api/types/recipe'
+import { RecipeData } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 export function useRecipePreview() {
   const updatePreview = useCallback(async (section: string, updates: Partial<RecipeData>) => {

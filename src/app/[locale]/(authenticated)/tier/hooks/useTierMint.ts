@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { useContract } from '@/app/api/blockchain/client/useContract'
+import { useContract } from '@/app/[locale]/(authenticated)/recipe/client/useContract'
 import { tierABI } from '@/app/api/blockchain/abis/tier'
 import { usdcABI } from '@/app/api/blockchain/abis/usdc'
 

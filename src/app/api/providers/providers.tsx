@@ -5,7 +5,7 @@ import { PrivyProvider } from './core/PrivyProvider'
 import { WagmiProvider } from './core/WagmiProvider'
 import { MotionProvider } from './core/MotionProvider'
 import { KitchenProvider } from './features/KitchenProvider'
-import { ProfileProvider } from './features/ProfileProvider'
+import { ProfileProvider } from '@/app/[locale]/(authenticated)/profile/providers/ProfileProvider'
 import { RecipeProvider } from './features/RecipeProvider'
 import { QueryClientProvider, QueryClient, HydrationBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -46,7 +46,13 @@ export function Providers({
           >
             <WagmiProvider>
               <MotionProvider>
-                <ThemeProvider>{children}</ThemeProvider>
+                <ThemeProvider>
+                  <KitchenProvider>
+                    <ProfileProvider>
+                      <RecipeProvider>{children}</RecipeProvider>
+                    </ProfileProvider>
+                  </KitchenProvider>
+                </ThemeProvider>
               </MotionProvider>
             </WagmiProvider>
           </PrivyProvider>

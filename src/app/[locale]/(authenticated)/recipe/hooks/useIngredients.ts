@@ -1,14 +1,9 @@
-import { useContract } from '@/lib/web3/hooks/useContract'
-import { RECIPE_NFT_ABI } from '@/lib/web3/abis'
-import { RECIPE_NFT_ADDRESS } from '@/lib/web3/addresses'
-import { useChangeLog } from '@/lib/web3/hooks/useChangeLog'
-import { useRecipePreview } from './useRecipePreview'
-import { RecipeData } from '@/app/api/types/recipe'
+import { useRecipe } from '@/app/[locale]/(authenticated)/recipe/context/RecipeContext'
+import { RecipeData } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 export function useIngredients() {
-  const contract = useContract(RECIPE_NFT_ADDRESS, RECIPE_NFT_ABI)
-  const { logChange } = useChangeLog()
-  const { updatePreview } = useRecipePreview()
+  const { state } = useRecipe()
+  const { contract, updatePreview, addChange } = state
 
   const updateIngredientsList = async (
     recipeId: number,
@@ -16,9 +11,13 @@ export function useIngredients() {
     groups: RecipeData['ingredientGroups']
   ) => {
     try {
+      if (!contract) {
+        throw new Error('Contract not initialized')
+      }
       const tx = await contract.updateIngredients(recipeId, JSON.stringify({ ingredients, groups }))
       await tx.wait()
-      await logChange(recipeId, 'UPDATE_INGREDIENTS', 'Updated recipe ingredients')
+      await addChange('Updated recipe ingredients')
+      await updatePreview('ingredients', { ingredients, groups })
     } catch (error) {
       console.error('Error updating ingredients:', error)
       throw error

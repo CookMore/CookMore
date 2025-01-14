@@ -10,7 +10,7 @@
   --canvas-subtle: #161b22;
   --canvas-inset: #010409;
   --canvas-overlay: #30363d;
-  --border-default: #30363d;
+  --border-default: #5f6367;
   --border-muted: #21262d;
   --border-subtle: #6e7681;
   --fg-default: #c9d1d9;
@@ -547,4 +547,16 @@
   bottom: 0;
   right: 0;
   z-index: 10;
+}
+
+.react-grid-item {
+  transition: none !important;
+}
+
+.react-grid-item:active {
+  background-color: transparent !important;
+}
+
+.react-grid-item > div {
+  pointer-events: auto;
 }

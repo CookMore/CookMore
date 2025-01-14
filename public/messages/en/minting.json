@@ -1,0 +1,12 @@
+{
+  "minting": {
+    "start": "Start Minting",
+    "inProgress": "Minting in progress...",
+    "completed": "Minting completed successfully",
+    "failed": "Minting failed. Please try again.",
+    "createBadge": "Create Badge",
+    "updateBadge": "Update Badge",
+    "mint": "Mint Recipe",
+    "minting": "Minting..."
+  }
+}

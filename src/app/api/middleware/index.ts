@@ -5,7 +5,7 @@ import { withAuth } from './auth'
 // Route configuration for different auth requirements
 const ROUTES = {
   public: ['/api/health', '/api/i18n'],
-  requiresAuth: ['/api/profile', '/api/recipes'],
+  requiresAuth: ['/api/profile/create', '/api/recipes'],
   requiresProfile: [
     '/api/kitchen',
     '/api/recipes/create',
@@ -14,6 +14,7 @@ const ROUTES = {
     '/api/tier',
     '/api/recipe',
     '/api/dashboard',
+    '/api/profile',
   ],
   adminOnly: ['/api/admin'],
 } as const

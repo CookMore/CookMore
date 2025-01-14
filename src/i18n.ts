@@ -4,6 +4,10 @@ import { createSharedPathnamesNavigation } from 'next-intl/navigation'
 // Import messages
 import enCommon from '../public/messages/en/common.json'
 import enProfile from '../public/messages/en/profile.json'
+import enRecipe from '../public/messages/en/recipe.json'
+import enPreview from '../public/messages/en/recipe.json'
+import enMinting from '../public/messages/en/recipe.json'
+
 import esCommon from '../public/messages/es/common.json'
 import frCommon from '../public/messages/fr/common.json'
 import deCommon from '../public/messages/de/common.json'
@@ -39,6 +43,9 @@ const messages = {
   en: {
     ...enCommon,
     profile: enProfile,
+    recipe: enRecipe,
+    preview: enPreview,
+    minting: enMinting,
   },
   es: esCommon,
   fr: frCommon,

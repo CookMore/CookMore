@@ -82,20 +82,17 @@ export function useAuth(): UseAuthResult {
   }, [user?.wallet?.address, checkProfileExists])
 
   useEffect(() => {
-    if (privyReady) {
-      console.log('Privy ready:', privyReady)
-      if (authenticated && user?.wallet?.address) {
-        console.log('User authenticated:', authenticated)
-        updateProfileState()
-      } else {
-        setHasProfile(null)
-        setCurrentTier(ProfileTier.FREE)
-        setIsAdmin(false)
-        setIsLoading(false)
-        clearHasProfileCookie()
-        clearCookie(COOKIE_NAMES.WALLET_ADDRESS as 'WALLET_ADDRESS')
-        console.log('User not authenticated, clearing state.')
-      }
+    if (privyReady && authenticated && user?.wallet?.address) {
+      console.log('Privy ready and user authenticated:', authenticated)
+      updateProfileState()
+    } else if (privyReady) {
+      setHasProfile(null)
+      setCurrentTier(ProfileTier.FREE)
+      setIsAdmin(false)
+      setIsLoading(false)
+      clearHasProfileCookie()
+      clearCookie(COOKIE_NAMES.WALLET_ADDRESS as 'WALLET_ADDRESS')
+      console.log('User not authenticated, clearing state.')
     }
   }, [privyReady, authenticated, user?.wallet?.address, updateProfileState])
 
