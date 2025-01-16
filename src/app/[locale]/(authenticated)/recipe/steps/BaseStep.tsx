@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { RecipeData } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
+import { RecipeData, RecipeMetadata } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 export interface BaseStepProps {
   onNext?: () => void

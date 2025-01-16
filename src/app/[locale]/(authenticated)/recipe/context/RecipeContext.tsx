@@ -1,6 +1,13 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react'
 import { RecipeData } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 import { useContract } from '@/app/[locale]/(authenticated)/recipe/client/useContract'
 import { recipeABI } from '@/app/api/blockchain/abis'
@@ -26,7 +33,7 @@ export function RecipeProvider({
   mode,
 }: {
   children: ReactNode
-  mode: 'create' | 'edit' | 'fork'
+  mode: 'create' | 'edit'
 }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [recipeData, setRecipeData] = useState<Partial<RecipeData>>({})
@@ -48,7 +55,7 @@ export function RecipeProvider({
     fetchData()
   }, [])
 
-  const updateRecipe = (updates: Partial<RecipeData>) => {
+  const updateRecipe = useCallback((updates: Partial<RecipeData>) => {
     console.log('updateRecipe called with updates:', updates)
     setRecipeData((prev) => {
       const newRecipeData: RecipeData = {
@@ -68,11 +75,15 @@ export function RecipeProvider({
         method: updates.method ?? prev.method ?? '',
         tags: updates.tags ?? prev.tags ?? [],
         changeLogDetails: updates.changeLogDetails ?? prev.changeLogDetails ?? { entries: [] },
-        // Add similar checks for other fields as needed
       }
-      return newRecipeData
+
+      // Only update if there are changes
+      if (JSON.stringify(prev) !== JSON.stringify(newRecipeData)) {
+        return newRecipeData
+      }
+      return prev
     })
-  }
+  }, [])
 
   if (isLoading) {
     return (

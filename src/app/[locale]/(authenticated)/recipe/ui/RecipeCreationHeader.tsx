@@ -10,8 +10,12 @@ import { Button } from '@/app/api/components/ui/button'
 import { IconEye, IconEdit } from '@/app/api/icons'
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { STEPS } from '../steps'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { RecipeMint } from './RecipeMint'
+import { useAuth } from '@/app/api/auth/hooks/useAuth'
+import { getProfile } from '@/app/[locale]/(authenticated)/profile/services/server/profile.service'
+import { ethers } from 'ethers'
+import { profileABI } from '@/app/api/blockchain/abis/profile'
 
 interface RecipeCreationHeaderProps {
   tier: ProfileTier | keyof typeof ProfileTier
@@ -70,6 +74,36 @@ export function RecipeCreationHeader({
   const t = useTranslations('recipe')
   const progress = (currentStep / totalSteps) * 100
   const [isMintDialogOpen, setIsMintDialogOpen] = useState(false)
+  const [profileId, setProfileId] = useState<string | null>(null)
+
+  const { user } = useAuth()
+
+  useEffect(() => {
+    async function fetchProfileData() {
+      if (user?.wallet?.address) {
+        try {
+          const sepoliaProvider = new ethers.providers.JsonRpcProvider(
+            process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL
+          )
+          const contract = new ethers.Contract(
+            '0x0C3897538e000dAdAEA1bb10D5757fC473972018',
+            profileABI,
+            sepoliaProvider
+          )
+
+          const profile = await contract.getProfile(user.wallet.address.toLowerCase())
+          const profileId = profile.profileId
+          console.log('Profile ID:', profileId.toString())
+
+          setProfileId(profileId.toString())
+        } catch (error) {
+          console.error('Failed to fetch profile data:', error)
+        }
+      }
+    }
+
+    fetchProfileData()
+  }, [user])
 
   const handleMintComplete = async () => {
     console.log('Minting complete')
@@ -82,7 +116,7 @@ export function RecipeCreationHeader({
   const currentStepId = STEPS[currentStep - 1]?.id || 'title-description'
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 border border-gray-300 p-4'>
       <div className='flex items-center justify-between'>
         <div className='space-y-1'>
           <h1 className='text-2xl font-bold tracking-tight'>
@@ -109,28 +143,28 @@ export function RecipeCreationHeader({
             {t('preview')}
           </Button>
           <Button
-            variant='primary'
+            variant='default'
             onClick={() => setIsMintDialogOpen(true)}
             disabled={!canMint || isMinting}
           >
             {t('mint')}
           </Button>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className={cn(
-              'flex items-center gap-2 px-3 py-1.5 rounded-full',
-              tierColors[tierKey(tier)]
-            )}
-          >
+          <div className={cn('flex items-center gap-4', tierColors[tierKey(tier)])}>
+            <span className='text-xs text-github-fg-muted'>Tier</span>
             <TierIcon className='w-5 h-5' />
             <span className='font-medium'>{tierKey(tier)}</span>
-          </motion.div>
+            {profileId && (
+              <>
+                <span className='text-xs text-github-fg-muted ml-4'>Profile ID</span>
+                <span className='text-sm text-github-fg-muted font-bold'>ID: {profileId}</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className='flex items-center justify-between'>
         <Progress value={progress} />
-        <span className='text-sm text-github-fg-muted'>{progress.toFixed(0)}%</span>
+        <span className='text-md text-github-fg-muted'>{progress.toFixed(0)}%</span>
       </div>
       <RecipeMint
         isOpen={isMintDialogOpen}

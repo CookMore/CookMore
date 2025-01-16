@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { StepsSidebar } from '@/app/[locale]/(authenticated)/recipe/ui/StepsSidebar'
 import { RecipePreview } from '@/app/[locale]/(authenticated)/recipe/ui/RecipePreview'
-import { PanelContainer } from '@/app/api/panels/PanelContainer'
 import { IconEye, IconEdit } from '@/app/api/icons'
 import { SessionWarning } from '@/app/[locale]/(authenticated)/recipe/steps/SessionWarning'
 import { RecipeLoadingSkeleton } from '@/app/[locale]/(authenticated)/recipe/ui/RecipeLoadingSkeleton'
@@ -44,6 +43,7 @@ import { FinishingTouch } from '../steps/FinishingTouch'
 import { Review } from '../steps/Review'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { recipeMetadataSchema, recipeDataSchema } from '../validations/recipe'
+import { RecipeData, RecipeTier } from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 const availableSteps = STEPS.filter((step) => {
   // Add any filtering logic here if needed
@@ -289,13 +289,19 @@ export default function CreateRecipeClient({ mode }: { mode: 'create' | 'edit' }
                   generationProgress={isGeneratingPreview ? { stage: 'preparing' } : undefined}
                   mode={mode}
                 />
-                <div className='space-y-4'>{renderStep()}</div>
-                <RecipePreview
-                  isOpen={isPreviewOpen}
-                  onClose={() => setIsPreviewOpen(false)}
-                  tier={currentTier as unknown as RecipeTier}
-                  formData={watch()}
-                />
+                <div className='flex flex-col lg:flex-row lg:space-x-4'>
+                  <div className='flex-1 lg:w-2/3 space-y-4 border border-gray-300 p-4'>
+                    {renderStep()}
+                  </div>
+                  <div className='flex-1 lg:w-1/3 border border-gray-300 p-4'>
+                    <RecipePreview
+                      isOpen={isPreviewOpen}
+                      onClose={() => setIsPreviewOpen(false)}
+                      tier={currentTier as unknown as RecipeTier}
+                      formData={watch()}
+                    />
+                  </div>
+                </div>
                 <div className='flex justify-between items-center mt-8 pt-4 border-t border-github-border-default'>
                   <button
                     onClick={prevStep}
