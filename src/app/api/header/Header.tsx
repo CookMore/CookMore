@@ -18,6 +18,7 @@ import alarm1 from '@/app/api/sounds/alarm1.aac'
 import alarm2 from '@/app/api/sounds/alarm2.aac'
 import alarm3 from '@/app/api/sounds/alarm3.aac'
 import { useTimer } from '@/app/api/components/widgets/useTimer'
+import { SearchBar } from './SearchBar'
 
 interface HeaderProps {
   showAuthButton: boolean
@@ -88,11 +89,12 @@ export function Header({ showAuthButton }: HeaderProps) {
         </div>
 
         <div className='flex items-center space-x-4 pr-4'>
+          <SearchBar />
           <Link
             href={ROUTES.AUTH.MEMBERS}
             className='text-github-fg-default hover:text-github-fg-muted transition-colors'
           >
-            <IconMembers className='h-6 w-6' />
+            <IconMembers className='h-7 w-7 ml-1' />
           </Link>
 
           <button
@@ -109,10 +111,10 @@ export function Header({ showAuthButton }: HeaderProps) {
               onClick={() => setIsTimerDropdownOpen(!isTimerDropdownOpen)}
               className={`text-github-fg-default hover:text-github-fg-muted transition-colors ${timerIsRunning ? 'text-red-500' : ''}`}
             >
-              <IconClock className='h-6 w-6' />
+              <IconClock className='h-7 w-7 mt-2 ml-1' />
             </button>
             {isTimerDropdownOpen && (
-              <div className='absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg'>
+              <div className='absolute right-0 mt-4 w-75 bg-white border border-gray-200 rounded-md shadow-lg'>
                 <div className='p-2' style={{ width: '200px' }}>
                   <TimerControl
                     initialTime={timerTime}
@@ -141,7 +143,7 @@ export function Header({ showAuthButton }: HeaderProps) {
 
         <div className='lg:hidden'>{showAuthButton && <AuthButton />}</div>
 
-        <div className='mt-4'>
+        <div className='mt-6'>
           <TimerControl
             initialTime={timerTime}
             isRunning={timerIsRunning}

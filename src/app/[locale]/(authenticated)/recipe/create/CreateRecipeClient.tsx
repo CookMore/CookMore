@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { StepsSidebar } from '@/app/[locale]/(authenticated)/recipe/ui/StepsSidebar'
-import { RecipePreview } from '@/app/[locale]/(authenticated)/recipe/ui/RecipePreview'
+import { RecipeCertificate } from '@/app/[locale]/(authenticated)/recipe/ui/RecipeCertificate'
 import { IconEye, IconEdit } from '@/app/api/icons'
 import { SessionWarning } from '@/app/[locale]/(authenticated)/recipe/steps/SessionWarning'
 import { RecipeLoadingSkeleton } from '@/app/[locale]/(authenticated)/recipe/ui/RecipeLoadingSkeleton'
@@ -104,7 +104,7 @@ export default function CreateRecipeClient({ mode }: { mode: 'create' | 'edit' }
   } = methods
 
   const [isExpanded, setIsExpanded] = useState(true)
-  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(true)
   const [isMintOpen, setIsMintOpen] = useState<boolean>(false)
   const [isMinting, setIsMinting] = useState<boolean>(false)
   const [canMint, setCanMint] = useState<boolean>(false)
@@ -242,6 +242,10 @@ export default function CreateRecipeClient({ mode }: { mode: 'create' | 'edit' }
   const isFirstStep = currentStep === 0
   const isLastStep = currentStep === availableSteps.length - 1
 
+  console.log('CreateRecipeClient - recipeData:', recipeData)
+  console.log('CreateRecipeClient - formData:', watch())
+  console.log('CreateRecipeClient - isOpen:', isPreviewOpen)
+
   if (isLoading) {
     return <RecipeLoadingSkeleton />
   }
@@ -289,16 +293,18 @@ export default function CreateRecipeClient({ mode }: { mode: 'create' | 'edit' }
                   generationProgress={isGeneratingPreview ? { stage: 'preparing' } : undefined}
                   mode={mode}
                 />
-                <div className='flex flex-col lg:flex-row lg:space-x-4'>
+                <div className='flex flex-col lg:flex-row lg:space-x-4 h- [600px]'>
                   <div className='flex-1 lg:w-2/3 space-y-4 border border-gray-300 p-4'>
                     {renderStep()}
                   </div>
                   <div className='flex-1 lg:w-1/3 border border-gray-300 p-4'>
-                    <RecipePreview
-                      isOpen={isPreviewOpen}
-                      onClose={() => setIsPreviewOpen(false)}
-                      tier={currentTier as unknown as RecipeTier}
+                    <RecipeCertificate
+                      recipeData={recipeData as RecipeData}
+                      validationErrors={Object.entries(validationResults).map(([key, value]) => ({
+                        [key]: value.join(', '),
+                      }))}
                       formData={watch()}
+                      isOpen={true}
                     />
                   </div>
                 </div>

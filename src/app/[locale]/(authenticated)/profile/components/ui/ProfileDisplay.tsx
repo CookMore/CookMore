@@ -36,9 +36,9 @@ export function ProfileDisplay({
   }
 
   return (
-    <div className='flex flex-col lg:flex-row gap-4 p-4'>
+    <div className='p-4 space-y-4'>
       {/* NFT Display */}
-      <div className='flex-none'>
+      <div>
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <IconCertificate className='w-5 h-5 text-github-fg-default' />
@@ -57,7 +57,7 @@ export function ProfileDisplay({
           )}
         </div>
 
-        <div className='rounded-lg border border-github-border-default shadow-lg bg-github-canvas-default w-[300px] mx-auto lg:mx-0'>
+        <div className='rounded-lg border border-github-border-default shadow-lg bg-github-canvas-default w-full'>
           {/* NFT Header */}
           <div className='p-3 border-b border-github-border-default'>
             <h3 className='text-base font-semibold text-github-fg-default'>
@@ -106,8 +106,8 @@ export function ProfileDisplay({
         </div>
       </div>
 
-      {/* Extended Profile Information */}
-      <div className='flex-1'>
+      {/* Profile Details */}
+      <div className='mt-4'>
         <div className='flex items-center gap-2 mb-2'>
           <IconEye className='w-5 h-5 text-github-fg-default' />
           <h2 className='text-lg font-semibold text-github-fg-default'>Profile Details</h2>

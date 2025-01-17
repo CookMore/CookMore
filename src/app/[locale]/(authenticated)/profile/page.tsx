@@ -13,6 +13,8 @@ import { IconUser, IconSettings } from '@/app/api/icons'
 import React from 'react'
 import { ProfileStepProvider } from './ProfileStepContext'
 import { Button } from '@/app/api/components/ui/button'
+import ProfileQrCodeGenerator from './components/ui/ProfileQrCodeGenerator'
+import { FaCog, FaUserCircle } from 'react-icons/fa'
 
 interface ProfilePageProps {
   address?: string
@@ -89,17 +91,26 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ address }) => {
         ) : (
           profileData && (
             <div>
-              <ProfileDisplay
-                profile={profileData.metadata}
-                currentTier={currentTier as ProfileTier}
-                isPublicView={!isOwnProfile}
-                hasProfile={hasProfile}
-                onEdit={isOwnProfile ? () => setIsEditing(true) : undefined}
-              />
+              <div className='flex items-center justify-between mb-8'>
+                <Button onClick={toggleEditing} className='mr-4'>
+                  {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+                </Button>
+                <div className='flex space-x-4'>
+                  <FaUserCircle className='h-6 w-6 text-gray-500' />
+                  <FaCog className='h-6 w-6 text-gray-500' />
+                </div>
+              </div>
+              <div className='flex flex-col lg:flex-row items-center justify-center lg:space-x-8 space-y-8 lg:space-y-0'>
+                <ProfileDisplay
+                  profile={profileData.metadata}
+                  currentTier={currentTier as ProfileTier}
+                  isPublicView={!isOwnProfile}
+                  hasProfile={hasProfile}
+                  onEdit={isOwnProfile ? () => setIsEditing(true) : undefined}
+                />
 
-              <Button onClick={toggleEditing} className='mt-4'>
-                {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-              </Button>
+                <ProfileQrCodeGenerator profileData={profileData} />
+              </div>
             </div>
           )
         )}
