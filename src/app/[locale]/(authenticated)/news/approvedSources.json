@@ -1,0 +1,122 @@
+{
+  "en": [
+    "bbc.co.uk",
+    "reuters.com",
+    "apnews.com",
+    "theguardian.com",
+    "nytimes.com",
+    "washingtonpost.com",
+    "aljazeera.com",
+    "ft.com",
+    "cnn.com",
+    "bloomberg.com"
+  ],
+  "es": [
+    "elpais.com",
+    "elmundo.es",
+    "abc.es",
+    "clarin.com",
+    "lanacion.com.ar",
+    "eluniversal.com.mx",
+    "reforma.com",
+    "eltiempo.com",
+    "elmercurio.com",
+    "lavanguardia.com"
+  ],
+  "fr": [
+    "lemonde.fr",
+    "lefigaro.fr",
+    "liberation.fr",
+    "afp.com",
+    "france24.com",
+    "rfi.fr",
+    "leparisien.fr",
+    "tv5monde.com",
+    "la-croix.com",
+    "lexpress.fr"
+  ],
+  "de": [
+    "dw.com",
+    "spiegel.de",
+    "faz.net",
+    "sueddeutsche.de",
+    "zeit.de",
+    "bild.de",
+    "tagesspiegel.de",
+    "handelsblatt.com",
+    "taz.de",
+    "ard.de"
+  ],
+  "it": [
+    "corriere.it",
+    "repubblica.it",
+    "lastampa.it",
+    "ilmessaggero.it",
+    "ansa.it",
+    "ilsole24ore.com",
+    "rainews.it",
+    "tgcom24.mediaset.it",
+    "ilfattoquotidiano.it",
+    "gazzetta.it"
+  ],
+  "pt": [
+    "folha.uol.com.br",
+    "oglobo.globo.com",
+    "estadao.com.br",
+    "cmjornal.pt",
+    "expresso.pt",
+    "publico.pt",
+    "jn.pt",
+    "observador.pt",
+    "dn.pt",
+    "agenciabrasil.ebc.com.br"
+  ],
+  "ru": [
+    "tass.ru",
+    "ria.ru",
+    "interfax.ru",
+    "rt.com",
+    "rbc.ru",
+    "kommersant.ru",
+    "iz.ru",
+    "vedomosti.ru",
+    "aif.ru",
+    "mk.ru"
+  ],
+  "zh": [
+    "xinhuanet.com",
+    "people.com.cn",
+    "chinadaily.com.cn",
+    "caixin.com",
+    "cctv.com",
+    "globaltimes.cn",
+    "phoenixtv.com",
+    "news.sina.com.cn",
+    "scmp.com",
+    "news.163.com"
+  ],
+  "ja": [
+    "nhk.or.jp",
+    "asahi.com",
+    "yomiuri.co.jp",
+    "mainichi.jp",
+    "nikkei.com",
+    "sankei.com",
+    "kyodonews.net",
+    "jiji.com",
+    "hokkaido-np.co.jp",
+    "tokyo-np.co.jp"
+  ],
+  "ko": [
+    "yna.co.kr",
+    "chosun.com",
+    "joongang.co.kr",
+    "donga.com",
+    "hani.co.kr",
+    "khan.co.kr",
+    "hankookilbo.com",
+    "mk.co.kr",
+    "seoul.co.kr",
+    "fnnews.com"
+  ]
+}

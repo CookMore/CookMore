@@ -6,10 +6,22 @@ import { ROUTES } from '@/app/api/routes/routes'
 import { cn } from '@/app/api/utils/utils'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { useMemo } from 'react'
+import {
+  IconChefHat,
+  IconSearch,
+  IconCalendar,
+  IconTrophy,
+  IconBook,
+  IconBell,
+  IconBriefcase,
+  IconPlus,
+  IconGear,
+} from '@/app/api/icons'
 
 interface NavLink {
   href: string
   label: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   requiresProfile?: boolean
   className?: string
 }
@@ -18,18 +30,61 @@ export function NavigationLinks() {
   const pathname = usePathname()
   const { isAuthenticated, hasProfile, isAdmin } = useAuth()
 
-  // Memoize links to prevent unnecessary re-renders
   const links = useMemo(() => {
-    // Define authenticated links with proper access control
     const authenticatedLinks: NavLink[] = [
-      { href: ROUTES.AUTH.KITCHEN, label: 'Kitchen', requiresProfile: true },
-      { href: ROUTES.AUTH.EXPLORE, label: 'Explore', requiresProfile: true },
-      { href: ROUTES.AUTH.CALENDAR, label: 'Calendar', requiresProfile: true },
-      { href: ROUTES.AUTH.TIER, label: 'Tier', requiresProfile: true },
-      { href: ROUTES.AUTH.WIKI, label: 'Wiki', requiresProfile: true },
+      {
+        href: ROUTES.AUTH.KITCHEN,
+        label: 'Kitchen',
+        icon: IconChefHat,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.EXPLORE,
+        label: 'Explore',
+        icon: IconSearch,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.PLAN,
+        label: 'Plan',
+        icon: IconCalendar,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.TIER,
+        label: 'Tier',
+        icon: IconTrophy,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.WIKI,
+        label: 'Wiki',
+        icon: IconBook,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.NEWS,
+        label: 'News',
+        icon: IconBell,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.JOBS,
+        label: 'Jobs',
+        icon: IconBriefcase,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
       {
         href: ROUTES.AUTH.RECIPE.CREATE,
-        label: 'New Recipe',
+        label: 'Recipe +',
+        icon: IconPlus,
         requiresProfile: true,
         className: 'bg-green-500 text-white font-bold hover:bg-green-600',
       },
@@ -38,6 +93,7 @@ export function NavigationLinks() {
             {
               href: ROUTES.AUTH.ADMIN,
               label: 'Admin',
+              icon: IconGear,
               requiresProfile: false,
               className: 'text-red-500 hover:text-red-600',
             },
@@ -45,43 +101,47 @@ export function NavigationLinks() {
         : []),
     ]
 
-    // Define marketing links for non-authenticated users
     const marketingLinks: NavLink[] = [
-      { href: ROUTES.MARKETING.HOME, label: 'Home' },
-      { href: ROUTES.MARKETING.FEATURES, label: 'Features' },
-      { href: ROUTES.MARKETING.DISCOVER, label: 'Discover' },
-      { href: ROUTES.MARKETING.PRICING, label: 'Pricing' },
+      { href: ROUTES.MARKETING.HOME, label: 'Home', icon: IconChefHat },
+      { href: ROUTES.MARKETING.FEATURES, label: 'Features', icon: IconTrophy },
+      { href: ROUTES.MARKETING.DISCOVER, label: 'Discover', icon: IconSearch },
+      { href: ROUTES.MARKETING.PRICING, label: 'Pricing', icon: IconTrophy },
     ]
 
-    // Return appropriate links based on authentication state
     return isAuthenticated
       ? authenticatedLinks.filter((link) => !link.requiresProfile || hasProfile)
       : marketingLinks
   }, [isAuthenticated, hasProfile, isAdmin])
 
   return (
-    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-1'>
-      {links.map(({ href, label, className }) => {
+    <div className='flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-2 space-y-2 lg:space-y-0'>
+      {links.map(({ href, label, icon: Icon, className }) => {
         const isActive = pathname === href
         return (
           <Link
             key={href}
             href={href}
             className={cn(
-              'relative px-3 py-2 text-sm font-medium transition-colors',
+              'relative px-3 py-2 text-sm font-semibold',
               'hover:text-github-fg-default',
               'lg:rounded-md lg:px-4',
-              'lg:hover:bg-github-canvas-subtle',
-              isActive
-                ? 'text-github-fg-default after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-github-accent-emphasis lg:after:hidden lg:bg-github-canvas-subtle'
-                : 'text-github-fg-muted',
-              'flex w-full items-center lg:w-auto',
+              'flex w-full items-center justify-center lg:w-auto',
               'rounded-md',
-              'hover:bg-github-canvas-subtle',
+              'bg-github-canvas-overlay',
+              'transition-all duration-200',
+              'shadow-sm hover:shadow-md',
+              'border border-transparent',
+              'hover:bg-github-btn-hover hover:border-gray-300',
+              isActive
+                ? 'bg-blue-500 text-white border-2 border-white font-bold'
+                : 'text-github-fg-muted',
               className
             )}
           >
-            {label}
+            <Icon className='w-4 h-4 mr-2 transition-transform duration-200 hover:scale-110' />
+            <span className='text-center transition-transform duration-200 hover:scale-105'>
+              {label}
+            </span>
           </Link>
         )
       })}

@@ -12,7 +12,7 @@ export const ROUTES = {
   // Authenticated routes
   AUTH: {
     KITCHEN: '/kitchen',
-    CALENDAR: '/calendar',
+    PLAN: '/plan',
     EXPLORE: '/explore',
     TIER: '/tier',
     PROFILE: {
@@ -28,6 +28,8 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     MEMBERS: '/members',
     WIKI: '/wiki',
+    NEWS: '/news',
+    JOBS: 'jobs/',
   },
 }
 
@@ -43,7 +45,7 @@ export const routeConfig = {
   requiresProfile: [
     ROUTES.AUTH.KITCHEN,
     ROUTES.AUTH.EXPLORE,
-    ROUTES.AUTH.CALENDAR,
+    ROUTES.AUTH.PLAN,
     ROUTES.AUTH.TIER,
     ROUTES.AUTH.RECIPE,
     ROUTES.AUTH.DASHBOARD,
