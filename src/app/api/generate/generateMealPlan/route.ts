@@ -5,6 +5,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+const extractIngredients = (mealPlan: string): string[] => {
+  // Simple regex to extract ingredients from the meal plan text
+  const ingredientLines = mealPlan.match(/-\s+[^\n]+/g) || []
+  return ingredientLines.map((line) => line.replace(/^-\s+/, '').trim())
+}
+
 export async function POST(req: Request) {
   try {
     const { timeToCook, cuisineType, preferences, dietaryRestrictions, inspiration, tier } =
@@ -35,8 +41,20 @@ export async function POST(req: Request) {
       temperature: 0.7,
     })
 
+    const content = response.choices[0].message.content
+    if (!content) {
+      throw new Error('No content received from OpenAI response.')
+    }
+
+    const ingredients = extractIngredients(content)
+
+    // Store meal plan in local storage
+    localStorage.setItem('mealPlan', content)
+    localStorage.setItem('mealPlanAvailable', 'true')
+
     return NextResponse.json({
       mealPlan: response.choices[0].message.content,
+      ingredients,
     })
   } catch (error) {
     console.error('Error generating meal plan:', error)

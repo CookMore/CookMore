@@ -1,15 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { IconChevronLeft, IconUtensils, IconList, IconCalendar } from '@/app/api/icons'
 import { cn } from '@/app/api/utils/utils'
 
-interface CalendarSidebarProps {
+interface PlanSidebarProps {
   setActiveView: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function CalendarSidebar({ setActiveView }: CalendarSidebarProps) {
+export function PlanSidebar({ setActiveView }: PlanSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(true)
+  const [newShoppingListAvailable, setNewShoppingListAvailable] = useState(false)
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const available = localStorage.getItem('mealPlanAvailable') === 'true'
+      setNewShoppingListAvailable(available)
+    }
+
+    const handleShoppingListGenerated = () => {
+      setNewShoppingListAvailable(true)
+    }
+
+    // Listen for storage changes
+    window.addEventListener('storage', handleStorageChange)
+    // Listen for custom event
+    window.addEventListener('shoppingListGenerated', handleShoppingListGenerated)
+
+    // Initial check
+    handleStorageChange()
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('shoppingListGenerated', handleShoppingListGenerated)
+    }
+  }, [])
 
   return (
     <div
@@ -66,10 +91,15 @@ export function CalendarSidebar({ setActiveView }: CalendarSidebarProps) {
         </button>
         <button
           onClick={() => setActiveView('MealShoppingList')}
-          className='flex items-center w-full p-3 text-left transition-all duration-200 border rounded-lg space-x-3 bg-github-canvas-default border-github-border-default hover:bg-github-canvas-subtle'
+          className='relative flex items-center w-full p-3 text-left transition-all duration-200 border rounded-lg space-x-3 bg-github-canvas-default border-github-border-default hover:bg-github-canvas-subtle'
         >
           <IconList className='h-5 w-5 text-github-fg-default' />
           {isExpanded && <span>Shopping List</span>}
+          {newShoppingListAvailable && (
+            <span className='absolute right-2 top-2 bg-red-500 text-white text-xs rounded-full px-1'>
+              New
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveView('CalendarView')}

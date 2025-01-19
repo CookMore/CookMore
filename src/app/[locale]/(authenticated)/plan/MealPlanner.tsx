@@ -60,11 +60,21 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
     },
   })
   const [mealPlanResponse, setMealPlanResponse] = useState<string>('')
+  const [mealPlanTitle, setMealPlanTitle] = useState<string>('')
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true)
     }, 100) // Small delay to ensure parent is mounted
+
+    const storedMealPlan = localStorage.getItem('mealPlanResponse')
+    const storedTitle = localStorage.getItem('mealPlanTitle')
+    if (storedMealPlan) {
+      setMealPlanResponse(storedMealPlan)
+    }
+    if (storedTitle) {
+      setMealPlanTitle(storedTitle)
+    }
 
     return () => clearTimeout(timer)
   }, [])
@@ -74,10 +84,42 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
       const response = await generateMealPlan(data)
       setMealPlans((prev) => [...prev, response.mealPlan])
       setMealPlanResponse(response.mealPlan)
+      setMealPlanTitle(`Meal Plan for ${data.cuisineType}`)
+      localStorage.setItem('mealPlanResponse', response.mealPlan)
+      localStorage.setItem('mealPlanTitle', `Meal Plan for ${data.cuisineType}`)
       toast.success('Meal plan generated successfully!')
     } catch (err) {
       toast.error(error || 'Failed to generate meal plan')
     }
+  }
+
+  const generateShoppingListFromMealPlan = () => {
+    if (!mealPlanResponse) return
+
+    // Debugging log to check the content of mealPlanResponse
+    console.log('Meal Plan Response:', mealPlanResponse)
+
+    // Extract ingredients from the meal plan
+    const ingredients = mealPlanResponse.match(/-\s+[^\n]+/g) || []
+    console.log('Extracted ingredients:', ingredients)
+    const shoppingList = ingredients.map((line) => line.replace(/^-\s+/, '').trim())
+    console.log('Final shopping list:', shoppingList)
+
+    // Store the shopping list in local storage
+    localStorage.setItem('shoppingList', JSON.stringify(shoppingList))
+
+    // Emit a custom event to notify the PlanSidebar
+    const event = new Event('shoppingListGenerated')
+    window.dispatchEvent(event)
+
+    toast.success('Shopping list generated successfully!')
+  }
+
+  const clearMealPlan = () => {
+    localStorage.removeItem('mealPlanResponse')
+    localStorage.removeItem('mealPlanTitle')
+    setMealPlanResponse('')
+    setMealPlanTitle('')
   }
 
   if (!mounted) {
@@ -242,9 +284,21 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
         >
           <div className='bg-github-canvas-default p-4 border-b border-github-border-default'>
             <h3 className='text-lg font-semibold text-github-fg-default'>Your Meal Plan</h3>
+            <button
+              onClick={clearMealPlan}
+              className='mt-2 p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
+            >
+              Clear Meal Plan
+            </button>
           </div>
           <div className='bg-github-canvas-subtle p-6'>
-            <div className='prose prose-github max-w-none'>
+            <button
+              onClick={generateShoppingListFromMealPlan}
+              className='mt-2 p-2 bg-blue-500 text-white rounded'
+            >
+              Make Shopping List for This Dish
+            </button>
+            <div className='prose prose-github max-w-none mt-4'>
               {mealPlanResponse.split('\n').map((line, index) => {
                 if (line.match(/^\*\*.*\*\*$/)) {
                   // Headers (wrapped in **)

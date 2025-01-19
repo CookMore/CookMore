@@ -1,25 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarSidebar } from './CalendarSidebar'
+import { PlanSidebar } from './PlanSidebar'
 import MealPlanner from './MealPlanner'
 import MealCalendar from './MealCalendar'
 import MealShoppingList from './MealShoppingList'
 import { cn } from '@/app/api/utils/utils'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 
-export default function CalendarPage() {
+export default function PlanPage() {
   const [mounted, setMounted] = useState(false)
   const [activeView, setActiveView] = useState('MealPlanner')
   const [mealPlans, setMealPlans] = useState<string[]>([])
   const { user, tier } = useAuth()
 
   useEffect(() => {
-    console.log('CalendarPage mounting...', { tier, user })
+    console.log('PlanPage mounting...', { tier, user })
     setMounted(true)
-    console.log('CalendarPage mounted')
+    console.log('PlanPage mounted')
     return () => {
-      console.log('CalendarPage unmounting')
+      console.log('PlanPage unmounting')
     }
   }, [tier, user])
 
@@ -55,7 +55,7 @@ export default function CalendarPage() {
 
   return (
     <div className='min-h-screen bg-github-canvas-default'>
-      <CalendarSidebar setActiveView={setActiveView} tier={tier} />
+      <PlanSidebar setActiveView={setActiveView} tier={tier} />
       <main
         className={cn(
           'transition-all duration-300 ease-in-out',

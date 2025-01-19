@@ -76,7 +76,7 @@ export function NavigationLinks() {
       },
       {
         href: ROUTES.AUTH.RECIPE.CREATE,
-        label: 'Recipe +',
+        label: 'Recipe',
         icon: IconPlus,
         requiresProfile: true,
         className: 'bg-green-500 text-white font-bold hover:bg-green-600',

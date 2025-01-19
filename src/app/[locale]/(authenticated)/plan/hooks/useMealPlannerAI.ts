@@ -25,7 +25,7 @@ export function useMealPlannerAI() {
     setError(null)
 
     try {
-      const response = await fetch('/en/calendar/api', {
+      const response = await fetch('/en/plan/api', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
