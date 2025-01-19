@@ -50,6 +50,7 @@ export const routeConfig = {
     ROUTES.AUTH.RECIPE,
     ROUTES.AUTH.DASHBOARD,
     ROUTES.AUTH.MEMBERS,
+    ROUTES.AUTH.WIKI,
   ],
 
   // Admin only routes

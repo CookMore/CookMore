@@ -11,11 +11,11 @@ import {
   IconSearch,
   IconCalendar,
   IconTrophy,
-  IconBook,
   IconBell,
   IconBriefcase,
   IconPlus,
   IconGear,
+  IconMembers,
 } from '@/app/api/icons'
 
 interface NavLink {
@@ -54,20 +54,6 @@ export function NavigationLinks() {
         className: 'flex items-center',
       },
       {
-        href: ROUTES.AUTH.TIER,
-        label: 'Tier',
-        icon: IconTrophy,
-        requiresProfile: true,
-        className: 'flex items-center',
-      },
-      {
-        href: ROUTES.AUTH.WIKI,
-        label: 'Wiki',
-        icon: IconBook,
-        requiresProfile: true,
-        className: 'flex items-center',
-      },
-      {
         href: ROUTES.AUTH.NEWS,
         label: 'News',
         icon: IconBell,
@@ -78,6 +64,13 @@ export function NavigationLinks() {
         href: ROUTES.AUTH.JOBS,
         label: 'Jobs',
         icon: IconBriefcase,
+        requiresProfile: true,
+        className: 'flex items-center',
+      },
+      {
+        href: ROUTES.AUTH.MEMBERS,
+        label: 'Members',
+        icon: IconMembers,
         requiresProfile: true,
         className: 'flex items-center',
       },

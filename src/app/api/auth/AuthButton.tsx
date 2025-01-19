@@ -16,6 +16,7 @@ import {
 } from '@/app/api/header/dropdown-menu'
 import { LoadingSpinner } from '@/app/api/loading/LoadingSpinner'
 import { Icons } from '@/app/api/icons/icons'
+import { IconTrophy } from '@/app/api/icons/icons'
 
 export function AuthButton() {
   const { login, logout, isAuthenticated, ready, user, hasProfile, isLoading } = useAuth()
@@ -87,6 +88,17 @@ export function AuthButton() {
           <Icons.user className='mr-2 h-5 w-5 transition-transform duration-200 hover:scale-110 hover:text-blue-500' />
           <span className='flex-1 text-center mr-3 transition-transform duration-200 hover:scale-105'>
             {hasProfile ? 'Profile' : 'Create Profile'}
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => router.push(ROUTES.AUTH.TIER)}
+          disabled={isLoading}
+          className='hover:bg-github-canvas-subtle p-2 rounded-md cursor-pointer flex items-center transition-transform duration-200 hover:scale-105'
+          style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)' }}
+        >
+          <IconTrophy className='mr-2 h-5 w-5 transition-transform duration-200 hover:scale-110 hover:text-blue-500' />
+          <span className='flex-1 text-center mr-3 transition-transform duration-200 hover:scale-105'>
+            Tier
           </span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className='my-1' />

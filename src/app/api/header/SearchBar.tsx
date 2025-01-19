@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { DefaultAvatar } from '@/app/api/avatar/DefaultAvatar'
 
-export function SearchBar() {
+interface SearchBarProps {
+  className?: string
+}
+
+interface SearchBarProps {
+  className?: string
+  onSearch?: () => void
+}
+
+export const SearchBar: React.FC<SearchBarProps> = ({ className, onSearch }) => {
   const [query, setQuery] = useState('')
   const [aiResponse, setAiResponse] = useState('')
   const [recommendations, setRecommendations] = useState('')
@@ -43,13 +52,14 @@ export function SearchBar() {
         recommendationsPart ? recommendationsPart.trim() : 'No recommendations available.'
       )
       setIsPopoverOpen(true)
+      onSearch?.() // Call onSearch callback if provided
     } catch (error) {
       console.error('Error with search API:', error)
     }
   }
 
   return (
-    <div className='flex flex-col items-center border rounded-md p-1'>
+    <div className={`flex flex-col items-center border rounded-md p-1 ${className}`}>
       <div className='flex items-center w-full'>
         <div className='flex items-center'>
           <input
