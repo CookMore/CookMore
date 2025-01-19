@@ -22,10 +22,15 @@ export function PlanSidebar({ setActiveView }: PlanSidebarProps) {
       setNewShoppingListAvailable(true)
     }
 
+    const handleShoppingListCleared = () => {
+      setNewShoppingListAvailable(false)
+    }
+
     // Listen for storage changes
     window.addEventListener('storage', handleStorageChange)
     // Listen for custom event
     window.addEventListener('shoppingListGenerated', handleShoppingListGenerated)
+    window.addEventListener('shoppingListCleared', handleShoppingListCleared)
 
     // Initial check
     handleStorageChange()
@@ -33,6 +38,7 @@ export function PlanSidebar({ setActiveView }: PlanSidebarProps) {
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('shoppingListGenerated', handleShoppingListGenerated)
+      window.removeEventListener('shoppingListCleared', handleShoppingListCleared)
     }
   }, [])
 
