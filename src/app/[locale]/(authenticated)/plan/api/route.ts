@@ -18,7 +18,9 @@ export async function POST(req: Request) {
     - Additional Notes: ${inspiration}
     - User Tier: ${tier}
 
-    Please provide a detailed meal plan including ingredients and cooking instructions.`
+    Please provide a detailed meal plan including the following sections:
+    **Ingredients**: List all ingredients needed.
+    **Instructions**: Provide step-by-step cooking instructions.`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4',

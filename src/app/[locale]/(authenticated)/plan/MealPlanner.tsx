@@ -44,6 +44,8 @@ interface MealPlanFormData {
   preferences: string[]
   dietaryRestrictions: string
   inspiration: string
+  mealCount: string
+  numberOfPeople: number
 }
 
 export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
@@ -57,6 +59,8 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
       preferences: [],
       dietaryRestrictions: '',
       inspiration: '',
+      mealCount: 'one',
+      numberOfPeople: 1,
     },
   })
   const [mealPlanResponse, setMealPlanResponse] = useState<string>('')
@@ -87,6 +91,7 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
       setMealPlanTitle(`Meal Plan for ${data.cuisineType}`)
       localStorage.setItem('mealPlanResponse', response.mealPlan)
       localStorage.setItem('mealPlanTitle', `Meal Plan for ${data.cuisineType}`)
+      localStorage.setItem('mealPlanSettings', JSON.stringify(data))
       toast.success('Meal plan generated successfully!')
     } catch (err) {
       toast.error(error || 'Failed to generate meal plan')
@@ -100,9 +105,19 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
     console.log('Meal Plan Response:', mealPlanResponse)
 
     // Extract ingredients from the meal plan
-    const ingredients = mealPlanResponse.match(/-\s+[^\n]+/g) || []
+    const ingredientsSection = mealPlanResponse
+      .split('**Instructions**')[0]
+      .split('**Ingredients**')[1]
+
+    if (!ingredientsSection) {
+      console.error('Ingredients section not found in meal plan response.')
+      return
+    }
+
+    const trimmedIngredientsSection = ingredientsSection.trim()
+    const ingredients = trimmedIngredientsSection.match(/\d+\.\s+[^\n]+/g) || []
     console.log('Extracted ingredients:', ingredients)
-    const shoppingList = ingredients.map((line) => line.replace(/^-\s+/, '').trim())
+    const shoppingList = ingredients.map((line) => line.replace(/^\d+\.\s+/, '').trim())
     console.log('Final shopping list:', shoppingList)
 
     // Store the shopping list in local storage
@@ -169,24 +184,43 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
         <div className='space-y-4'>
           <div>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
-              Time to Cook:
+              How long do you want to cook?
             </label>
-            <div className='flex gap-2'>
-              {['15 min', '30 min', '1 hour'].map((time) => (
-                <button
-                  key={time}
-                  type='button'
-                  onClick={() => form.setValue('timeToCook', time)}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    form.watch('timeToCook') === time
-                      ? 'bg-github-accent-emphasis text-github-fg-onEmphasis'
-                      : 'bg-github-btn-bg hover:bg-github-btn-hover text-github-fg-default border border-github-border-default'
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
+            <select
+              {...form.register('timeToCook')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+            >
+              <option value=''>Select Time</option>
+              <option value='15 min'>15 min</option>
+              <option value='30 min'>30 min</option>
+              <option value='1 hour'>1 hour</option>
+              <option value='More than 1 hour'>More than 1 hour</option>
+            </select>
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              Is this for one meal or more?
+            </label>
+            <select
+              {...form.register('mealCount')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+            >
+              <option value='one'>One Meal</option>
+              <option value='multiple'>Multiple Meals</option>
+            </select>
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              How many people are we planning for?
+            </label>
+            <input
+              type='number'
+              {...form.register('numberOfPeople')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              min='1'
+            />
           </div>
 
           <div>
@@ -292,6 +326,18 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
             </button>
           </div>
           <div className='bg-github-canvas-subtle p-6'>
+            <h4 className='text-lg font-semibold text-github-fg-default mt-4'>Settings Used</h4>
+            <div className='flex flex-wrap gap-2'>
+              {Object.entries(form.getValues()).map(([key, value]) => (
+                <div
+                  key={key}
+                  className='bg-github-canvas-default p-2 rounded-md text-github-fg-muted border border-github-border-default'
+                >
+                  <span className='font-medium'>{key}:</span>{' '}
+                  {Array.isArray(value) ? value.join(', ') : value}
+                </div>
+              ))}
+            </div>
             <button
               onClick={generateShoppingListFromMealPlan}
               className='mt-2 p-2 bg-blue-500 text-white rounded'
@@ -307,12 +353,14 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
                       {line.replace(/^\*\*|\*\*$/g, '')}
                     </h4>
                   )
-                } else if (line.match(/^-/)) {
-                  // List items
+                } else if (line.match(/^\d+\./)) {
+                  // Numbered list items
                   return (
                     <div key={index} className='flex items-start gap-2 mt-2'>
                       <div className='w-2 h-2 rounded-full bg-github-success-emphasis mt-2'></div>
-                      <p className='text-github-fg-default flex-1'>{line.replace(/^-\s*/, '')}</p>
+                      <p className='text-github-fg-default flex-1'>
+                        {line.replace(/^\d+\.\s*/, '')}
+                      </p>
                     </div>
                   )
                 } else if (line.trim() === '') {
