@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, Suspense } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import toast from 'react-hot-toast'
 import { useNotes } from './context/NotesContext'
 import NoteBuilder from './components/NoteBuilder'
@@ -91,7 +91,7 @@ const NotesClient: React.FC = React.memo(() => {
 
   if (!mounted) {
     return (
-      <div className='min-h-screen bg-github-canvas-default'>
+      <div className='min-h-screen bg-github-canvas-default flex justify-center items-center'>
         <div className='animate-pulse p-8 relative z-30'>
           <div className='h-8 bg-github-canvas-subtle rounded w-1/4 mb-6'></div>
           <div className='space-y-4'>
@@ -104,11 +104,8 @@ const NotesClient: React.FC = React.memo(() => {
   }
 
   return (
-    <div className='flex h-full relative' style={{ zIndex: 10 }}>
-      <div
-        className='w-2/3 min-w-[300px] p-4 overflow-y-auto hover:border-blue-500'
-        style={{ zIndex: 10 }}
-      >
+    <div className='flex flex-col items-center justify-center min-h-screen bg-github-canvas-default'>
+      <div className='w-full max-w-4xl p-4' style={{ minWidth: '1200px', zIndex: 10 }}>
         <NoteBuilder onAddNote={handleAddNote} />
         <NoteDisplay
           notes={notes}
