@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa'
 import { useNotesContract } from '../hooks/useNotesContract'
 import { NotesContext } from '../context/NotesContext'
+import { useTheme } from '@/app/api/providers/core/ThemeProvider'
 
 interface Note {
   tokenId?: number
@@ -42,6 +43,7 @@ const NoteBuilder: React.FC = () => {
   const showAdvancedControls = false
   const { mintNote, batchMintNotes, updateMetadata } = useNotesContract()
   const notesContext = useContext(NotesContext)
+  const { theme } = useTheme()
 
   if (!notesContext) {
     throw new Error('NoteBuilder must be used within a NotesProvider')
@@ -138,32 +140,40 @@ const NoteBuilder: React.FC = () => {
   }
 
   return (
-    <div className='p-6 mb-4 bg-gradient-to-b from-blue-500 to-gray-900 rounded-lg shadow-2xl'>
+    <div className={`p-6 mb-4 border border-gray-100 rounded-lg shadow-2xl bg-${theme}`}>
       <h2 className='text-white text-2xl font-bold mb-4'>Note Builder</h2>
       {popoverMessage && <div className='popover'>{popoverMessage}</div>}
       <div className='flex justify-between mb-2'>
         <button
           onClick={handleNewNote}
-          className='bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-2 rounded shadow-lg transition-transform duration-200 hover:scale-105'
+          className='bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-3 m-5 rounded shadow-lg transition-transform duration-200 hover:scale-105'
         >
           New +
         </button>
         <button
           onClick={handleBatchToggle}
-          className={`bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-2 rounded shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
+          className={`bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-6 rounded shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
         >
           <FaTh className='inline-block mr-1' /> Batch Mint
         </button>
       </div>
-      <div className='border-b border-gray-300 mb-4'></div>
+      <div className='border-b border-gray-300 mb-8'></div>
       <div className='flex flex-wrap'>
         {notes.map((note, index) => (
           <div
             key={index}
-            className='p-2 mb-4 flex-col flex bg-white justify-center items-center rounded-lg shadow-xl'
-            style={{ width: 'calc(33.33% - 16px)', margin: '8px' }}
+            className={`py-2 px-5 mb-6 flex-col flex justify-center items-center rounded-lg shadow-xl bg-${theme}`}
+            style={{
+              width: 'calc(33.33% - 16px)',
+              margin: '10px',
+              padding: '20px',
+              border: '0.5px solid rgba(128, 128, 128, 0.5)',
+              transition: 'border-color 0.3s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'blue')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(128, 128, 128, 0.5)')}
           >
-            <div className='flex justify-center items-center mb-2' style={{ width: '100%' }}>
+            <div className='flex justify-center items-center mb-4' style={{ width: '100%' }}>
               <input
                 type='text'
                 value={note.name}
@@ -190,7 +200,7 @@ const NoteBuilder: React.FC = () => {
               />
             </div>
             <div
-              className='p-4 flex flex-col justify-center items-center bg-white rounded-md shadow-lg relative'
+              className='p-6 flex flex-col justify-center items-center rounded-md shadow-lg relative'
               style={{
                 backgroundColor: note.color,
                 fontFamily: 'Inter',
@@ -198,7 +208,7 @@ const NoteBuilder: React.FC = () => {
                 height: '300px',
                 color: '#333',
                 textAlign: 'center',
-                paddingTop: '20px',
+                paddingTop: '15px',
                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
               }}
             >
@@ -219,25 +229,25 @@ const NoteBuilder: React.FC = () => {
               >
                 <button
                   onClick={() => handleAddOrUpdateNote(index)}
-                  className='bg-green-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                  className='bg-green-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                 >
                   {note.tokenId ? <FaEdit /> : <FaPlus />}
                 </button>
                 <button
                   onClick={() => setShowControls(!showControls)}
-                  className='bg-blue-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                  className='bg-blue-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                 >
                   <FaEdit />
                 </button>
                 <button
                   onClick={() => handleClear(index)}
-                  className='bg-yellow-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                  className='bg-yellow-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                 >
                   <FaEraser />
                 </button>
                 <button
                   onClick={() => handleDelete(index)}
-                  className='bg-red-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                  className='bg-red-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                 >
                   <FaTrash />
                 </button>
@@ -245,13 +255,13 @@ const NoteBuilder: React.FC = () => {
                   <>
                     <button
                       onClick={handleBurn}
-                      className='bg-red-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                      className='bg-red-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                     >
                       <FaFire />
                     </button>
                     <button
                       onClick={handleTransfer}
-                      className='bg-teal-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
+                      className='bg-teal-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105'
                     >
                       <FaArrowRight />
                     </button>
@@ -259,7 +269,7 @@ const NoteBuilder: React.FC = () => {
                 )}
                 <button
                   onClick={handleBatchToggle}
-                  className={`bg-gray-500 text-white py-1 px-2 rounded-r shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
+                  className={`bg-gray-500 text-white py-1 px-3 rounded-r shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
                 >
                   <FaTh />
                 </button>

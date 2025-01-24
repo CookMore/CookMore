@@ -105,7 +105,7 @@ const NotesClient: React.FC = React.memo(() => {
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-github-canvas-default'>
-      <div className='w-full max-w-4xl p-4' style={{ minWidth: '1200px', zIndex: 10 }}>
+      <div className='w-full max-w-6xl p-4' style={{ minWidth: '1400px', zIndex: 10 }}>
         <NoteBuilder onAddNote={handleAddNote} />
         <NoteDisplay
           notes={notes}
