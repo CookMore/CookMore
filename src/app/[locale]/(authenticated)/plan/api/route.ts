@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const { timeToCook, cuisineType, preferences, dietaryRestrictions, inspiration, tier } =
       await req.json()
 
-    const prompt = `Generate a meal plan with the following requirements:
+    const prompt = `Generate a detailed meal plan with the following requirements:
     - Cooking Time: ${timeToCook}
     - Cuisine Type: ${cuisineType}
     - Dietary Preferences: ${preferences.join(', ')}
@@ -19,8 +19,18 @@ export async function POST(req: Request) {
     - User Tier: ${tier}
 
     Please provide a detailed meal plan including the following sections:
-    **Ingredients**: List all ingredients needed.
-    **Instructions**: Provide step-by-step cooking instructions.`
+    **Title**: Provide a title for the meal.
+    **Description**: Briefly describe the meal.
+    **Servings**: Number of servings.
+    **Prep Time**: Preparation time required.
+    **Cook Time**: Cooking time required.
+    **Difficulty**: Level of difficulty (easy, medium, hard, expert).
+    **Ingredients**: List all ingredients needed with quantities and units.
+    **Equipment**: List all equipment needed.
+    **Instructions**: Provide step-by-step cooking instructions.
+    **Dietary Information**: Include any dietary information.
+    **Tags**: Include relevant tags such as categories, cuisines, occasions.
+    **Inspiration**: Any inspiration or themes for the meal.`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4',

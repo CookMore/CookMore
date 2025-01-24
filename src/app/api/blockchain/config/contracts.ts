@@ -2,6 +2,7 @@ import { Address, isAddress } from 'viem'
 import { recipeABI } from '../abis/recipe'
 import { profileABI } from '../abis/profile'
 import { tierABI } from '../abis/tier'
+import { stickyABI } from '../abis/sticky'
 
 // Contract addresses for different environments
 const MAINNET_CONTRACTS = {
@@ -9,6 +10,7 @@ const MAINNET_CONTRACTS = {
   TIER: process.env.NEXT_PUBLIC_TIER_CONTRACT_ADDRESS,
   USDC: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
   ACCESS_CONTROL: process.env.NEXT_PUBLIC_ACCESS_CONTROL_ADDRESS,
+  STICKY_NOTE: process.env.NEXT_PUBLIC_STICKY_NOTE_CONTRACT,
 } as const
 
 const TESTNET_CONTRACTS = {
@@ -16,6 +18,7 @@ const TESTNET_CONTRACTS = {
   TIER: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
   USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897' as Address,
   ACCESS_CONTROL: process.env.NEXT_PUBLIC_TESTNET_ACCESS_CONTROL,
+  STICKY_NOTE: process.env.NEXT_PUBLIC_TESTNET_STICKY_NOTE_CONTRACT,
 } as const
 
 const LOCAL_CONTRACTS = {
@@ -23,6 +26,7 @@ const LOCAL_CONTRACTS = {
   TIER: process.env.NEXT_PUBLIC_TESTNET_TIER_CONTRACT,
   USDC: '0x6Ac3aB54Dc5019A2e57eCcb214337FF5bbD52897' as Address,
   ACCESS_CONTROL: process.env.NEXT_PUBLIC_TESTNET_ACCESS_CONTROL,
+  STICKY_NOTE: process.env.NEXT_PUBLIC_TESTNET_STICKY_NOTE_CONTRACT,
 } as const
 
 // Select contracts based on environment
@@ -73,5 +77,9 @@ export const contracts = {
   tier: {
     address: CONTRACTS.TIER,
     abi: tierABI,
+  },
+  stickyNote: {
+    address: CONTRACTS.STICKY_NOTE,
+    abi: stickyABI,
   },
 }

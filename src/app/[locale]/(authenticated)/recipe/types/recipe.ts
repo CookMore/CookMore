@@ -283,3 +283,5 @@ export interface HaccpStep {
   verification: string[]
   records: string[]
 }
+
+export * from './recipe'

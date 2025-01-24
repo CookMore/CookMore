@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { useMealPlannerAI } from './hooks/useMealPlannerAI'
 import { toast } from 'sonner'
+import * as RecipeTypes from '@/app/[locale]/(authenticated)/recipe/types/recipe'
 
 interface MealPlannerProps {
   setMealPlans: React.Dispatch<React.SetStateAction<string[]>>
@@ -38,14 +39,22 @@ const tierKey = (tier: ProfileTier | keyof typeof ProfileTier) => {
   return (tierMap[tier as ProfileTier] ?? 'free') as Lowercase<keyof typeof ProfileTier>
 }
 
-interface MealPlanFormData {
+interface MealPlanFormData extends Partial<RecipeTypes.RecipeData> {
   timeToCook: string
   cuisineType: string
   preferences: string[]
   dietaryRestrictions: string
-  inspiration: string
+  inspiration: RecipeTypes.Inspiration
   mealCount: string
   numberOfPeople: number
+  numberOfMeals?: number
+  budget: number
+  mealPlanningOption: string
+}
+
+interface MealPlanResponse {
+  mealPlan: string
+  image?: string
 }
 
 export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
@@ -61,10 +70,17 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
       inspiration: '',
       mealCount: 'one',
       numberOfPeople: 1,
+      servings: 1,
+      prepTime: 1,
+      cookTime: 1,
+      difficulty: 'easy',
+      budget: 5,
+      mealPlanningOption: 'sameMealDifferentDays',
     },
   })
-  const [mealPlanResponse, setMealPlanResponse] = useState<string>('')
+  const [mealPlanResponse, setMealPlanResponse] = useState<MealPlanResponse>({ mealPlan: '' })
   const [mealPlanTitle, setMealPlanTitle] = useState<string>('')
+  const [budgetValue, setBudgetValue] = useState(5)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,7 +90,12 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
     const storedMealPlan = localStorage.getItem('mealPlanResponse')
     const storedTitle = localStorage.getItem('mealPlanTitle')
     if (storedMealPlan) {
-      setMealPlanResponse(storedMealPlan)
+      try {
+        const parsedMealPlan = JSON.parse(storedMealPlan)
+        setMealPlanResponse(parsedMealPlan)
+      } catch (e) {
+        console.error('Failed to parse meal plan from local storage:', e)
+      }
     }
     if (storedTitle) {
       setMealPlanTitle(storedTitle)
@@ -85,11 +106,15 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
 
   const onSubmit = async (data: MealPlanFormData) => {
     try {
-      const response = await generateMealPlan(data)
+      const promptData = {
+        ...data,
+        includeMetadata: true,
+      }
+      const response: MealPlanResponse = await generateMealPlan(promptData)
       setMealPlans((prev) => [...prev, response.mealPlan])
-      setMealPlanResponse(response.mealPlan)
+      setMealPlanResponse(response)
       setMealPlanTitle(`Meal Plan for ${data.cuisineType}`)
-      localStorage.setItem('mealPlanResponse', response.mealPlan)
+      localStorage.setItem('mealPlanResponse', JSON.stringify({ mealPlan: response.mealPlan }))
       localStorage.setItem('mealPlanTitle', `Meal Plan for ${data.cuisineType}`)
       localStorage.setItem('mealPlanSettings', JSON.stringify(data))
       toast.success('Meal plan generated successfully!')
@@ -99,13 +124,13 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
   }
 
   const generateShoppingListFromMealPlan = () => {
-    if (!mealPlanResponse) return
+    if (!mealPlanResponse.mealPlan) return
 
     // Debugging log to check the content of mealPlanResponse
     console.log('Meal Plan Response:', mealPlanResponse)
 
     // Extract ingredients from the meal plan
-    const ingredientsSection = mealPlanResponse
+    const ingredientsSection = mealPlanResponse.mealPlan
       .split('**Instructions**')[0]
       .split('**Ingredients**')[1]
 
@@ -133,7 +158,7 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
   const clearMealPlan = () => {
     localStorage.removeItem('mealPlanResponse')
     localStorage.removeItem('mealPlanTitle')
-    setMealPlanResponse('')
+    setMealPlanResponse({ mealPlan: '' })
     setMealPlanTitle('')
   }
 
@@ -163,6 +188,10 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
 
   const TierIcon = tierIcons[tierKey(currentTier)]
 
+  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBudgetValue(Number(event.target.value))
+  }
+
   return (
     <div className='max-w-4xl mx-auto p-6'>
       <div className='flex items-center justify-between mb-6'>
@@ -179,57 +208,152 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='space-y-6 border border-github-border-default rounded-lg p-6 bg-github-canvas-subtle'
+        className='space-y-6 border border-github-border-default rounded-lg p-6 bg-github-canvas-subtle shadow-lg'
       >
-        <div className='space-y-4'>
-          <div>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='col-span-2 border-b border-github-border-default pb-4 mb-4'>
+            <h3 className='text-lg font-semibold text-github-fg-default'>Planning</h3>
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              How Many Meals Are You Planning For?
+            </label>
+            <input
+              type='number'
+              {...form.register('numberOfMeals')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+              min='1'
+            />
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              Meal Planning Options:
+            </label>
+            <select
+              {...form.register('mealPlanningOption')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+            >
+              <option value='sameMealDifferentDays'>Same Meal/Different Days</option>
+              <option value='differentMealsDifferentDays'>Different Meals/Different Days</option>
+            </select>
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              How Many People Are We Planning For?
+            </label>
+            <input
+              type='number'
+              {...form.register('numberOfPeople')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+              min='1'
+            />
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              How Many Servings?
+            </label>
+            <input
+              type='number'
+              {...form.register('servings')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+              min='1'
+            />
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>Budget:</label>
+            <input
+              type='range'
+              {...form.register('budget')}
+              className='w-full'
+              min='5'
+              max='1000'
+              step='5'
+              onChange={handleBudgetChange}
+            />
+            <div className='flex justify-between text-sm text-github-fg-muted'>
+              <span>$5</span>
+              <span>${budgetValue}</span>
+              <span>$1000</span>
+            </div>
+          </div>
+
+          <div className='col-span-2 border-b border-github-border-default pb-4 mt-4 mb-4'>
+            <h3 className='text-lg font-semibold text-github-fg-default'>Cooking Details</h3>
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
               How long do you want to cook?
             </label>
             <select
               {...form.register('timeToCook')}
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
             >
               <option value=''>Select Time</option>
               <option value='15 min'>15 min</option>
               <option value='30 min'>30 min</option>
               <option value='1 hour'>1 hour</option>
-              <option value='More than 1 hour'>More than 1 hour</option>
+              <option value='2 hours'>2 hours</option>
+              <option value='More than 2 hours'>More than 2 hours</option>
             </select>
           </div>
 
-          <div>
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
-              Is this for one meal or more?
-            </label>
-            <select
-              {...form.register('mealCount')}
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
-            >
-              <option value='one'>One Meal</option>
-              <option value='multiple'>Multiple Meals</option>
-            </select>
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
-              How many people are we planning for?
+              Prep Time (minutes):
             </label>
             <input
               type='number'
-              {...form.register('numberOfPeople')}
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              {...form.register('prepTime')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
               min='1'
             />
           </div>
 
-          <div>
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              Cook Time (minutes):
+            </label>
+            <input
+              type='number'
+              {...form.register('cookTime')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+              min='1'
+            />
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
+            <label className='block text-sm font-medium mb-2 text-github-fg-default'>
+              Difficulty:
+            </label>
+            <select
+              {...form.register('difficulty')}
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
+            >
+              <option value=''>Select Difficulty</option>
+              <option value='easy'>Easy</option>
+              <option value='medium'>Medium</option>
+              <option value='hard'>Hard</option>
+              <option value='expert'>Expert</option>
+            </select>
+          </div>
+
+          <div className='col-span-2 border-b border-github-border-default pb-4 mt-4 mb-4'>
+            <h3 className='text-lg font-semibold text-github-fg-default'>Meal Details</h3>
+          </div>
+
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
               Cuisine Type:
             </label>
             <select
               {...form.register('cuisineType')}
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
             >
               <option value=''>Select Cuisine</option>
               <option value='Italian'>Italian</option>
@@ -241,7 +365,7 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
             </select>
           </div>
 
-          <div>
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
               Preferences:
             </label>
@@ -263,24 +387,24 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
             </div>
           </div>
 
-          <div>
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
               Dietary Restrictions:
             </label>
             <input
               {...form.register('dietaryRestrictions')}
               type='text'
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
             />
           </div>
 
-          <div>
+          <div className='hover:border-github-accent-emphasis border border-transparent rounded-md p-2 transition-colors'>
             <label className='block text-sm font-medium mb-2 text-github-fg-default'>
               Inspiration or Themes:
             </label>
             <textarea
               {...form.register('inspiration')}
-              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default'
+              className='w-full p-2 rounded-md bg-github-canvas-default border border-github-border-default text-github-fg-default shadow-sm focus:ring-2 focus:ring-github-accent-emphasis'
             />
           </div>
         </div>
@@ -288,7 +412,7 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
         <button
           type='submit'
           disabled={isLoading}
-          className={`w-full p-3 rounded-md transition-colors ${
+          className={`w-full p-3 rounded-md transition-colors shadow-md ${
             isLoading
               ? 'bg-github-btn-bg cursor-not-allowed'
               : 'bg-github-accent-emphasis hover:bg-github-accent-muted text-github-fg-onEmphasis'
@@ -316,42 +440,54 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
           transition={{ duration: 0.3 }}
           className='mt-8 border border-github-border-default rounded-lg overflow-hidden'
         >
-          <div className='bg-github-canvas-default p-4 border-b border-github-border-default'>
+          <div className='bg-github-canvas-default p-4 border-b border-github-border-default flex justify-between items-center'>
             <h3 className='text-lg font-semibold text-github-fg-default'>Your Meal Plan</h3>
-            <button
-              onClick={clearMealPlan}
-              className='mt-2 p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
-            >
-              Clear Meal Plan
-            </button>
+            <div className='flex gap-2'>
+              <button
+                onClick={clearMealPlan}
+                className='p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
+              >
+                Clear Meal Plan
+              </button>
+              <button
+                onClick={generateShoppingListFromMealPlan}
+                className='p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
+              >
+                Make Shopping List
+              </button>
+            </div>
           </div>
           <div className='bg-github-canvas-subtle p-6'>
             <h4 className='text-lg font-semibold text-github-fg-default mt-4'>Settings Used</h4>
-            <div className='flex flex-wrap gap-2'>
+            <div className='flex flex-wrap gap-2 mb-4'>
               {Object.entries(form.getValues()).map(([key, value]) => (
                 <div
                   key={key}
                   className='bg-github-canvas-default p-2 rounded-md text-github-fg-muted border border-github-border-default'
                 >
-                  <span className='font-medium'>{key}:</span>{' '}
+                  <span className='font-medium'>
+                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}:
+                  </span>{' '}
                   {Array.isArray(value) ? value.join(', ') : value}
                 </div>
               ))}
             </div>
-            <button
-              onClick={generateShoppingListFromMealPlan}
-              className='mt-2 p-2 bg-blue-500 text-white rounded'
-            >
-              Make Shopping List for This Dish
-            </button>
+
             <div className='prose prose-github max-w-none mt-4'>
-              {mealPlanResponse.split('\n').map((line, index) => {
+              {mealPlanResponse.mealPlan.split('\n').map((line, index) => {
                 if (line.match(/^\*\*.*\*\*$/)) {
                   // Headers (wrapped in **)
                   return (
                     <h4 key={index} className='text-github-fg-default font-medium mt-4 first:mt-0'>
                       {line.replace(/^\*\*|\*\*$/g, '')}
                     </h4>
+                  )
+                } else if (line.match(/^\*\s/)) {
+                  // Bold text (wrapped in *)
+                  return (
+                    <p key={index} className='font-bold text-github-fg-default'>
+                      {line.replace(/^\*|\*$/g, '')}
+                    </p>
                   )
                 } else if (line.match(/^\d+\./)) {
                   // Numbered list items
@@ -376,6 +512,16 @@ export default function MealPlanner({ setMealPlans }: MealPlannerProps) {
                 }
               })}
             </div>
+
+            {mealPlanResponse.image && (
+              <div className='mt-4'>
+                <img
+                  src={mealPlanResponse.image}
+                  alt='Meal Plan Image'
+                  className='w-full rounded-md shadow-md'
+                />
+              </div>
+            )}
           </div>
         </motion.div>
       )}

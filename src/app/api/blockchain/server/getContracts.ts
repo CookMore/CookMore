@@ -5,6 +5,7 @@ import { tierABI } from '../abis/tier'
 import { usdcABI } from '../abis/usdc'
 import { accessABI } from '../abis/access'
 import { CONTRACTS } from '../config/contracts'
+import { stickyABI } from '../abis/sticky'
 
 const contractInstances: Record<string, ReturnType<typeof getContract>> = {}
 
@@ -79,5 +80,11 @@ export async function getContracts() {
     key: 'access',
   })
 
-  return { profileContract, tierContract, usdcContract, accessControlContract }
+  const stickyContract = await getServerContract({
+    address: CONTRACTS.STICKY_NOTE as Address,
+    abi: stickyABI as Abi,
+    key: 'sticky',
+  })
+
+  return { profileContract, tierContract, usdcContract, accessControlContract, stickyContract }
 }

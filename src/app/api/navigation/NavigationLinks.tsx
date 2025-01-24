@@ -81,6 +81,13 @@ export function NavigationLinks() {
         requiresProfile: true,
         className: 'bg-green-500 text-white font-bold hover:bg-green-600',
       },
+      {
+        href: ROUTES.AUTH.NOTES,
+        label: 'Sticky Note',
+        icon: IconPlus,
+        requiresProfile: true,
+        className: 'flex items-center text-yellow-500',
+      },
       ...(isAdmin
         ? [
             {
