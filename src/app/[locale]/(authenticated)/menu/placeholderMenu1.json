@@ -1,0 +1,52 @@
+[
+  {
+    "id": "menu1",
+    "name": "User's Breakfast Menu",
+    "thumbnail": "path/to/breakfast-thumbnail.jpg"
+  },
+  {
+    "id": "menu2",
+    "name": "User's Lunch Menu",
+    "thumbnail": "path/to/lunch-thumbnail.jpg"
+  },
+  {
+    "id": "menu3",
+    "name": "User's Dinner Menu",
+    "thumbnail": "path/to/dinner-thumbnail.jpg"
+  },
+  {
+    "id": "menu4",
+    "name": "User's Snack Menu",
+    "thumbnail": "path/to/snack-thumbnail.jpg"
+  },
+  {
+    "id": "menu5",
+    "name": "User's Dessert Menu",
+    "thumbnail": "path/to/dessert-thumbnail.jpg"
+  },
+  {
+    "id": "menu6",
+    "name": "User's Vegan Menu",
+    "thumbnail": "path/to/vegan-thumbnail.jpg"
+  },
+  {
+    "id": "menu7",
+    "name": "User's Keto Menu",
+    "thumbnail": "path/to/keto-thumbnail.jpg"
+  },
+  {
+    "id": "menu8",
+    "name": "User's Paleo Menu",
+    "thumbnail": "path/to/paleo-thumbnail.jpg"
+  },
+  {
+    "id": "menu9",
+    "name": "User's Gluten-Free Menu",
+    "thumbnail": "path/to/gluten-free-thumbnail.jpg"
+  },
+  {
+    "id": "menu10",
+    "name": "User's Low-Carb Menu",
+    "thumbnail": "path/to/low-carb-thumbnail.jpg"
+  }
+]

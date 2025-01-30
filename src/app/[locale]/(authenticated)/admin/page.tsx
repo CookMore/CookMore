@@ -9,6 +9,7 @@ import RoleManager from './components/RoleManager'
 import NFTManager from './components/NFTManager'
 import SystemStatus from './components/SystemStatus'
 import DeletedProfiles from './components/DeletedProfiles'
+import AttestationManager from './components/AttestationManager'
 
 const AdminSection = ({
   title,
@@ -56,6 +57,13 @@ export default function AdminDashboard() {
 
         <AdminSection title='Deleted Profiles' description='View history of deleted profiles'>
           <DeletedProfiles />
+        </AdminSection>
+
+        <AdminSection
+          title='Attestation Management'
+          description='Create or revoke EAS attestations for applicants/employers'
+        >
+          <AttestationManager />
         </AdminSection>
       </div>
     </div>

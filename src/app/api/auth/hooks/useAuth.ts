@@ -8,6 +8,7 @@ import { setHasProfileCookie, clearHasProfileCookie } from '@/app/api/utils/cook
 import { ProfileTier } from '@/app/[locale]/(authenticated)/profile/profile'
 import { COOKIE_NAMES } from '@/app/api/auth/constants'
 import { setCookie, clearCookie } from '@/app/api/utils/client-cookies'
+import { useAdminCheck } from './useAdminCheck'
 
 interface UseAuthResult {
   isLoading: boolean
@@ -40,6 +41,7 @@ export function useAuth(): UseAuthResult {
   const [error, setError] = useState<Error | null>(null)
   const [currentTier, setCurrentTier] = useState<ProfileTier>(ProfileTier.FREE)
   const [isAdmin, setIsAdmin] = useState(false)
+  const { isAdmin: adminCheckIsAdmin } = useAdminCheck()
 
   const checkProfileExists = useCallback(async (address: string) => {
     try {
@@ -64,7 +66,6 @@ export function useAuth(): UseAuthResult {
         setHasProfile(true)
         setHasProfileCookie(true)
         setCurrentTier(ProfileTier.FREE)
-        setIsAdmin(false)
         console.log('Profile found, setting state.')
       } else {
         setHasProfile(false)
@@ -85,6 +86,7 @@ export function useAuth(): UseAuthResult {
     if (privyReady && authenticated && user?.wallet?.address) {
       console.log('Privy ready and user authenticated:', authenticated)
       updateProfileState()
+      setIsAdmin(adminCheckIsAdmin)
     } else if (privyReady) {
       setHasProfile(null)
       setCurrentTier(ProfileTier.FREE)
@@ -94,7 +96,7 @@ export function useAuth(): UseAuthResult {
       clearCookie(COOKIE_NAMES.WALLET_ADDRESS as 'WALLET_ADDRESS')
       console.log('User not authenticated, clearing state.')
     }
-  }, [privyReady, authenticated, user?.wallet?.address, updateProfileState])
+  }, [privyReady, authenticated, user?.wallet?.address, updateProfileState, adminCheckIsAdmin])
 
   const handleProfileCreated = useCallback(async () => {
     await updateProfileState()
@@ -125,6 +127,14 @@ export function useAuth(): UseAuthResult {
       router.push(ROUTES.MARKETING.HOME)
     }
   }, [privyLogout, router])
+
+  console.log('Auth Hook:', {
+    isLoading,
+    hasProfile,
+    isAdmin,
+    isAuthenticated: authenticated,
+    userWallet: user?.wallet?.address,
+  })
 
   return {
     isLoading,

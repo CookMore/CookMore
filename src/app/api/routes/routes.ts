@@ -31,6 +31,7 @@ export const ROUTES = {
     NEWS: '/news',
     JOBS: '/jobs',
     NOTES: '/notes',
+    MENU: '/menu',
   },
 }
 
@@ -53,6 +54,7 @@ export const routeConfig = {
     ROUTES.AUTH.MEMBERS,
     ROUTES.AUTH.WIKI,
     ROUTES.AUTH.NOTES,
+    ROUTES.AUTH.MENU,
   ],
 
   // Admin only routes

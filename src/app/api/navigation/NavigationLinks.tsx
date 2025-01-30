@@ -16,6 +16,7 @@ import {
   IconPlus,
   IconGear,
   IconMembers,
+  IconMenu,
 } from '@/app/api/icons'
 
 interface NavLink {
@@ -82,11 +83,18 @@ export function NavigationLinks() {
         className: 'bg-green-500 text-white font-bold hover:bg-green-600',
       },
       {
+        href: ROUTES.AUTH.MENU,
+        label: 'Menu',
+        icon: IconMenu,
+        requiresProfile: true,
+        className: 'bg-blue-500 text-white font-bold hover:bg-blue-600',
+      },
+      {
         href: ROUTES.AUTH.NOTES,
         label: 'Sticky Note',
         icon: IconPlus,
         requiresProfile: true,
-        className: 'flex items-center text-yellow-500',
+        className: 'bg-yellow-500 text-white font-bold hover:bg-yellow-600',
       },
       ...(isAdmin
         ? [
@@ -95,7 +103,7 @@ export function NavigationLinks() {
               label: 'Admin',
               icon: IconGear,
               requiresProfile: false,
-              className: 'text-red-500 hover:text-red-600',
+              className: 'bg-red-500 text-white font-bold hover:bg-red-600',
             },
           ]
         : []),

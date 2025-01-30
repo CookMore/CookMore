@@ -43,7 +43,6 @@ export function Footer() {
         ]
       )}
     >
-      <div className='absolute inset-0 bg-black/5' />
       <div className='container mx-auto px-4 max-w-5xl'>
         <div className='grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left'>
           {/* Brand Column */}

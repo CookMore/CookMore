@@ -4,6 +4,7 @@ import { useRecipe } from '../context/RecipeContext'
 import { IconChevronLeft } from '@/app/api/icons'
 import { STEPS } from '../steps/steps'
 import { useState, useEffect } from 'react'
+import { cn } from '@/app/api/utils/utils'
 
 interface Props {
   currentStep: number
@@ -66,25 +67,28 @@ export function StepsSidebar({
       >
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`
-            absolute -right-[-6px] top-[7px]
-            bg-github-canvas-default 
-            border border-github-border-default
-            rounded-full
-            shadow-sm
-            hover:bg-github-canvas-subtle
-            flex items-center justify-center
-            w-8 h-8
-            transition-transform duration-200
-            ${isExpanded ? 'rotate-0' : 'rotate-180'}
-          `}
+          className={cn(
+            'absolute -right-[-10px] top-[20px]',
+            'mb-8',
+            'bg-github-canvas-default',
+            'border border-github-border-default',
+            'rounded-full',
+            'shadow-sm',
+            'hover:bg-github-canvas-subtle',
+            'flex items-center justify-center',
+            'w-8 h-8',
+            'transition-transform duration-200',
+            'ring-2 ring-github-accent-emphasis ring-offset-2',
+            'hover:ring-green-700 active:ring-green-700',
+            isExpanded ? 'rotate-0 ring-green-700' : 'rotate-180'
+          )}
           aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           <IconChevronLeft className='w-4 h-4 text-github-fg-muted' />
         </button>
 
         {hydrated && (
-          <div className='flex-1 min-h-0 overflow-y-auto pt-3'>
+          <div className='flex-1 min-h-0 overflow-y-auto pt-3 mb-2'>
             {isExpanded ? (
               <div
                 className={`
@@ -110,6 +114,7 @@ export function StepsSidebar({
                       hover:scale-[1.02]
                       active:scale-[0.98]
                       focus:outline-none
+                      ${index === 0 ? 'mt-4' : ''}
                     `}
                   >
                     <span className='text-sm transform transition-transform duration-100 ease-in-out group-hover:translate-x-0.5'>

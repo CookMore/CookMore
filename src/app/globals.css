@@ -37,6 +37,11 @@
   --danger-emphasis: #da3633;
   --danger-muted: #f8514926;
   --banner-height: 0px;
+
+  /* Font settings for dark mode */
+  --font-family-default: 'Inter', sans-serif;
+  --font-weight-default: 400;
+  --font-size-default: 16px;
 }
 
 [data-theme='light'] {
@@ -75,6 +80,11 @@
   --danger-muted: rgba(207, 34, 46, 0.1);
   --danger-subtle: rgba(207, 34, 46, 0.15);
   --banner-height: 0px;
+
+  /* Font settings for light mode */
+  --font-family-default: 'Arial', sans-serif;
+  --font-weight-default: 400;
+  --font-size-default: 16px;
 }
 
 @layer base {
@@ -85,6 +95,9 @@
 
   body {
     @apply bg-github-canvas-default text-github-fg-default font-sans font-[450];
+    font-family: var(--font-family-default);
+    font-weight: var(--font-weight-default);
+    font-size: var(--font-size-default);
   }
 
   /* Optional: Style headings */
@@ -559,4 +572,17 @@
 
 .react-grid-item > div {
   pointer-events: auto;
+}
+
+[data-theme='dark'] {
+  --shadow-default: 0 3px 5px rgba(255, 255, 255, 0.311), 0 1px 3px rgba(255, 255, 255, 0.325);
+}
+
+[data-theme='light'] {
+  --shadow-default: 0 3px 5px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Apply the shadow globally */
+.shadow-md {
+  box-shadow: var(--shadow-default);
 }

@@ -141,30 +141,45 @@ const NoteBuilder: React.FC = () => {
 
   return (
     <div className={`p-6 mb-4 border border-gray-100 rounded-lg shadow-2xl bg-${theme}`}>
-      <h2 className='text-white text-2xl font-bold mb-4'>Note Builder</h2>
+      <h2
+        className={`text-3xl font-bold mb-2 text-center ${theme === 'light' ? 'text-black' : 'text-white'}`}
+      >
+        Note Builder
+      </h2>
+      <div className='max-w-5xl mx-auto'>
+        <p className='text-gray-400 text-center mb-4'>
+          Welcome to the NFT Sticky Note Builder! This innovative tool allows you to craft
+          personalized sticky notes with a modern twist. Choose from a variety of colors, fonts, and
+          sizes to create notes that reflect your unique style. Once your masterpiece is complete,
+          mint it as an NFT to secure it on the blockchain, ensuring it lasts forever. Whether
+          you're using these notes for personal reminders or sharing them with friends, they offer a
+          creative and lasting way to express yourself.
+        </p>
+      </div>
+
       {popoverMessage && <div className='popover'>{popoverMessage}</div>}
-      <div className='flex justify-between mb-2'>
+      <div className='flex justify-center mb-2'>
         <button
           onClick={handleNewNote}
-          className='bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-3 m-5 rounded shadow-lg transition-transform duration-200 hover:scale-105'
+          className='bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-3 mx-4 rounded shadow-lg transition-transform duration-200 hover:scale-105'
         >
           New +
         </button>
         <button
           onClick={handleBatchToggle}
-          className={`bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-6 rounded shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
+          className={`bg-yellow-500 text-white font-bold hover:bg-yellow-600 py-1 px-3 mx-4 rounded shadow-lg transition-transform duration-200 hover:scale-105 ${isBatch ? 'bg-purple-700' : ''}`}
         >
           <FaTh className='inline-block mr-1' /> Batch Mint
         </button>
       </div>
-      <div className='border-b border-gray-300 mb-8'></div>
-      <div className='flex flex-wrap'>
+      <div className={`flex flex-wrap ${notes.length === 1 ? 'justify-center' : ''}`}>
         {notes.map((note, index) => (
           <div
             key={index}
             className={`py-2 px-5 mb-6 flex-col flex justify-center items-center rounded-lg shadow-xl bg-${theme}`}
             style={{
-              width: 'calc(33.33% - 16px)',
+              width: '400px',
+              height: '400px',
               margin: '10px',
               padding: '20px',
               border: '0.5px solid rgba(128, 128, 128, 0.5)',
@@ -184,7 +199,11 @@ const NoteBuilder: React.FC = () => {
                 }}
                 placeholder='Name'
                 className='bg-gray-100 text-gray-700 rounded font-sans p-1 text-sm w-1/2 text-center border border-gray-300 hover:border-gray-500 shadow-inner'
-                style={{ margin: '4px', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)' }}
+                style={{
+                  margin: '4px',
+                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)',
+                  maxWidth: '180px',
+                }}
               />
               <input
                 type='text'
@@ -196,7 +215,11 @@ const NoteBuilder: React.FC = () => {
                 }}
                 placeholder='Description'
                 className='bg-gray-100 text-gray-700 rounded font-sans p-1 text-sm w-1/2 text-center border border-gray-300 hover:border-gray-500 shadow-inner'
-                style={{ margin: '4px', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)' }}
+                style={{
+                  margin: '4px',
+                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)',
+                  maxWidth: '180px',
+                }}
               />
             </div>
             <div
@@ -221,7 +244,7 @@ const NoteBuilder: React.FC = () => {
                 }}
                 placeholder='Write your note here...'
                 className='w-full p-2 mb-2 border-none bg-transparent outline-none flex-grow font-sans'
-                style={{ fontSize: note.fontSize + 'px', fontFamily: font }}
+                style={{ fontSize: note.fontSize + 'px', fontFamily: font, maxWidth: '280px' }}
               />
               <div
                 className='absolute top-10 right-0 flex flex-col space-y-1 ml-1'

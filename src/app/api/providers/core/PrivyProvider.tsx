@@ -2,12 +2,9 @@
 
 import React from 'react'
 import { PrivyProvider as Privy } from '@privy-io/react-auth'
-import { useTranslations } from 'next-intl'
 import { baseSepolia } from 'wagmi/chains'
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
-  const t = useTranslations('wallet.connect')
-
   return (
     <Privy
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}

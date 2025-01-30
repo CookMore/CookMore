@@ -3,7 +3,7 @@ import { PanelProvider } from '@/app/api/providers/features/PanelProvider'
 import { PanelContainer } from '@/app/api/panels/PanelContainer'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
-const NotesLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+const MenuLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <div className='min-h-screen bg-gray-100 dark:bg-gray-900'>
       <PanelProvider>
@@ -17,4 +17,4 @@ const NotesLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   )
 }
 
-export default NotesLayout
+export default MenuLayout

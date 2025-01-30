@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/useProfile'
+import { useProfile } from '@/app/[locale]/(authenticated)/profile/components/hooks/core/useProfile'
 import { ROLES } from '@/app/[locale]/(authenticated)/profile/constants/roles'
 import { hasRequiredRole } from '@/app/[locale]/(authenticated)/profile/utils/role-utils'
 import { getContracts } from '@/app/api/blockchain/server/getContracts'

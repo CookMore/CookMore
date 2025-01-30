@@ -1,0 +1,52 @@
+[
+  {
+    "id": "menu11",
+    "name": "Community Breakfast Menu",
+    "thumbnail": "path/to/community-breakfast-thumbnail.jpg"
+  },
+  {
+    "id": "menu12",
+    "name": "Community Lunch Menu",
+    "thumbnail": "path/to/community-lunch-thumbnail.jpg"
+  },
+  {
+    "id": "menu13",
+    "name": "Community Dinner Menu",
+    "thumbnail": "path/to/community-dinner-thumbnail.jpg"
+  },
+  {
+    "id": "menu14",
+    "name": "Community Snack Menu",
+    "thumbnail": "path/to/community-snack-thumbnail.jpg"
+  },
+  {
+    "id": "menu15",
+    "name": "Community Dessert Menu",
+    "thumbnail": "path/to/community-dessert-thumbnail.jpg"
+  },
+  {
+    "id": "menu16",
+    "name": "Community Vegan Menu",
+    "thumbnail": "path/to/community-vegan-thumbnail.jpg"
+  },
+  {
+    "id": "menu17",
+    "name": "Community Keto Menu",
+    "thumbnail": "path/to/community-keto-thumbnail.jpg"
+  },
+  {
+    "id": "menu18",
+    "name": "Community Paleo Menu",
+    "thumbnail": "path/to/community-paleo-thumbnail.jpg"
+  },
+  {
+    "id": "menu19",
+    "name": "Community Gluten-Free Menu",
+    "thumbnail": "path/to/community-gluten-free-thumbnail.jpg"
+  },
+  {
+    "id": "menu20",
+    "name": "Community Low-Carb Menu",
+    "thumbnail": "path/to/community-low-carb-thumbnail.jpg"
+  }
+]

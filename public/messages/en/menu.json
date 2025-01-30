@@ -1,0 +1,26 @@
+{
+  "title": "Menu",
+  "createMenu": "Create Menu",
+  "menuCreated": "Menu Created",
+  "redirectingToMenu": "Redirecting to your menu...",
+  "errorCreatingMenu": "Error Creating Menu",
+  "pleaseTryAgain": "Please try again",
+  "creating": "Creating...",
+  "navigation": "Navigation",
+  "localStorageNote": "Changes stored in browser until menu is finalized",
+  "autosave": {
+    "saving": "Saving draft locally...",
+    "saved": "Draft saved at {time}",
+    "storageNote": "Changes stored in browser until menu is finalized",
+    "error": "Error saving draft"
+  },
+  "wallet": {
+    "connect": {
+      "start": "Connecting wallet...",
+      "success": "Wallet connected successfully",
+      "error": "Failed to connect wallet"
+    }
+  },
+  "Recipes": "Recipes",
+  "A-Z Search": "A-Z Search"
+}

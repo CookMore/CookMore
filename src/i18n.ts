@@ -7,6 +7,7 @@ import enProfile from '../public/messages/en/profile.json'
 import enRecipe from '../public/messages/en/recipe.json'
 import enPreview from '../public/messages/en/recipe.json'
 import enMinting from '../public/messages/en/recipe.json'
+import enMenu from '../public/messages/en/menu.json'
 
 import esCommon from '../public/messages/es/common.json'
 import frCommon from '../public/messages/fr/common.json'
@@ -46,6 +47,7 @@ const messages = {
     recipe: enRecipe,
     preview: enPreview,
     minting: enMinting,
+    menu: enMenu,
   },
   es: esCommon,
   fr: frCommon,

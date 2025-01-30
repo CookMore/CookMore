@@ -10,6 +10,9 @@ import { RecipeProvider } from './features/RecipeProvider'
 import { QueryClientProvider, QueryClient, HydrationBoundary } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { I18nProvider } from './edge/i18n-provider'
+import { JobsProvider } from '@/app/[locale]/(authenticated)/jobs/context/JobsContext'
+import { PanelProvider } from './features/PanelProvider'
+import { TooltipProvider } from '@radix-ui/react-tooltip'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,17 +26,18 @@ const queryClient = new QueryClient({
 
 export function Providers({
   children,
-  messages,
+  messages = {},
   locale,
 }: {
   children: React.ReactNode
-  messages: any
+  messages?: any
   locale: string
 }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <HydrationBoundary>
-        <I18nProvider messages={messages} locale={locale}>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <TooltipProvider>
+        <ThemeProvider>
           <PrivyProvider
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
             config={{
@@ -46,19 +50,26 @@ export function Providers({
           >
             <WagmiProvider>
               <MotionProvider>
-                <ThemeProvider>
-                  <KitchenProvider>
-                    <ProfileProvider>
-                      <RecipeProvider>{children}</RecipeProvider>
-                    </ProfileProvider>
-                  </KitchenProvider>
-                </ThemeProvider>
+                <KitchenProvider>
+                  <ProfileProvider>
+                    <RecipeProvider>
+                      <JobsProvider>
+                        <PanelProvider>
+                          <HydrationBoundary state={messages}>
+                            <I18nProvider locale={locale} messages={messages}>
+                              {children}
+                            </I18nProvider>
+                          </HydrationBoundary>
+                        </PanelProvider>
+                      </JobsProvider>
+                    </RecipeProvider>
+                  </ProfileProvider>
+                </KitchenProvider>
               </MotionProvider>
             </WagmiProvider>
           </PrivyProvider>
-        </I18nProvider>
-      </HydrationBoundary>
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+        </ThemeProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   )
 }
