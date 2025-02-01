@@ -8,6 +8,7 @@ import enRecipe from '../public/messages/en/recipe.json'
 import enPreview from '../public/messages/en/recipe.json'
 import enMinting from '../public/messages/en/recipe.json'
 import enMenu from '../public/messages/en/menu.json'
+import enJobs from '../public/messages/en/jobs.json'
 
 import esCommon from '../public/messages/es/common.json'
 import frCommon from '../public/messages/fr/common.json'
@@ -48,7 +49,9 @@ const messages = {
     preview: enPreview,
     minting: enMinting,
     menu: enMenu,
+    jobs: enJobs.jobs,
   },
+
   es: esCommon,
   fr: frCommon,
   de: deCommon,

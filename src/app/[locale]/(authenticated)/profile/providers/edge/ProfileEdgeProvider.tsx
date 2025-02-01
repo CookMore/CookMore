@@ -1,14 +1,15 @@
 'use client'
 
 import React, { useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ProfileMetadata } from '../../profile'
 
 interface ProfileEdgeContextValue {
   profile: ProfileMetadata | null
   isLoading: boolean
   error: Error | null
-  refreshProfile: () => Promise<void>
-  clearProfileCache: () => Promise<void>
+  refreshProfile: () => void
+  clearProfileCache: () => void
 }
 
 const ProfileEdgeContext = React.createContext<ProfileEdgeContextValue | null>(null)
@@ -20,50 +21,44 @@ export function ProfileEdgeProvider({
   children: React.ReactNode
   address: string
 }) {
-  const [profile, setProfile] = React.useState<ProfileMetadata | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [error, setError] = React.useState<Error | null>(null)
+  const queryClient = useQueryClient()
 
-  const refreshProfile = useCallback(async () => {
-    if (!address) return
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch(`/api/profile/address/${address}`)
-      if (!response.ok) {
-        const text = await response.text()
-        console.error('Error response text:', text)
-        throw new Error(`Failed to fetch profile: ${response.statusText}`)
-      }
-      const data: ProfileMetadata = await response.json()
-      setProfile(data)
-    } catch (err) {
-      console.error('Error fetching profile:', err)
-      setError(err instanceof Error ? err : new Error('Failed to fetch profile'))
-    } finally {
-      setIsLoading(false)
+  const fetchProfile = async (): Promise<ProfileMetadata> => {
+    const response = await fetch(`/api/profile/address/${address}`)
+    if (!response.ok) {
+      const text = await response.text()
+      console.error('Error response text:', text)
+      throw new Error(`Failed to fetch profile: ${response.statusText}`)
     }
-  }, [address])
+    return response.json()
+  }
 
-  const clearProfileCache = useCallback(async () => {
-    if (!address) return
-    await fetch(`/api/profile/${address}/cache`, { method: 'DELETE' })
-    await refreshProfile()
-  }, [address, refreshProfile])
+  const {
+    data: profile,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['profile', address],
+    queryFn: fetchProfile,
+    enabled: !!address, // Only run query if address is available
+  })
 
-  // Initial fetch
-  React.useEffect(() => {
+  const refreshProfile = useCallback(() => {
+    refetch()
+  }, [refetch])
+
+  const clearProfileCache = useCallback(() => {
+    queryClient.removeQueries({ queryKey: ['profile', address] })
     refreshProfile()
-  }, [refreshProfile])
+  }, [queryClient, address, refreshProfile])
 
   return (
     <ProfileEdgeContext.Provider
       value={{
-        profile,
+        profile: profile || null,
         isLoading,
-        error,
+        error: error as Error | null,
         refreshProfile,
         clearProfileCache,
       }}

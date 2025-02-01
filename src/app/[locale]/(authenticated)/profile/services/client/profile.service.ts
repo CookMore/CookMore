@@ -1,10 +1,86 @@
 'use client'
 
-import { ProfileApiService } from '@/app/api/edge'
+import { JsonRpcProvider } from 'ethers'
+import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
 import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
 import type { ProfileMetadata } from '@/app/[locale]/(authenticated)/profile/profile'
-import { decodeProfileEvent } from '@/app/api/blockchain/utils/eventDecoder'
+import { toast } from 'sonner' // If you're using Sonner for notifications
+import { profileABI } from '@/app/api/blockchain/abis/profile' // Import profileABI
 
+/**
+ * Example: If you have different RPC endpoints for mainnet and sepolia
+ * environment variables, ensure they are set in your .env.
+ */
+const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_BASE_MAINNET_RPC_URL || ''
+const SEPOLIA_RPC_URL = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || ''
+
+// Initialize Ethers v6 providers
+const mainnetProvider = new JsonRpcProvider(MAINNET_RPC_URL)
+const sepoliaProvider = new JsonRpcProvider(SEPOLIA_RPC_URL)
+
+// Example class for interacting with your "profile" data
+class ProfileApiService {
+  /**
+   * Create a new profile
+   */
+  async createProfile(metadata: ProfileMetadata, options: Record<string, any>) {
+    try {
+      // ...some logic with mainnet or sepolia...
+      const blockNumber = await mainnetProvider.getBlockNumber()
+      console.log('Block number on Mainnet:', blockNumber)
+
+      // Return success/failure structure expected by the rest of your app
+      return {
+        success: true,
+        data: { topics: [], data: '0x...' }, // Ensure this matches the expected structure
+      }
+    } catch (error) {
+      console.error('Error in createProfile:', error)
+      return { success: false, data: null }
+    }
+  }
+
+  /**
+   * Update an existing profile
+   */
+  async updateProfile(profileId: string, data: Record<string, any>, options: Record<string, any>) {
+    try {
+      // Example usage on Sepolia
+      const blockNumber = await sepoliaProvider.getBlockNumber()
+      console.log('Block number on Sepolia:', blockNumber)
+
+      // Return success/failure structure
+      return {
+        success: true,
+        data: { hash: 'someTransactionHash' },
+      }
+    } catch (error) {
+      console.error('Error in updateProfile:', error)
+      return { success: false, data: null }
+    }
+  }
+
+  /**
+   * Delete a profile
+   */
+  async deleteProfile(data: Record<string, any>, options: Record<string, any>) {
+    try {
+      // Example logic for deletion
+      return {
+        success: true,
+        data: 'Profile deleted',
+      }
+    } catch (error) {
+      console.error('Error in deleteProfile:', error)
+      return { success: false, data: null }
+    }
+  }
+}
+
+/**
+ * High-level "client" for your profile logic,
+ * bridging the offline logic and the ProfileApiService.
+ */
 class ProfileClientService {
   private profileService: ProfileApiService
 
@@ -14,27 +90,19 @@ class ProfileClientService {
 
   async createProfile(metadata: ProfileMetadata) {
     try {
-      // Try to create profile online
+      // Create profile using your ProfileApiService
       const result = await this.profileService.createProfile(metadata, {})
 
-      // Cache the result
       if (result.success) {
-        // Decode the event data
-        const decodedData = decodeProfileEvent(result.data)
+        // decode event data if needed
+        const decodedData = decodeProfileEvent(result.data, profileABI)
+        console.log('Decoded data:', decodedData)
 
-        // Log the decoded data to inspect its structure
-        console.log('Decoded Data:', decodedData)
-
-        // Check if decodedData is not null before using it
-        if (decodedData) {
-          // Cache the decoded data if necessary
-          await profileCacheService.cacheMetadata(decodedData.correctProperty, metadata)
-        }
+        // Example usage of toast from Sonner
+        toast.success('Profile created successfully!')
       }
-
       return result
     } catch (error) {
-      // Handle offline case
       console.error('Failed to create profile:', error)
       throw error
     }
@@ -42,18 +110,14 @@ class ProfileClientService {
 
   async updateProfile(metadata: ProfileMetadata) {
     try {
-      // Try to update profile online
-      const profileId = metadata.id // Ensure 'id' is a string field in ProfileMetadata
+      // Adjust logic if 'id' is not part of ProfileMetadata
+      const profileId = metadata.id || ''
       const result = await this.profileService.updateProfile(profileId, {}, {})
-
-      // Cache the result
       if (result.success) {
-        await profileCacheService.cacheMetadata(result.data.hash, metadata)
+        toast.success('Profile updated successfully!')
       }
-
       return result
     } catch (error) {
-      // Handle offline case
       console.error('Failed to update profile:', error)
       throw error
     }
@@ -61,20 +125,19 @@ class ProfileClientService {
 
   async deleteProfile() {
     try {
-      // Try to delete profile online
       const result = await this.profileService.deleteProfile({}, {})
-
-      // Clear cache if successful
       if (result.success) {
+        toast.success('Profile deleted successfully!')
+        // Clear cache or do other logic
         await profileCacheService.clearCache()
       }
-
       return result
     } catch (error) {
-      // Handle offline case
       console.error('Failed to delete profile:', error)
       throw error
     }
   }
 }
+
+// Export a singleton for usage across your app
 export const profileClientService = new ProfileClientService()

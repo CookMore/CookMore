@@ -1,0 +1,31 @@
+{
+  "jobs": {
+    "title": "Jobs",
+    "section": "Jobs Section",
+    "verificationError": "Verification error: {{error}}",
+    "loadingJobs": "Loading jobs...",
+    "errorLoadingJobs": "Error loading jobs: {{error}}",
+    "jobAdded": "Job added successfully!",
+    "jobUpdated": "Job updated successfully!",
+    "culinaryJobBoard": "Culinary Job Board",
+    "jobBoardDescription": "Welcome to our attestation-based culinary job board. Here, employers can post job listings and verify their credentials through blockchain attestations. Join us in revolutionizing the culinary job market with transparency and trust.",
+    "checkingVerification": "Checking verification...",
+    "mustBeVerified": "You must be verified as an employer to post jobs.",
+    "getVerified": "Get Verified",
+    "addNewJob": "Add New Job",
+    "editJob": "Edit Job",
+    "connectWallet": "Please connect your wallet first.",
+    "allFieldsRequired": "All fields are required.",
+    "jobSaveFailed": "Failed to save job. Please try again.",
+    "createNewJob": "Create a New Job",
+    "description": "Description",
+    "location": "Location",
+    "requiredSkills": "Required Skills",
+    "chooseDurationTier": "Choose Duration/Tier",
+    "threeMonths": "3 Months ($10)",
+    "sixMonths": "6 Months ($20)",
+    "oneYear": "1 Year ($30)",
+    "processing": "Processing...",
+    "saveAndPublish": "Save & Publish"
+  }
+}

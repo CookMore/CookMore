@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner' // Import toast
 
 const EAS_INDEXER_URL = 'https://base-sepolia.easscan.org/graphql' // Base Sepolia GraphQL API
 
@@ -24,6 +25,7 @@ export function useVerification(address: string, schemaUID: string): Verificatio
     if (!address || !schemaUID) {
       setIsLoading(false)
       setError('Invalid address or schema UID')
+      toast.error('Invalid address or schema UID')
       return
     }
 
@@ -32,7 +34,8 @@ export function useVerification(address: string, schemaUID: string): Verificatio
       setError(null)
 
       try {
-        // GraphQL query to find attestations for this user
+        console.log(`🔍 Checking attestations for: ${address} with schema ${schemaUID}`)
+
         const response = await fetch(EAS_INDEXER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -47,17 +50,26 @@ export function useVerification(address: string, schemaUID: string): Verificatio
           }),
         })
 
+        console.log('📡 Response status:', response.status)
+
         const data = await response.json()
+        console.log('🔍 Attestation response:', JSON.stringify(data, null, 2))
 
         if (data.errors) {
           throw new Error('Failed to fetch attestations')
         }
 
-        // If attestations exist, user is verified
-        setIsVerified(data.data.attestations.length > 0)
+        const verified = data.data.attestations.length > 0
+        setIsVerified(verified)
+        if (verified) {
+          toast.success('User is verified')
+        } else {
+          toast.info('User is not verified')
+        }
       } catch (err: any) {
-        console.error('Error fetching attestation:', err)
+        console.error('❌ Error fetching attestation:', err)
         setError(err.message || 'Failed to verify attestation.')
+        toast.error(err.message || 'Failed to verify attestation.')
       } finally {
         setIsLoading(false)
       }

@@ -99,7 +99,13 @@ const nextConfig = {
       },
     ]
   },
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.devServer = {
+        hot: true,
+      }
+    }
+
     config.resolve.fallback = { fs: false, net: false, tls: false }
     config.module.rules.push({
       test: /\.(mp3|aac|wav)$/,
@@ -117,7 +123,7 @@ const nextConfig = {
   // Next.js 15 specific options
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'cookmore.xyz'],
+      allowedOrigins: ['localhost:3000', 'localhost:3001', 'localhost:3002', 'cookmore.xyz'],
     },
   },
   // External packages configuration

@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+'use client'
+
+import React from 'react'
 import JobBoard from './components/JobBoard'
-import { useJobs } from './context/JobsContext'
 
 const JobsClient: React.FC = () => {
-  const { jobs, addJob, updateJob } = useJobs()
-
   return (
-    <div className='mx-auto px-4 py-6'>
-      <JobBoard jobs={jobs} addJob={addJob} updateJob={updateJob} />
+    <div className='mx-auto px-4 py-6 max-w-5xl'>
+      <JobBoard />
     </div>
   )
 }

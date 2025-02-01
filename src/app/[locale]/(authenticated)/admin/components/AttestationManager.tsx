@@ -19,6 +19,7 @@ const AttestationManager: React.FC = () => {
   const [docsCid, setDocsCid] = useState('') // For employer
   const [revokeUID, setRevokeUID] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
+  const [pendingApplications, setPendingApplications] = useState([])
 
   const handleCreateAttestation = async () => {
     try {
@@ -65,6 +66,22 @@ const AttestationManager: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to revoke attestation:', err)
       setStatusMessage(`Error: ${err.message}`)
+    }
+  }
+
+  const fetchPendingApplications = async () => {
+    const res = await fetch('/api/applications/pending')
+    const data = await res.json()
+    setPendingApplications(data)
+  }
+
+  const handleApproveApplication = async (applicationId: string) => {
+    const res = await fetch(`/api/applications/approve/${applicationId}`, { method: 'POST' })
+    if (res.ok) {
+      setStatusMessage('Application approved!')
+      fetchPendingApplications() // Refresh the list
+    } else {
+      setStatusMessage('Failed to approve application.')
     }
   }
 
@@ -170,6 +187,22 @@ const AttestationManager: React.FC = () => {
       {statusMessage && (
         <div className='mt-3 p-2 border border-gray-300 rounded bg-gray-50'>{statusMessage}</div>
       )}
+
+      <div>
+        <h4 className='font-bold mb-2'>Pending Applications</h4>
+        {pendingApplications.map((app) => (
+          <div key={app.id} className='border p-2 mb-2'>
+            <p>Company: {app.companyName}</p>
+            <p>Status: {app.status}</p>
+            <button
+              onClick={() => handleApproveApplication(app.id)}
+              className='bg-green-500 text-white px-4 py-2'
+            >
+              Approve
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

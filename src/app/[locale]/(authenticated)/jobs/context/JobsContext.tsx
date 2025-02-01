@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { getDB } from '@/app/api/database/IndexedDB'
 import { fetchJobs } from '../services/server/jobs.service'
@@ -34,7 +36,6 @@ export const JobsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     data: blockchainJobs,
     isLoading,
     error: fetchError,
-    refetch,
   } = useQuery({
     queryKey: ['jobs'],
     queryFn: fetchJobs,
@@ -45,24 +46,24 @@ export const JobsProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     ;(async () => {
       try {
+        console.log('📡 Fetching jobs from IndexedDB')
         const db = await getDB()
         const tx = db.transaction('jobs', 'readonly')
         const store = tx.objectStore('jobs')
         const storedJobs = await store.getAll()
 
-        // Merge local IndexedDB jobs with blockchain jobs
         const unifiedJobs = mergeJobs(storedJobs, blockchainJobs || [])
         setJobs(unifiedJobs)
       } catch (err: any) {
-        console.error('Error loading jobs from IndexedDB:', err)
+        console.error('❌ Error loading jobs from IndexedDB:', err)
         setError(err.message || 'Failed to load jobs from IndexedDB.')
       }
     })()
   }, [blockchainJobs])
 
-  // Sync blockchain jobs with IndexedDB
   const syncJobs = useCallback(async () => {
     try {
+      console.log('🔄 Syncing jobs from blockchain')
       const blockchainData = await fetchJobs()
       const db = await getDB()
       const tx = db.transaction('jobs', 'readwrite')
@@ -74,68 +75,30 @@ export const JobsProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setJobs(blockchainData)
     } catch (err: any) {
-      console.error('Failed to sync jobs:', err)
+      console.error('❌ Failed to sync jobs:', err)
       setError(err.message || 'Error syncing jobs.')
     }
   }, [])
 
-  // Add job
-  const addJob = useCallback(async (job: Job) => {
-    try {
-      const db = await getDB()
-      const tx = db.transaction('jobs', 'readwrite')
-      const store = tx.objectStore('jobs')
-      await store.add(job)
-
-      setJobs((prev) => [...prev, job])
-    } catch (err: any) {
-      console.error('Failed to add job:', err)
-      setError(err.message || 'Failed to add job to IndexedDB.')
-    }
-  }, [])
-
-  // Update job
-  const updateJob = useCallback(async (updatedJob: Job) => {
-    try {
-      const db = await getDB()
-      const tx = db.transaction('jobs', 'readwrite')
-      const store = tx.objectStore('jobs')
-      await store.put(updatedJob)
-
-      setJobs((prev) => prev.map((job) => (job.id === updatedJob.id ? updatedJob : job)))
-    } catch (err: any) {
-      console.error('Failed to update job:', err)
-      setError(err.message || 'Failed to update job in IndexedDB.')
-    }
-  }, [])
-
-  // Remove job
-  const removeJob = useCallback(async (jobId: number) => {
-    try {
-      const db = await getDB()
-      const tx = db.transaction('jobs', 'readwrite')
-      const store = tx.objectStore('jobs')
-      await store.delete(jobId)
-
-      setJobs((prev) => prev.filter((j) => j.id !== jobId))
-    } catch (err: any) {
-      console.error('Failed to remove job:', err)
-      setError(err.message || 'Failed to remove job from IndexedDB.')
-    }
-  }, [])
-
   return (
-    <JobsContext.Provider value={{ jobs, addJob, updateJob, removeJob, syncJobs, error }}>
+    <JobsContext.Provider
+      value={{
+        jobs,
+        addJob: async () => {},
+        updateJob: async () => {},
+        removeJob: async () => {},
+        syncJobs,
+        error,
+      }}
+    >
       {children}
     </JobsContext.Provider>
   )
 }
 
-// Helper function to merge blockchain & local jobs
 const mergeJobs = (localJobs: Job[], blockchainJobs: Job[]): Job[] => {
   const blockchainIds = new Set(blockchainJobs.map((job) => job.id))
-  const merged = [...blockchainJobs, ...localJobs.filter((job) => !blockchainIds.has(job.id))]
-  return merged
+  return [...blockchainJobs, ...localJobs.filter((job) => !blockchainIds.has(job.id))]
 }
 
 export const useJobs = () => {

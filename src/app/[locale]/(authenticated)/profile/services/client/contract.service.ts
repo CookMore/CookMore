@@ -13,7 +13,6 @@ import { toast } from 'sonner'
 import { profileABI } from '@/app/api/blockchain/abis/profile'
 import type { AbiEvent } from 'abitype'
 import { profileCacheService } from '@/app/[locale]/(authenticated)/profile/services/offline/profile-cache.service'
-import type { Profile as AppProfile } from '../../profile'
 
 // Get chain based on environment
 const chain = process.env.NEXT_PUBLIC_NETWORK === 'production' ? base : baseSepolia
@@ -34,20 +33,25 @@ export type ContractProfile = {
 }
 
 export class ContractService {
-  private publicClient: PublicClient
+  private publicClient: PublicClient | null = null
   private walletClient: WalletClient | null = null
   private statusCallback?: (status: MintStatus) => void
   private contract: GetContractReturnType<typeof profileABI> | null = null
 
   constructor() {
-    if (typeof window === 'undefined' || !window.ethereum) {
-      throw new Error('Web3 provider not found')
+    // Check if the code is running on the client side and if a Web3 provider is available
+    if (typeof window !== 'undefined' && window.ethereum) {
+      const transport = custom(window.ethereum as any)
+      this.publicClient = createPublicClient({
+        chain,
+        transport,
+      })
+    } else {
+      toast.error('Web3 provider not found')
     }
 
-    this.publicClient = createPublicClient({
-      chain,
-      transport: custom(window.ethereum),
-    })
+    // Initialize the contract variable
+    this.contract = null
   }
 
   setStatusCallback(callback: (status: MintStatus) => void) {
@@ -139,9 +143,10 @@ export class ContractService {
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
       console.log('Transaction confirmed:', receipt)
 
-      // Look for ProfileCreated event
+      // Ensure that the type of profileCreatedEvent is correctly narrowed to include 'id'
       const profileCreatedEvent = profileABI.find(
-        (x): x is AbiEvent => x.type === 'event' && x.name === 'ProfileCreated'
+        (x): x is AbiEvent & { id: string } =>
+          x.type === 'event' && x.name === 'ProfileCreated' && x.anonymous === false
       )
 
       if (!profileCreatedEvent) {

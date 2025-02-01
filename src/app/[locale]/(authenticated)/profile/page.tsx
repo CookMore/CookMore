@@ -1,16 +1,15 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/app/api/auth/hooks/useAuth'
 import { usePrivy } from '@privy-io/react-auth'
 import { ProfileDisplay } from './components/ui/ProfileDisplay'
 import CreateProfileClient from './create/CreateProfileClient'
-import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+import { ethers, JsonRpcProvider, Contract } from 'ethers'
 import { profileABI } from '@/app/api/blockchain/abis/profile'
 import { ProfileTier, Profile } from './profile'
 import { ipfsService } from '@/app/[locale]/(authenticated)/profile/services/ipfs/ipfs.service'
 import { IconUser, IconSettings } from '@/app/api/icons'
-import React from 'react'
 import { ProfileStepProvider } from './ProfileStepContext'
 import { Button } from '@/app/api/components/ui/button'
 import ProfileQrCodeGenerator from './components/ui/ProfileQrCodeGenerator'
@@ -30,31 +29,33 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ address }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState<Profile | null>(null)
 
-  const toggleEditing = () => setIsEditing((prev) => !prev) // Toggle function
+  const toggleEditing = () => setIsEditing((prev) => !prev)
 
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!walletAddress) return
 
       try {
-        const sepoliaProvider = new ethers.providers.JsonRpcProvider(
-          process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL
-        )
-        const contract = new ethers.Contract(
+        // Ethers v6: Direct import of JsonRpcProvider
+        const sepoliaProvider = new JsonRpcProvider(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL)
+        // Ethers v6: Import Contract from 'ethers' too
+        const contract = new Contract(
           '0x0C3897538e000dAdAEA1bb10D5757fC473972018',
           profileABI,
           sepoliaProvider
         )
 
+        // Call the getProfile method
         const profile = await contract.getProfile(walletAddress)
         const profileId = profile.profileId
         console.log('Profile ID:', profileId.toString())
 
         // Fetch metadata from IPFS
-        const metadataResponse = await fetch(ipfsService.getHttpUrl(profile.metadataURI))
+        const metadataUrl = ipfsService.getHttpUrl(profile.metadataURI)
+        const metadataResponse = await fetch(metadataUrl)
         const metadataJson = await metadataResponse.json()
 
-        // Ensure metadataJson matches ProfileMetadata type
+        // Construct the final typed Profile object
         const parsedProfile: Profile = {
           ...profile,
           metadata: metadataJson,
@@ -79,9 +80,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ address }) => {
     return <div>Loading wallet...</div>
   }
 
+  // If the contract has an `owner` or `wallet` property in the `profile` struct:
   const isOwnProfile = user?.wallet?.address === profileData?.owner
-
-  console.log('Is Own Profile:', isOwnProfile)
 
   return (
     <ProfileStepProvider tier={currentTier as ProfileTier}>

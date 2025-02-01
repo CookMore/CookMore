@@ -39,7 +39,7 @@
   --banner-height: 0px;
 
   /* Font settings for dark mode */
-  --font-family-default: 'Inter', sans-serif;
+  --font-family-default: 'Inter', var(--font-inter), sans-serif;
   --font-weight-default: 400;
   --font-size-default: 16px;
 }
@@ -82,7 +82,7 @@
   --banner-height: 0px;
 
   /* Font settings for light mode */
-  --font-family-default: 'Arial', sans-serif;
+  --font-family-default: 'Inter', var(--font-inter), sans-serif;
   --font-weight-default: 400;
   --font-size-default: 16px;
 }
